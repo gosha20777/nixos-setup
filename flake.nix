@@ -135,14 +135,37 @@
         };
     in
     {
-      nixosConfigurations = lib.genAttrs hostNames mkHost;
+      nixosConfigurations = (lib.genAttrs hostNames mkHost) // {
+        iso = lib.nixosSystem {
+          system = "aarch64-linux";
+          specialArgs = { inherit inputs; };
+          modules = [
+            "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+            ./configuration.nix
+            niri.nixosModules.niri
+            noctalia-greeter.nixosModules.default
+            home-manager.nixosModules.home-manager
+            {
+              boot.loader.systemd-boot.enable = lib.mkForce false;
+              boot.loader.efi.canTouchEfiVariables = lib.mkForce false;
+              fileSystems."/boot".options = lib.mkForce [ ];
+              boot.zfs.forceImportRoot = false;
+
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.extraSpecialArgs = { inherit inputs; };
+              home-manager.users.gosha20777 = import ./home.nix;
+            }
+          ];
+        };
+      };
 
       # `nix fmt` formats all .nix files in the tree. pkgs.nixfmt is the RFC 166
       # implementation that ships in nixpkgs. The tree is already nixfmt-clean
       # and CI enforces it (`nix fmt --check` in .github/workflows/check.yml),
       # so running this is a no-op unless you introduced drift.
       formatter = lib.genAttrs [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ] (
-        sys: nixpkgs.legacyPackages.${sys}.nixfmt-rfc-style or nixpkgs.legacyPackages.${sys}.nixfmt
+        sys: nixpkgs.legacyPackages.${sys}.nixfmt
       );
     };
 }

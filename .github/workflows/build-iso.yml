@@ -1,0 +1,70 @@
+name: Build and Release ISO
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-iso:
+    name: Build NixOS ARM64 ISO
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Enable Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Build ISO Image
+        run: |
+          nix build .#nixosConfigurations.iso.config.system.build.isoImage --show-trace
+
+      - name: Prepare Artifacts
+        run: |
+          mkdir -p dist
+          cp result/iso/*.iso dist/
+          cd dist
+          for f in *.iso; do
+            sha256sum "$f" > "$f.sha256"
+          done
+          ls -lh
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nixos-mac-vm-aarch64.iso
+          path: dist/*
+          retention-days: 7
+
+      - name: Release to GitHub
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'latest' }}
+          name: ${{ github.ref_type == 'tag' && github.ref_name || 'NixOS mac-vm (aarch64) Latest' }}
+          body: |
+            Automated NixOS Live ISO build for Apple Silicon (UTM / QEMU).
+            
+            - **Architecture:** `aarch64-linux` (ARM64)
+            - **Compositor:** Niri (Wayland)
+            - **Shell:** Noctalia v5 (Catppuccin theme)
+            - **Default User:** `gosha20777`
+            - **Password:** `20777`
+          draft: false
+          prerelease: false
+          files: |
+            dist/*.iso
+            dist/*.sha256
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

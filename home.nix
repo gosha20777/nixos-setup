@@ -960,7 +960,6 @@ in
   # repo is the source of truth for the skill, so a local edit is drift to be
   # corrected, not a user tweak to preserve.
 
-
   # Wallpaper library — seeds ~/Pictures/Wallpapers with the assets in
   # ./assets/wallpapers/. Copy-once per file: if a wallpaper already exists
   # at the destination (user replaced it, deleted-and-recreated it, or picked
