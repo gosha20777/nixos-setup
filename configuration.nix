@@ -1,4 +1,4 @@
-# System-level configuration for the Framework 13 AMD.
+# System-level configuration for NixOS (mac-vm).
 # User-level packages and dotfiles live in home.nix.
 {
   config,
@@ -8,47 +8,7 @@
   ...
 }:
 
-let
-  # Mintplex-Labs/anything-llm — Desktop app packaged from the upstream
-  # AppImage release. Not in nixpkgs (checked: no `anythingllm` / `anythingllm-desktop`
-  # attrs). appimageTools.wrapType2 mounts the AppImage into an FHS-like
-  # runtime so the bundled Chromium + Node stack starts on NixOS.
-  # `--no-sandbox` is what upstream's .desktop ships — Chromium's SUID
-  # sandbox depends on chrome-sandbox owning setuid-root, which AppImage
-  # extraction on NixOS can't guarantee. Trade-off is documented; the
-  # workspace itself still lives under $HOME.
-  # Version bump: change `version`, run
-  #   nix-prefetch-url --type sha256 <url>
-  # and re-encode with `nix hash to-sri --type sha256 <hash>`.
-  anythingllm-desktop =
-    let
-      pname = "anythingllm-desktop";
-      version = "1.15.0";
-      src = pkgs.fetchurl {
-        url = "https://github.com/Mintplex-Labs/anything-llm/releases/download/v${version}/AnythingLLMDesktop.AppImage";
-        hash = "sha256-Dk/FeGzefACiJlyTf+/BVc8ZJryF9Gq8BWxZqXeAacs=";
-      };
-      contents = pkgs.appimageTools.extractType2 { inherit pname version src; };
-    in
-    pkgs.appimageTools.wrapType2 {
-      inherit pname version src;
-      extraInstallCommands = ''
-        install -Dm644 ${contents}/${pname}.desktop \
-          $out/share/applications/${pname}.desktop
-        substituteInPlace $out/share/applications/${pname}.desktop \
-          --replace-fail 'Exec=AppRun' 'Exec=${pname}'
-        install -Dm644 ${contents}/usr/share/icons/hicolor/0x0/apps/${pname}.png \
-          $out/share/icons/hicolor/512x512/apps/${pname}.png
-      '';
-      meta = {
-        description = "AnythingLLM — all-in-one local RAG / agent chat desktop app";
-        homepage = "https://anythingllm.com/";
-        license = lib.licenses.mit;
-        platforms = [ "x86_64-linux" ];
-        mainProgram = "anythingllm-desktop";
-      };
-    };
-in
+
 {
   ############################################################
   # Nix / nixpkgs
@@ -80,8 +40,24 @@ in
   # the fail line where nixos-rebuild switch dies mid-activation.
   boot.loader.systemd-boot.configurationLimit = 10;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.kernelPackages = pkgs.linuxPackages_latest; # 6.12+ floor for Ryzen 7040
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
+  # Plymouth boot splash screen
+  boot.plymouth = {
+    enable = true;
+    theme = "bgrt";
+  };
+  boot.initrd.verbose = false;
+  boot.consoleLogLevel = 0;
+  boot.kernelParams = [
+    "quiet"
+    "splash"
+    "boot.shell_on_fail"
+    "loglevel=3"
+    "rd.systemd.show_status=false"
+    "rd.udev.log_level=3"
+    "udev.log_priority=3"
+  ];
   # FAT32 doesn't support Unix perms, so the ESP defaults to world-readable.
   # bootctl writes a kernel random-seed file in /boot/loader and (correctly)
   # complains: any local user could read the seed and learn things about the
@@ -199,27 +175,27 @@ in
     passwordFile = "/etc/restic/home-password";
     # Create the repo on first run so there's no manual `restic init` step.
     initialize = true;
-    paths = [ "/home/sroberts" ];
+    paths = [ "/home/gosha20777" ];
 
     # Excludes. Measured 2026-09-05: $HOME was 31G, of which ~26G is
     # re-fetchable. What's left (~5G) is the genuinely irreplaceable part —
     # Documents, source, keys, ~/.claude, this flake.
     exclude = [
       # Model weights — large and re-downloadable.
-      "/home/sroberts/.lmstudio"
-      "/home/sroberts/.ollama"
+      "/home/gosha20777/.lmstudio"
+      "/home/gosha20777/.ollama"
       # Caches.
-      "/home/sroberts/.cache"
-      "/home/sroberts/.npm"
-      "/home/sroberts/.local/share/Trash"
-      "/home/sroberts/.zoom"
+      "/home/gosha20777/.cache"
+      "/home/gosha20777/.npm"
+      "/home/gosha20777/.local/share/Trash"
+      "/home/gosha20777/.zoom"
       # Chat/browser app state: big, and all of it re-syncs on next sign-in.
       # Signal in particular is re-linked from the phone, not restored.
-      "/home/sroberts/.config/Signal"
-      "/home/sroberts/.config/chromium"
-      "/home/sroberts/.config/Slack"
-      "/home/sroberts/.config/discord"
-      "/home/sroberts/Downloads"
+      "/home/gosha20777/.config/Signal"
+      "/home/gosha20777/.config/chromium"
+      "/home/gosha20777/.config/Slack"
+      "/home/gosha20777/.config/discord"
+      "/home/gosha20777/Downloads"
       # Build artefacts / dependency trees — rebuildable from the source
       # that IS backed up, and by far the worst churn-to-value ratio.
       "**/node_modules"
@@ -276,32 +252,12 @@ in
   i18n.defaultLocale = "en_US.UTF-8";
 
   ############################################################
-  # Networking, Bluetooth, fingerprint
-  ############################################################
+  # Networking, Bluetooth
   # networking.hostName is set per-host in hosts/<hostname>/default.nix.
   networking.networkmanager.enable = true;
-  services.tailscale.enable = true;
+
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = true;
-  # Goodix fingerprint reader. fprintd runs the daemon; the PAM hooks
-  # below let it stand in for a password. Enroll once with `fprintd-enroll`
-  # before the integrations are useful.
-  services.fprintd.enable = true;
-  security.pam.services = {
-    sudo.fprintAuth = true; # sudo prompt
-    login.fprintAuth = true; # TTY login
-    su.fprintAuth = true; # su to another user
-    polkit-1.fprintAuth = true; # GUI privilege prompts (e.g. password change)
-    greetd.fprintAuth = true; # noctalia-greeter at the login screen
-    # Noctalia's lock screen uses /etc/pam.d/login, so login.fprintAuth above
-    # is what lights up the lock screen's fingerprint path. In v5 the lock
-    # screen's auth is native (C++): it arms pam_fprintd at lock time and
-    # manages the fingerprint-vs-password handoff itself. The v4 QML flags that
-    # used to gate this (`allowPasswordWithFprintd` / `autoStartAuth`, once
-    # asserted by home.activation.noctaliaConfigSeed) no longer exist and are
-    # not needed. Re-verify the touch-to-unlock path after any Noctalia bump —
-    # this system-side fprintd wiring assumes Noctalia arms the reader for us.
-  };
 
   ############################################################
   # niri + greetd (noctalia-greeter) login
@@ -334,7 +290,7 @@ in
   programs.noctalia-greeter = {
     enable = true;
     settings = {
-      auth.allow_empty_password = true;
+      auth.allow_empty_password = false;
       keyboard.layout = "us";
     };
   };
@@ -373,11 +329,14 @@ in
   services.gvfs.enable = true;
 
   ############################################################
-  # Shell
+  # Shells (Fish primary, Bash standard)
   ############################################################
-  programs.zsh.enable = true;
-  environment.shells = [ pkgs.zsh ];
-
+  programs.bash.enable = true;
+  programs.fish.enable = true;
+  environment.shells = [
+    pkgs.fish
+    pkgs.bash
+  ];
   ############################################################
   # Non-Nix dynamic binaries (mise / pre-built toolchains)
   #
@@ -409,33 +368,7 @@ in
     ];
   };
 
-  ############################################################
-  # 1Password (GUI + CLI + browser integration)
-  ############################################################
-  programs._1password.enable = true;
-  programs._1password-gui = {
-    enable = true;
-    polkitPolicyOwners = [ "sroberts" ];
-  };
 
-  ############################################################
-  # Chromium + auto-installed extensions
-  ############################################################
-  # `programs.chromium` only writes a managed-policy file under
-  # /etc/chromium/policies — it does NOT install chromium. The package
-  # itself still has to be added to environment.systemPackages below.
-  # The policy pre-installs each extension ID at first launch and locks
-  # installation, so the user can disable but not remove without
-  # editing this file. One-time sign-in for each extension is still
-  # required and lives in TODO.md.
-  programs.chromium = {
-    enable = true;
-    extensions = [
-      "aeblfdkhhhdcdjpifhhbdiojplfjncoa" # 1Password
-      "cnjifjpddelmedmihgijeibhnjfabmlf" # Obsidian Web Clipper
-      "ldjkgaaoikpmhmkelcgkgacicjfbofhh" # Instapaper
-    ];
-  };
 
   ############################################################
   # Containers + local LLM serving
@@ -446,30 +379,21 @@ in
     autoPrune.enable = true;
   };
 
-  services.ollama = {
-    enable = true;
-    package = pkgs.ollama-rocm; # Radeon 780M iGPU; switch to pkgs.ollama (cpu) or pkgs.ollama-vulkan if rocm crashes
-    # Pulled on first start by ollama-model-loader.service.
-    loadModels = [
-      "llama3.2"
-      "gemma4:latest"
-      "gpt-oss:20b"
-      "lfm2.5-thinking"
-      # 27B, ~16.5 GB, 256K context, vision + tool use. Bound to crush's
-      # large/coder role in home.nix. Comfortable here: 93 GB RAM, and the
-      # 780M iGPU shares system memory rather than being capped at a fixed
-      # VRAM size. `qwen3.8:27b` is the same manifest as `:latest`.
-      "qwen3.8"
-    ];
-  };
 
   ############################################################
   # User
   ############################################################
-  users.users.sroberts = {
+
+
+  users.users.gosha20777 = {
     isNormalUser = true;
-    description = "Scott";
-    shell = pkgs.zsh;
+    description = "gosha20777";
+    shell = pkgs.fish;
+    initialPassword = "20777";
+    # To use a hashed password instead, generate one with:
+    #   mkpasswd -m sha-512 "20777"
+    # and replace initialPassword with:
+    #   hashedPassword = "...";
     extraGroups = [
       "wheel"
       "networkmanager"
@@ -483,33 +407,19 @@ in
   # System-wide GUI applications
   ############################################################
   environment.systemPackages = with pkgs; [
-    _1password-gui
-    anythingllm-desktop
-    chromium
-    discord
-    firefox
-    localsend
+    google-chrome
+    vscode
+    telegram-desktop
     nautilus
     obsidian
-    lmstudio
-    rpi-imager
-    slack
-    signal-desktop
-    spotify
+    localsend
     typora
-    zed-editor
-    zoom-us
-
     git
     curl
     wget
     unzip
     cryptsetup # handy for inspecting/managing the LUKS volume post-install
-    # Framework EC monitor/control TUI: fan curves, battery charge limit,
-    # thermals, keyboard backlight. Talks to the embedded controller directly,
-    # so it needs root — run `sudo framework-tool-tui`. System-wide rather than
-    # in home.packages for that reason.
-    framework-tool-tui
+
     # The backup service brings its own restic; this is for driving the repo
     # by hand — `restic snapshots`, and `restic mount` to browse snapshots as
     # directories. Both need `--repo /mnt/backup/restic/<host>` and the

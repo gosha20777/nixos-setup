@@ -1,5 +1,5 @@
 {
-  description = "Scott's Framework 13 AMD — NixOS + niri + Noctalia (encrypted, hibernate, secure-boot-ready)";
+  description = "NixOS + niri + Noctalia configuration";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -58,8 +58,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    claude-code-nix = {
-      url = "github:sadjow/claude-code-nix";
+    oh-my-pi = {
+      url = "github:can1357/oh-my-pi";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -111,7 +111,6 @@
       mkHost =
         hostname:
         lib.nixosSystem {
-          system = "x86_64-linux";
           specialArgs = { inherit inputs; };
           modules = [
             ./hosts/${hostname}
@@ -130,7 +129,7 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.extraSpecialArgs = { inherit inputs; };
-              home-manager.users.sroberts = import ./home.nix;
+              home-manager.users.gosha20777 = import ./home.nix;
             }
           ];
         };
@@ -142,6 +141,8 @@
       # implementation that ships in nixpkgs. The tree is already nixfmt-clean
       # and CI enforces it (`nix fmt --check` in .github/workflows/check.yml),
       # so running this is a no-op unless you introduced drift.
-      formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt;
+      formatter = lib.genAttrs [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ] (
+        sys: nixpkgs.legacyPackages.${sys}.nixfmt-rfc-style or nixpkgs.legacyPackages.${sys}.nixfmt
+      );
     };
 }

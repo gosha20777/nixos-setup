@@ -22,38 +22,10 @@ let
     };
     vendorHash = "sha256-x4tEGE/ewE4SjUm9m+NTbKZVLNJsvbNg03Wdw7s4qhI=";
   };
-
-  # basecamp/fizzy-cli — packaged from the prebuilt linux-amd64 release
-  # binary because `go install` can't reach v3.x.x for this repo: their
-  # go.mod still declares `module github.com/basecamp/fizzy-cli` with no
-  # `/v3` suffix, and Go's semantic import versioning won't resolve v2+
-  # tags without the major-version path. So `@latest` falls back to a
-  # pseudo-version of master, which fizzy itself flags as out-of-date.
-  # autoPatchelfHook fixes the ELF interpreter path; stdenv.cc.cc.lib
-  # covers libstdc++/libgcc_s that the cgo binary links against.
-  fizzy-cli = pkgs.stdenvNoCC.mkDerivation rec {
-    pname = "fizzy-cli";
-    version = "3.0.3";
-    src = pkgs.fetchurl {
-      url = "https://github.com/basecamp/fizzy-cli/releases/download/v${version}/fizzy-linux-amd64";
-      hash = "sha256-r1vNVFkRaRkxo81nhpE0X8MiHsiE2M7px0ZMxfKPgVQ=";
-    };
-    dontUnpack = true;
-    nativeBuildInputs = [ pkgs.autoPatchelfHook ];
-    buildInputs = [ pkgs.stdenv.cc.cc.lib ];
-    installPhase = ''
-      install -Dm755 $src $out/bin/fizzy
-    '';
-    meta = {
-      description = "Fizzy CLI and Agent Skills";
-      homepage = "https://github.com/basecamp/fizzy-cli";
-      platforms = [ "x86_64-linux" ];
-    };
-  };
 in
 {
-  home.username = "sroberts";
-  home.homeDirectory = "/home/sroberts";
+  home.username = "gosha20777";
+  home.homeDirectory = "/home/gosha20777";
   home.stateVersion = "26.05";
 
   ############################################################
@@ -72,7 +44,7 @@ in
   #
   # Revisit when home-manager's module matures: if it gains equivalent
   # coverage, switching to it would let us drop the import above. Compare with:
-  #   nix eval .#nixosConfigurations.sjr-fw13.options.home-manager.users.sroberts.programs.noctalia
+  #   nix eval .#nixosConfigurations.mac-vm.options.home-manager.users.gosha20777.programs.noctalia
   disabledModules = [ "programs/noctalia.nix" ];
 
   programs.noctalia = {
@@ -104,10 +76,10 @@ in
     settings = {
       # Weather + where-am-I. v5 moved the unit under [weather]; [location]
       # geocodes `address`.
-      location.address = "Greenville, SC";
+      location.address = "";
       weather = {
         enabled = true;
-        unit = "fahrenheit";
+        unit = "celsius";
       };
 
       # Theme derives from the wallpaper (Material You), same as v4's matugen
@@ -121,7 +93,8 @@ in
       # faithful, dysfunctional, muted (only applies while source = "wallpaper").
       theme = {
         mode = "dark";
-        source = "wallpaper";
+        source = "builtin";
+        builtin = "Catppuccin";
         # v5 replaces v4's single `gtk` template with two builtin templates
         # writing ~/.config/gtk-{3,4}.0/noctalia.css (the paths our managed
         # gtk.css @imports). Opt into them explicitly. Discover ids with
@@ -175,10 +148,7 @@ in
             "bat"
             "neovim"
             "obsidian"
-            "zed"
-            "zellij"
-            "discord"
-            "steam"
+            "vscode"
           ];
         };
       };
@@ -214,11 +184,6 @@ in
           command = "noctalia:session lock";
           enabled = true;
         };
-        hibernate = {
-          timeout = 900;
-          command = "systemctl suspend-then-hibernate";
-          enabled = true;
-        };
       };
     };
   };
@@ -238,16 +203,7 @@ in
     # aligned at y=480 (Dell 1440 − laptop 960) so crossing the boundary
     # matches the physical arrangement — laptop on the desk, Dell rising
     # above it. Discover identifier strings with `niri msg outputs`.
-    outputs = {
-      "Dell Inc. DELL P3221D C57ZQ83".position = {
-        x = 0;
-        y = 0;
-      };
-      "BOE NE135A1M-NY1 Unknown".position = {
-        x = 2560;
-        y = 480;
-      };
-    };
+
     # Noctalia now runs as a systemd user unit tied to wayland.systemd.target
     # (see programs.noctalia.systemd.enable above), not a compositor spawn.
     # NOTE: v5 replaced the `noctalia ipc call <target> <fn>` surface with
@@ -592,7 +548,7 @@ in
     # basecamp/fizzy-cli is the prebuilt v3.0.3 binary, also from `let`.
     q-text-as-data
     qq
-    fizzy-cli
+
     # pipx itself is still NOT installed via Nix: build-time deps in current
     # nixos-unstable (black, black[extras], nox) cycle through transient
     # failures. Install pipx + jsongrep (not in nixpkgs) manually post-boot
@@ -623,51 +579,16 @@ in
     python3
     glib
 
-    # AI CLIs — Option B (hourly-updated flake). For Option A, delete the next
-    # binding and add `claude-code` to this list instead.
-    #
-    # Wrapped so a bare `claude` (no args) starts with Remote Control enabled —
-    # this is a PATH-level wrapper, not a shell alias, so it also covers
-    # non-interactive starts (niri/launcher spawns, scripts), which an alias
-    # misses. The flag is added ONLY when there are no args: `--remote-control`
-    # takes an optional [name], so prepending it unconditionally would make
-    # `claude update` / `claude -p …` / `claude --resume` misparse their first
-    # arg as the session name. Any invocation with args passes straight through.
-    (
-      let
-        claudePkg = inputs.claude-code-nix.packages.${pkgs.stdenv.hostPlatform.system}.claude-code;
-        claudeWrapper = writeShellScript "claude-remote-control" ''
-          if [ "$#" -eq 0 ]; then
-            exec ${claudePkg}/bin/claude --remote-control
-          fi
-          exec ${claudePkg}/bin/claude "$@"
-        '';
-      in
-      symlinkJoin {
-        name = "claude-code-remote-control";
-        paths = [ claudePkg ];
-        postBuild = ''
-          rm "$out/bin/claude"
-          ln -s ${claudeWrapper} "$out/bin/claude"
-        '';
-      }
-    )
-    gemini-cli
-
+    # Oh My Pi (omp) — Terminal AI coding agent
+    inputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}.default
     # ogulcancelik/herdr — terminal workspace manager for AI coding agents
-    # (panes, sessions that survive detach). Tag-pinned in flake.nix to
-    # match the herdr server version; bump by editing the tag there.
     inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
   ############################################################
   # Shell + integrations (replaces the script's ~/.zshrc edits)
-  ############################################################
-  programs.zsh = {
+  programs.bash = {
     enable = true;
-    enableCompletion = true;
-    autosuggestion.enable = true;
-    syntaxHighlighting.enable = true;
     shellAliases = {
       ls = "eza";
       ll = "eza -l";
@@ -675,37 +596,41 @@ in
       tree = "eza --tree";
       cat = "bat";
     };
-    # Append ~/.local/bin to PATH for imperatively-installed user binaries:
-    # pipx drops console scripts here (see pipx note in home.packages above),
-    # and `claude update` maintains its own native install at
-    # ~/.local/bin/claude. Appended (not prepended via home.sessionPath) so
-    # the Nix-managed claude-code from the flake input still wins on PATH;
-    # ~/.local/bin/claude exists but is shadowed, which silences `claude
-    # update`'s PATH warning without changing which binary actually runs.
-    # In initExtra (interactive-shell .zshrc) because Ghostty (and most
-    # terminal emulators) launch zsh as a non-login interactive shell, so
-    # .zprofile never sources; .zshrc does. `typeset -U path` dedupes if a
-    # parent shell already appended it.
-    initContent = ''
-      typeset -U path
-      path+=("$HOME/.local/bin")
+    initExtra = ''
+      export PATH="$HOME/.local/bin:$PATH"
+    '';
+  };
+  programs.fish = {
+    enable = true;
+    shellAliases = {
+      ls = "eza";
+      ll = "eza -l";
+      la = "eza -la";
+      tree = "eza --tree";
+      cat = "bat";
+    };
+    shellInit = ''
+      fish_add_path "$HOME/.local/bin"
     '';
   };
 
   programs.zoxide = {
     enable = true;
-    enableZshIntegration = true;
+    enableBashIntegration = true;
+    enableFishIntegration = true;
     options = [ "--cmd cd" ]; # cd -> zoxide, matching the script
   };
 
   programs.fzf = {
     enable = true;
-    enableZshIntegration = true;
+    enableBashIntegration = true;
+    enableFishIntegration = true;
   };
 
   programs.eza = {
     enable = true;
-    enableZshIntegration = true;
+    enableBashIntegration = true;
+    enableFishIntegration = true;
   };
 
   # bat — syntax-highlighted `cat` (see shellAliases above).
@@ -751,7 +676,11 @@ in
   #   fg/directory      → text       dim  → overlay1   faint → overlay0
   # The [palettes.noctalia] table itself is deliberately NOT defined here —
   # Noctalia injects it; defining it too would make a duplicate TOML table.
-  programs.starship.enable = true;
+  programs.starship = {
+    enable = true;
+    enableBashIntegration = true;
+    enableFishIntegration = true;
+  };
 
   # ghostty — primary terminal (see niri binds + home.sessionVariables.TERMINAL).
   # Noctalia owns the theme now (issue #62): the `ghostty` builtin template
@@ -819,12 +748,9 @@ in
   #
   # enableZshIntegration is intentionally OFF — upstream's hook auto-attaches
   # on every new shell, which is too invasive. Invoke `zellij` manually.
-  programs.zellij = {
+  programs.vscode = {
     enable = true;
-    settings = {
-      theme = "noctalia";
-      default_layout = "compact";
-    };
+    package = pkgs.vscode;
   };
 
   # mise for per-project runtime pins (python/node/go)
@@ -846,7 +772,8 @@ in
   # only — no equivalent knob — and nix-ld alone covers it at runtime.
   programs.mise = {
     enable = true;
-    enableZshIntegration = true;
+    enableBashIntegration = true;
+    enableFishIntegration = true;
     globalConfig = {
       tools = {
         python = "latest";
@@ -902,12 +829,8 @@ in
     enable = true;
     settings = {
       user = {
-        name = "Scott J Roberts";
-        # GitHub's "no-reply" form for this account (numeric user ID +
-        # username). Lets the repo go public without putting the real
-        # email in future commits' diffs / Author lines, while still
-        # being correctly attributed on GitHub.
-        email = "44774+sroberts@users.noreply.github.com";
+        name = "gosha20777";
+        email = "gosha20777@users.noreply.github.com";
       };
       # Delegate GitHub HTTPS auth to gh so git push uses the token gh stores
       # in the system keyring. Declared here because home-manager renders
@@ -1036,16 +959,7 @@ in
   # Unlike home.activation.wallpapers, this OVERWRITES on every rebuild: the
   # repo is the source of truth for the skill, so a local edit is drift to be
   # corrected, not a user tweak to preserve.
-  home.activation.frameworkSkill = {
-    after = [ "writeBoundary" ];
-    before = [ ];
-    data = ''
-      DEST="$HOME/.claude/skills/framework"
-      ${pkgs.coreutils}/bin/mkdir -p "$DEST"
-      ${pkgs.coreutils}/bin/install -m 0644 \
-        ${./assets/skills/framework/SKILL.md} "$DEST/SKILL.md"
-    '';
-  };
+
 
   # Wallpaper library — seeds ~/Pictures/Wallpapers with the assets in
   # ./assets/wallpapers/. Copy-once per file: if a wallpaper already exists
@@ -1530,7 +1444,7 @@ in
       - [ ] Install pipx + jsongrep: `pip install --user pipx && pipx ensurepath && pipx install jsongrep`
       - [ ] Authenticate Claude Code: run `claude`
       - [ ] Authenticate Gemini CLI: `gemini auth`
-      - [ ] Run `fizzy setup` (auth + config; the binary itself is packaged)
+
       - [ ] (Optional) Customize wallpaper in Noctalia — default ships in ~/Pictures/Wallpapers
       - [ ] Sync noctalia-greeter to the shell's palette + wallpaper: Noctalia → Settings → Shell → Security → Noctalia Greeter → Sync Now (writes /var/lib/noctalia-greeter — needs admin creds, not something Nix owns)
       - [ ] Noctalia app themes (bat/zellij/discord/obsidian/zed/steam/…) are community templates fetched from api.noctalia.dev at runtime — offline first-boot won't have them until the shell reaches the network. If they're missing, confirm connectivity and toggle the wallpaper (or restart Noctalia) to re-apply.
