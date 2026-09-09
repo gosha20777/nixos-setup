@@ -121,7 +121,6 @@ in
             #              noctalia.kdl gets written (as a regular file, not
             #              through HM). (issue #62)
             "btop"
-            "ghostty"
             "starship"
             "niri"
           ];
@@ -220,8 +219,9 @@ in
     binds = {
       # Help + spawn
       "Mod+Shift+Slash".action.show-hotkey-overlay = [ ];
-      "Mod+T".action.spawn = "ghostty";
-      "Mod+Return".action.spawn = "ghostty";
+      "Mod+T".action.spawn = "foot";
+      "Mod+Return".action.spawn = "foot";
+      "Mod+Shift+Return".action.spawn = "kitty";
       # App launcher — Noctalia's, toggled over IPC. v5: `panel-toggle <id>`.
       "Mod+Space".action.spawn = [
         "noctalia"
@@ -513,7 +513,7 @@ in
 
   # Default terminal for tools that consult $TERMINAL (lazygit edit, fzf,
   # xdg-terminal-exec helpers, etc.).
-  home.sessionVariables.TERMINAL = "ghostty";
+  home.sessionVariables.TERMINAL = "foot";
 
   ############################################################
   # CLI / TUI tools
@@ -535,6 +535,7 @@ in
     fd
     ripgrep # crush prefers `rg` for greps; unfound falls back to slower search
     mosh
+    kitty
 
     # C/C++ toolchain basics. `pkgs.gcc` resolves to the current nixpkgs
     # default (gcc-wrapper around gcc 14.x at time of writing); pin to
@@ -682,23 +683,39 @@ in
     enableFishIntegration = true;
   };
 
-  # ghostty — primary terminal (see niri binds + home.sessionVariables.TERMINAL).
-  # Noctalia owns the theme now (issue #62): the `ghostty` builtin template
-  # renders the colors to ~/.config/ghostty/themes/noctalia, and its apply.sh
-  # no-ops on THIS config the moment it sees `theme = noctalia` already set —
-  # so our read-only home-manager symlink is never materialized/clobbered
-  # (that clobber is exactly what broke the first v5 rebuild). Under
-  # theme.wallpaper_scheme = "m3-monochrome" the generated palette stays
-  # grayscale, matching the zellij/nvim mono aesthetic. font stays declarative.
-  programs.ghostty = {
+  # foot — fast, lightweight Wayland terminal (no OpenGL required, works in any VM)
+  programs.foot = {
     enable = true;
     settings = {
-      theme = "noctalia";
-      font-family = "JetBrainsMono Nerd Font";
-      font-size = 11;
+      main = {
+        term = "xterm-256color";
+        font = "JetBrainsMono Nerd Font:size=11";
+        dpi-aware = "yes";
+        pad = "8x8";
+      };
+      colors = {
+        alpha = 0.95;
+        background = "1e1e2e";
+        foreground = "cdd6f4";
+        regular0 = "45475a";
+        regular1 = "f38ba8";
+        regular2 = "a6e3a1";
+        regular3 = "f9e2af";
+        regular4 = "89b4fa";
+        regular5 = "f5c2e7";
+        regular6 = "94e2d5";
+        regular7 = "bac2de";
+        bright0 = "585b70";
+        bright1 = "f38ba8";
+        bright2 = "a6e3a1";
+        bright3 = "f9e2af";
+        bright4 = "89b4fa";
+        bright5 = "f5c2e7";
+        bright6 = "94e2d5";
+        bright7 = "a6adc8";
+      };
     };
   };
-
   # lazygit — git TUI. Colors take YAML list form: [hex, "bold"] etc.
   # nerdFontsVersion = "3" to match the JetBrainsMono Nerd Font shipped
   # in configuration.nix.
@@ -1057,9 +1074,7 @@ in
     data = ''
       DEST="${config.xdg.configHome}/bat/config"
       STAMP="$HOME/.cache/noctalia/.bat-base-src"
-      SRC="${pkgs.writeText "bat-base-config" ''
-        --map-syntax='${config.xdg.configHome}/ghostty/config:Ghostty Config'
-      ''}"
+      SRC="${pkgs.writeText "bat-base-config" ""}"
       ${pkgs.coreutils}/bin/mkdir -p "$(${pkgs.coreutils}/bin/dirname "$DEST")" \
                                      "$(${pkgs.coreutils}/bin/dirname "$STAMP")"
       if [ ! -f "$DEST" ] || \

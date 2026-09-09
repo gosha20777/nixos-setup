@@ -336,6 +336,12 @@
     pkgs.fish
     pkgs.bash
   ];
+
+  # Ensure Mesa exposes OpenGL 3.3 for VM/virgl environments
+  environment.sessionVariables = {
+    MESA_GL_VERSION_OVERRIDE = "3.3";
+    MESA_GLSL_VERSION_OVERRIDE = "330";
+  };
   ############################################################
   # Non-Nix dynamic binaries (mise / pre-built toolchains)
   #
