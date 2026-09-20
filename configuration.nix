@@ -1,4 +1,4 @@
-# System-level configuration for NixOS (mac-vm).
+# System-level configuration for NixOS (dev).
 # User-level packages and dotfiles live in home.nix.
 {
   config,
@@ -390,11 +390,6 @@
     isNormalUser = true;
     description = "gosha20777";
     shell = pkgs.fish;
-    initialPassword = "20777";
-    # To use a hashed password instead, generate one with:
-    #   mkpasswd -m sha-512 "20777"
-    # and replace initialPassword with:
-    #   hashedPassword = "...";
     extraGroups = [
       "wheel"
       "networkmanager"

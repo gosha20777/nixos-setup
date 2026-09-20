@@ -1,4 +1,4 @@
-# Hardware configuration for UTM virtual machine on Apple Silicon (M-series).
+# Hardware configuration for Gnome Boxes / QEMU virtual machine on x86_64 Linux.
 # When installing NixOS on the VM, you can replace this file with the output
 # of `nixos-generate-config` or keep the standard virtio/btrfs structure below.
 {
@@ -71,5 +71,5 @@
 
   swapDevices = [ ];
 
-  nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 }

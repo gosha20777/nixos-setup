@@ -44,7 +44,7 @@ in
   #
   # Revisit when home-manager's module matures: if it gains equivalent
   # coverage, switching to it would let us drop the import above. Compare with:
-  #   nix eval .#nixosConfigurations.mac-vm.options.home-manager.users.gosha20777.programs.noctalia
+  #   nix eval .#nixosConfigurations.dev.options.home-manager.users.gosha20777.programs.noctalia
   disabledModules = [ "programs/noctalia.nix" ];
 
   programs.noctalia = {
