@@ -1,526 +1,146 @@
-# Installing NixOS + Noctalia on a Framework 13 AMD
+# Руководство по установке NixOS (хост `dev`) в виртуальную машину Gnome Boxes
 
-Single canonical runbook for installing this flake onto a fresh Framework 13
-AMD (Ryzen 7040). This is the install guide for the `sjr-fw13` host
-specifically; for any other machine, the shape is the same — base install →
-`scripts/new-host.sh` → `nixos-rebuild` — but the hardware-specific bits
-(BIOS prep, `nixos-hardware` module, kernel floor, power daemon, hibernation
-sizing) change per box. Use this file as the template, and substitute the
-right values for your hardware. Top-to-bottom; you should not need to switch
-docs while installing. For Secure Boot, work through this guide first, then
-see `secure-boot.md` as a follow-up. For the *why* behind specific Nix
-options, read `configuration.nix` / `home.nix` directly — they're the source
-of truth.
+Инструкция по развертыванию NixOS конфигурации `dev` в виртуальной машине **Gnome Boxes** (QEMU/KVM) на **Fedora Linux**.
 
-> **Two install paths.** The default path uses the Calamares graphical
-> installer to get an encrypted base (with optional hibernation-sized
-> swap), then layers this flake on top with `nixos-rebuild`. It's robust
-> and has a rollback safety net. The appendix at the end covers a manual
-> LVM-on-LUKS install for anyone who wants the LVM layout specifically;
-> hibernation is no longer the reason to take that path — Calamares' new
-> "Swap with Hibernate" option handles it for the default flow.
+Репозиторий размещается в домашней папке пользователя (`~/projects/my_projects/nixos-setup`), избегая засорения системного каталога `/etc/nixos`.
 
 ---
 
-## Bottom Line
+## Подготовка
 
-Install NixOS unstable (26.05) with an encrypted disk via the Calamares
-graphical installer (with the "Swap with Hibernate" option for
-suspend-to-disk support and **"No desktop"** as the desktop choice — see
-Step 1), log in at the TTY as the user it created, then point
-`nixos-rebuild` at this flake. The rebuild installs niri + Noctalia and
-everything else.
+1. Скачайте образ **NixOS Minimal ISO (x86_64-linux)** с официального сайта:
+   [https://nixos.org/download](https://nixos.org/download)
 
-Three facts drive the sequencing:
-
-- **Encryption is install-time.** Calamares' "Encrypt system" checkbox is
-  what you want; opting out later means a reinstall.
-- **Set the root and user passwords in the GUI.** This is where the manual
-  install path most commonly fails (locked accounts → emergency mode with
-  no recovery shell). Calamares can't proceed without both passwords being
-  set, so you get a guaranteed-working base.
-- **Secure Boot is post-install only.** lanzaboote layers signing onto a
-  booting system. Enabling Secure Boot in BIOS before keys are enrolled
-  leaves you unbootable. Do it after this guide; see `secure-boot.md`.
-
-Plus: BIOS 3.05+ (else multi-watt standby drain), Secure Boot **off** during
-install, and `power-profiles-daemon` (not TLP) on Ryzen 7040.
+2. Откройте **Gnome Boxes** (Боксы):
+   - Нажмите `+` -> **Установить из файла** -> выберите скачанный `.iso` файл.
+   - Зайдите в **Настройки (Preferences)** созданной VM:
+     - **Память (RAM):** от 4 до 8 ГБ (рекомендуется 8 ГБ).
+     - **Процессор:** 4+ ядра.
+     - **Размер диска:** от 30 ГБ.
+   - Запустите виртуальную машину.
 
 ---
 
-## Stack at a glance
+## Пошаговая установка в Live ISO
 
-| Layer | Choice | Why |
-|---|---|---|
-| Distro | NixOS unstable (26.05) | Tracks the Quickshell / niri-unstable ecosystem Noctalia builds on |
-| Channel mgmt | Flakes + home-manager | Reproducible; pins Noctalia / niri independently |
-| Hardware module | `nixos-hardware.nixosModules.framework-13-7040-amd` | Maintained quirks (lid wake, sensors, GPU) |
-| Power | `power-profiles-daemon` | Framework's official recommendation for Ryzen 7040; do NOT use TLP |
-| Compositor | niri via `niri-flake` (sodiboo), pinned to `niri-unstable` | Quickshell-based shells (Noctalia, etc.) track niri's latest |
-| Shell/UI | Noctalia v5 (Quickshell) via the `noctalia` flake + home-manager module | Faster updates than nixpkgs; run as a systemd user unit so `nixos-rebuild switch` restarts it cleanly instead of leaving a stale bar |
-| Greeter | `noctalia-greeter` on tty1 (its module sets up greetd) | Quickshell greeter that mirrors the shell's palette/wallpaper |
-| Disk (default) | LUKS-encrypted ext4 + swap-with-hibernate (via Calamares) | Encrypted root + hibernation-sized swap, no LVM |
-| Disk (appendix path) | LUKS2 + LVM, 92 GiB swap | Same encryption + hibernation, with LVM for multi-volume management |
-| Bootloader | systemd-boot → lanzaboote (post-install) | Layered Secure Boot signing; see `secure-boot.md` |
+После загрузки виртуалка откроется в TTY-консоли NixOS Live ISO.
 
-If you have a Ryzen AI 300 (not 7040), swap the hardware module to
-`framework-amd-ai-300-series` in this host's `default.nix`. For
-non-Framework hardware (a workstation, NUC, ThinkPad, …), find the matching
-entry in [nixos-hardware](https://github.com/NixOS/nixos-hardware) and use
-that module instead; the rest of the flake is hardware-agnostic. Power on a
-non-Ryzen-7040 machine may also want a different default — TLP is the
-common choice outside the 7040 line.
+### 1. Разметка и форматирование диска
+
+Выполните следующие команды для создания разделов UEFI (FAT32) и Btrfs (с подтомами `@`, `@home`, `@nix`):
+
+```bash
+# 1. Создание таблицы разделов GPT
+sudo parted /dev/vda -- mklabel gpt
+sudo parted /dev/vda -- mkpart ESP fat32 1MiB 512MiB
+sudo parted /dev/vda -- set 1 boot on
+sudo parted /dev/vda -- mkpart primary btrfs 512MiB 100%
+
+# 2. Форматирование разделов
+sudo mkfs.fat -F32 -n boot /dev/vda1
+sudo mkfs.btrfs -L nixos -f /dev/vda2
+
+# 3. Создание Btrfs подтомов
+sudo mount /dev/vda2 /mnt
+sudo btrfs subvolume create /mnt/@
+sudo btrfs subvolume create /mnt/@home
+sudo btrfs subvolume create /mnt/@nix
+sudo umount /mnt
+
+# 4. Монтирование файловых систем
+sudo mount -o subvol=@,compress=zstd /dev/vda2 /mnt
+sudo mkdir -p /mnt/{boot,home,nix}
+sudo mount -o subvol=@home,compress=zstd /dev/vda2 /mnt/home
+sudo mount -o subvol=@nix,compress=zstd,noatime /dev/vda2 /mnt/nix
+sudo mount /dev/vda1 /mnt/boot
+```
 
 ---
 
-## Pre-install (do once, on your current machine)
+### 2. Клонирование репозитория в целевую систему
 
-### 1. BIOS
-
-Update BIOS to **3.05 or later** before installing — older firmware causes
-multi-watt standby drain on the 7040. Then in BIOS:
-
-1. Set a UEFI admin password.
-2. **Disable Secure Boot** in "Administer Secure Boot."
-
-### 2. USB media
-
-Download the **NixOS unstable graphical (GNOME) ISO** from nixos.org and flash
-it with `dd` or Rufus — don't use Etcher from a NixOS host, it's no longer
-packaged. The graphical ISO ships Calamares, which is the installer this
-guide uses.
-
-### 3. Set your git identity in `home.nix`
-
-`programs.git.settings.user.{name,email}` are committed values. Set them on
-your current machine before you push, so the target machine's commits go out
-under the right author.
-
-### 4. Push the repo to GitHub (if you haven't)
+Создайте каталог `~/projects/my_projects/` в `/mnt/home/gosha20777/` и склонируйте туда ваш репозиторий:
 
 ```bash
-cd ~/nixos-setup
-git add -A && git commit -m "ready to install"
-git push
+# Создаем папку пользователя в целевой системе
+sudo mkdir -p /mnt/home/gosha20777/projects/my_projects
+sudo chown -R 1000:100 /mnt/home/gosha20777
+
+# Клонируем репозиторий
+cd /mnt/home/gosha20777/projects/my_projects
+sudo git clone https://github.com/gosha20777/nixos-setup.git nixos-setup
 ```
 
-Each host's `hardware-configuration.nix` is committed under `hosts/<name>/`
-(LUKS UUIDs are identifiers, not secrets). The disk passphrase you set in
-Calamares is what protects the data, and it never touches the repo.
+*(Или скопируйте файлы репозитория через `scp` / флешку / локальный веб-сервер, если репозиторий еще не в GitHub).*
 
 ---
 
-## Step 1 — Install the base with Calamares
+### 3. Запуск установки
 
-Boot the graphical ISO, wait for the GNOME live session to load, then launch
-**Install NixOS** from the desktop. Click through to the *Storage* step.
-
-**Critical choices:**
-
-- **Storage:** "Erase disk" (the whole disk gets reformatted).
-- **Encrypt:** check **"Encrypt system."** Set a strong LUKS passphrase —
-  you'll type it at every boot.
-- **Swap:** select **"Swap (with Hibernate)"**. This creates a swap
-  partition sized for the hibernation image. Without it, suspend-to-disk
-  won't work; suspend-to-RAM still will. If you don't care about
-  hibernation, any swap option (or none) is fine.
-- **User account:** username `sroberts` (must match the `sroberts` referenced
-  throughout `configuration.nix` and `home.nix`). Set **both** the user
-  password and the root password in the GUI. Don't leave root blank — that's
-  what causes the locked-emergency-mode dead-end in the manual path.
-- **Locale / timezone:** whatever you want.
-- **Desktop:** select **"No desktop"** (the option may be labeled "None"
-  or "Minimal" on older ISOs — pick whichever skips the desktop
-  install). This gives you a TTY-only base that boots in seconds and
-  uses minimal disk; niri + Noctalia come in via the flake in Step 3.
-  If your ISO genuinely doesn't offer a no-desktop option, picking
-  GNOME also works — the flake's `services.xserver.enable = false`
-  (and friends) tear it out on first rebuild. You just paid ~15 min of
-  install time you didn't need to.
-
-Click through to install. Calamares writes an encrypted ext4 root, an
-unencrypted FAT32 ESP, and (if you picked Swap with Hibernate) a swap
-partition sized for the RAM image.
-
-When it finishes, reboot. Pull the USB out.
-
-## Step 2 — First boot
-
-At the LUKS passphrase prompt, type the passphrase you set in Calamares.
-You land at a text-mode login (no display manager because you picked
-"No desktop"); sign in as `sroberts`. You now have a working NixOS
-install — this is the base that the rest of this guide builds on.
-
-If anything goes wrong from here, you can always boot back into this
-generation from the systemd-boot menu (it gets named "default" + the
-date). That's the safety net.
-
-## Step 3 — Layer this flake on top
-
-Bring up Wi-Fi via `nmtui` if you're not on Ethernet, then:
+Перейдите в папку склонированного репозитория и запустите сборку и установку:
 
 ```bash
-# Calamares' "No desktop" base doesn't include git, and per-user nix
-# channels may not be set up yet, which makes `nix-shell -p git` flaky.
-# Install git into your user profile via the system-level nixos channel
-# (Calamares configured that one) — works on the first try.
-nix-env -iA nixos.git
-git clone https://github.com/sroberts/nixos-setup.git ~/nixos-setup
-cd ~/nixos-setup
-# After the nixos-rebuild below, git lands in environment.systemPackages
-# and is on PATH system-wide; the user-profile copy is redundant from
-# then on (remove later with `nix-env -e git` if you care).
+cd /mnt/home/gosha20777/projects/my_projects/nixos-setup
+
+# Запуск установки для хоста dev
+sudo nixos-install --flake .#dev
 ```
 
-Bring the machine-specific hardware file Calamares generated into this
-host's directory. Nix flakes only evaluate files known to Git, so the
-per-host `hardware-configuration.nix` has to be tracked for the build to
-see it — `scripts/new-host.sh` copies it in and `git add`s it for you, and
-also auto-detects the hibernation swap LUKS UUID:
+В процессе установки `nixos-install` попросит вас задать:
+1. **Пароль для пользователя root**
+2. **Пароль для пользователя gosha20777**
 
-```bash
-scripts/new-host.sh sjr-fw13
-```
-
-If `hosts/sjr-fw13/` already exists in the repo (it's the committed host)
-and you're **reinstalling from scratch**, your fresh disk has *new* LUKS
-UUIDs, so overwrite the committed file and update the swap unlock:
-
-```bash
-sudo cp /etc/nixos/hardware-configuration.nix hosts/sjr-fw13/hardware-configuration.nix
-sudo chown $USER:users hosts/sjr-fw13/hardware-configuration.nix
-# then edit hosts/sjr-fw13/default.nix and replace the swap LUKS UUID
-# (find it with `swapon --show` → the /dev/mapper/luks-<uuid> name)
-```
-
-These files carry only LUKS UUIDs (identifiers, not secrets) and the
-filesystem layout, so committing them is fine and makes the repo a true
-source of truth. The committed `hosts/sjr-fw13/` already matches *this*
-machine — you only regenerate on a fresh disk.
-
-Make `~/nixos-setup` the live config so `nixos-rebuild` finds your edits:
-
-```bash
-sudo rm -rf /etc/nixos
-sudo ln -s ~/nixos-setup /etc/nixos
-```
-
-Now the big rebuild. This installs niri + Noctalia, all the CLI/GUI
-packages, shell integrations and activation hooks, and generates
-`~/TODO.md` for the things Nix can't declare.
-
-```bash
-sudo nixos-rebuild switch --flake .#sjr-fw13
-```
-
-Expect 15–40 minutes depending on bandwidth — niri, Noctalia, Claude Code, and
-home-manager are all in the closure. The download buffer is bumped to
-256 MiB in `configuration.nix`, so you won't see the "download buffer is
-full" warnings you'd otherwise hit.
-
-Reboot when it finishes. At the noctalia-greeter prompt on tty1, sign in as
-`sroberts` and you'll land in niri + Noctalia.
-
-**If the rebuild fails or the new session won't start**, this is where the
-Calamares base saves you. From the systemd-boot menu, pick the older
-generation (it'll boot back to the bare TTY login). Then debug from
-there, or `sudo nixos-rebuild --rollback switch` to drop back permanently.
-
-## Step 4 — Lock in the lock file
-
-If `flake.lock` didn't exist in the repo when you cloned, the rebuild just
-generated one. Commit it so the next machine reproduces this one:
-
-```bash
-cd ~/nixos-setup
-git add flake.lock
-git commit -m "Pin flake inputs from first install"
-git push
-```
-
-## Step 5 — Verify
-
-```bash
-# Encryption: root sits under cryptroot
-lsblk
-sudo cryptsetup status cryptroot   # name may differ; check `lsblk` output
-
-# Hibernation (if you picked Swap with Hibernate in Calamares)
-swapon --show                      # swap device should be listed
-cat /sys/power/resume              # non-zero device path
-systemctl hibernate                # should power off fully, then restore on unlock
-
-# Power profiles working, TLP not loaded
-powerprofilesctl get
-systemctl status tlp 2>&1 | head -2
-
-# Kernel 6.12+ floor for Ryzen 7040
-uname -r
-
-# Firmware
-fwupdmgr get-devices
-sudo fwupdmgr update
-
-# Noctalia is running (systemd user unit, not a niri spawn-at-startup)
-systemctl --user status noctalia
-noctalia msg --help                # v5 IPC surface; `ipc call` is v4 and gone
-
-# Docker available without sudo
-docker run --rm hello-world
-
-# Ollama up (if rocm caused a crash, swap to pkgs.ollama-vulkan or pkgs.ollama in configuration.nix)
-curl -s http://localhost:11434/api/version
-
-# AI CLIs on PATH
-claude --version
-gemini --version
-```
-
-Work through `~/TODO.md` (auto-created on first activation) for the
-credential / sign-in steps Nix can't declare.
+Задайте пароли и дождитесь завершения установки.
 
 ---
 
-## Migrating from Arch + DankLinux (optional)
+### 4. Перезагрузка и вход
 
-One thing carries over cleanly from the previous install, if relevant:
+Выполните команду перезагрузки:
 
-- **niri config (custom binds only).** This flake declares the niri binds
-  in `home.nix`, so you don't copy `~/.config/niri/config.kdl`. If you
-  had personal-only binds layered on top of the DMS defaults that aren't
-  represented in `home.nix`, grab those individually and add them to the
-  `programs.niri.settings.binds` block in `home.nix`.
+```bash
+sudo reboot
+```
 
-What doesn't carry:
+В Gnome Boxes отключите ISO-образ (в свойствах VM уберите устройство CD/DVD), чтобы загрузиться с установленного диска.
 
-- **DMS / DankMaterialShell config** (`~/.config/DankMaterialShell/`).
-  Noctalia replaces DMS in this flake. Its base config is declarative —
-  `programs.noctalia.settings` in `home.nix` renders
-  `~/.config/noctalia/config.toml` (validated at build time). Runtime tweaks
-  from the settings UI go to a separate `~/.local/state/noctalia/settings.toml`
-  that home-manager never touches.
-- **`dankinstall`-managed system packages.** On NixOS those live in the
-  flake (`environment.systemPackages`, `home.packages`), not on disk.
+После загрузки вас встретит графический экран входа (Noctalia / niri) или TTY. Авторизуйтесь под пользователем `gosha20777`.
 
 ---
 
-## Ongoing workflow
+## Обновление и управление конфигурацией из VM
+
+Так как репозиторий находится в `~/projects/my_projects/nixos-setup`, внесение изменений и их применение в системе выполняется без прав root для git:
 
 ```bash
-cd ~/nixos-setup
-git pull                                      # grab changes from any machine
-nix flake update                              # bump all inputs
-# Or: nix flake update noctalia               # bump one input
-sudo nixos-rebuild switch --flake .#<host>    # <host> is the hostname / hosts/<dir>
+cd ~/projects/my_projects/nixos-setup
 
-# commit your edits (per-host hardware configs under hosts/ are tracked too)
-git add -A && git commit -m "..." && git push
+# Редактирование файлов, коммиты:
+git status
+git commit -m "my change"
+
+# Применение изменений к системе:
+sudo nixos-rebuild switch --flake .#dev
 ```
-
-Roll back a bad change with `sudo nixos-rebuild --rollback switch` and pair
-it with `git revert` so the repo and running generation stay in sync.
 
 ---
 
-## Known gotchas
+## Подключение агента по SSH с Fedora
 
-1. **niri-flake's `niri-stable` lags niri-unstable.** This config pins
-   `programs.niri.package` to `niri-unstable` from the flake (see
-   `configuration.nix`) because Quickshell-based shells like Noctalia
-   track niri's latest Wayland-protocol surface, and the stable tag
-   trails. We also `.overrideAttrs (doCheck = false)` to skip niri's
-   in-build cargo tests, which can SIGABRT in the Nix build sandbox even
-   when the runtime binary is fine. Don't drop the override unless
-   you've verified niri's upstream test suite passes in a sandbox.
-2. **Keep a recovery USB.** With an encrypted root, a broken boot chain
-   means recovering from the live ISO: `cryptsetup open` → `mount` →
-   `nixos-enter` → roll back. `secure-boot.md` has the exact commands;
-   substitute the LVM steps with plain mount if you used the Calamares
-   layout.
-3. **lmstudio is unfree** — `nixpkgs.config.allowUnfree = true` is mandatory
-   (already set).
-4. **Ollama ROCm on Radeon 780M** is hit-or-miss. If you see crashes, swap
-   `services.ollama.package` to `pkgs.ollama` (CPU) or `pkgs.ollama-vulkan`.
-   The older `services.ollama.acceleration = "rocm"` option was removed
-   upstream; the working API is `services.ollama.package = pkgs.ollama-rocm`.
-5. **Claude Code via Nix bundles its own Node** — your project's
-   `npm`/`node` from mise stays untouched. Intentional; prevents the "wrong
-   shell" error that affected earlier Nix packaging.
-6. **Activation hooks run as the user, not root.** Use absolute Nix store
-   paths for any binary in a hook (the existing hooks do).
-7. **Secure Boot is a separate project.** See `secure-boot.md`. Get the
-   encrypted system booting reliably first, then enable lanzaboote. Never
-   flip Secure Boot ON in BIOS before keys are enrolled.
-8. **Don't reference this repo as a flake input.** It would force a token
-   into `nix.settings.access-tokens` (a committed credential leak), and the
-   `github:` fetch wouldn't include your local `hardware-configuration.nix`.
-   Always build from the local clone.
-9. **Noctalia config is declarative (v5).** `programs.noctalia.settings` in
-   `home.nix` renders `~/.config/noctalia/config.toml`, which the module
-   validates at build time and the shell treats as a read-only base — so no
-   first-run SetupWizard and no `home.activation` seed. Every runtime change
-   from the settings UI (including the wallpaper, which drives the Material
-   You palette) is written to a *separate*
-   `~/.local/state/noctalia/settings.toml` overrides file that Noctalia merges on
-   top, so the store-path base can never clobber your live tweaks. Note the
-   v5 renames: the module is `programs.noctalia` (was
-   `programs.noctalia-shell`) and the IPC surface is `noctalia msg <command…>`
-   (was `noctalia ipc call <target> <fn>`).
-10. **Polkit auth agent swap.** This flake disables niri-flake's bundled
-    `polkit-kde-agent` (`systemd.user.services.niri-flake-polkit.enable =
-    lib.mkForce false`) in favour of Noctalia's own polkit agent, enabled
-    declaratively via `programs.noctalia.settings.shell.polkit_agent = true`.
-    Two agents on the PolicyKit1 bus would race; the Noctalia docs explicitly
-    require the other to be disabled. In v5 this is native config — there is
-    no runtime plugin fetch and no network dependency.
-11. **Noctalia runs as a systemd user unit**, not a niri `spawn-at-startup`
-    (`programs.noctalia.systemd.enable = true`). `nixos-rebuild switch`
-    doesn't kill a compositor-spawned shell, so the old spawn approach left
-    the previous store-path bar alive and added a second one on next start.
-    Check it with `systemctl --user status noctalia`.
+В конфигурацию `hosts/dev/default.nix` зашит SSH-ключ с вашей системы Fedora (`gosha20777@pc`).
 
----
+1. Узнайте IP-адрес виртуальной машины внутри VM:
+   ```bash
+   ip a
+   ```
+   *(обычно `192.168.122.x`)*
 
-## File inventory
+2. С основной системы Fedora подключитесь к VM без пароля:
+   ```bash
+   ssh gosha20777@192.168.122.X
+   ```
 
-| File | In repo? | Why |
-|---|---|---|
-| `flake.nix` | Yes | Entry point, declares inputs, auto-discovers `hosts/` |
-| `configuration.nix` | Yes | Shared system config — no secrets, host-agnostic |
-| `home.nix` | Yes | Shared user config — no secrets |
-| `hosts/<name>/default.nix` | Yes | Per-host: hostname, `nixos-hardware` module, swap/resume |
-| `hosts/<name>/hardware-configuration.nix` | Yes | Per-host disk UUIDs + filesystems (UUIDs are identifiers, not secrets) |
-| `scripts/new-host.sh` | Yes | Scaffolds a new host on a fresh machine |
-| `flake.lock` | Yes (after first install) | Pins inputs for reproducibility |
-| `secure-boot.md` | Yes | Post-install lanzaboote runbook |
-| `INSTALL.md` | Yes | This file |
-| `hosts/README.md` | Yes | Per-host layout + runbook for standing up a new machine |
-| `README.md` | Yes | Orientation and day-to-day commands |
-| `CONTRIBUTING.md` | Yes | Branch/PR workflow and the per-merge checks |
-| `CLAUDE.md` | Yes | Context for AI coding agents working in this repo |
-
----
-
-## Appendix — manual LVM-on-LUKS install
-
-Use this path only if you specifically want the LVM layout (e.g. for
-multi-volume management, easier resize later, or a deliberately sized
-encrypted swap LV inside the same LUKS container). Hibernation is *not*
-a reason to take this path anymore — Calamares' "Swap with Hibernate"
-option in Step 1 gives you that on the default flow.
-
-The trade-off is no built-in rollback safety net during install — if it
-goes wrong, you're recovering from the live ISO.
-
-You'll also need to set `boot.resumeDevice = "/dev/vg/swap"` in this host's
-module (`hosts/sjr-fw13/default.nix`) — replacing the by-UUID swap unlock the
-Calamares path uses — before the rebuild in Step 3, so the kernel resumes
-from the LVM swap LV.
-
-Boot the live ISO (minimal or graphical), connect Wi-Fi, then:
-
-> **This erases the disk.** Run `lsblk` first and confirm `nvme0n1` is your
-> target. If your NVMe is named differently (e.g., `nvme1n1`), substitute it
-> in every command below.
-
-```bash
-sudo -i
-
-# 1. Partition: 1 GiB ESP + LUKS container for the rest
-sgdisk --zap-all /dev/nvme0n1
-sgdisk -n 1:0:+1G   -t 1:ef00 -c 1:ESP         /dev/nvme0n1
-sgdisk -n 2:0:0     -t 2:8309 -c 2:cryptsystem /dev/nvme0n1
-mkfs.fat -F32 -n BOOT /dev/nvme0n1p1
-
-# 2. LUKS2 (this passphrase unlocks the machine at every boot — make it strong)
-cryptsetup luksFormat --type luks2 /dev/nvme0n1p2
-cryptsetup open /dev/nvme0n1p2 cryptsystem
-
-# 3. LVM inside LUKS: 92 GiB swap + root on the remainder
-pvcreate /dev/mapper/cryptsystem
-vgcreate vg /dev/mapper/cryptsystem
-lvcreate -L 92G       -n swap vg
-lvcreate -l 100%FREE  -n root vg
-
-# 4. Filesystems + mount. Swap MUST be active when config is generated, so
-#    nixos-generate-config writes it into hardware-configuration.nix.
-mkfs.ext4 -L nixos /dev/vg/root
-mkswap   -L swap   /dev/vg/swap
-mount /dev/vg/root /mnt
-mkdir -p /mnt/boot
-mount /dev/nvme0n1p1 /mnt/boot
-swapon /dev/vg/swap
-
-# 5. Generate the hardware config
-nixos-generate-config --root /mnt
-```
-
-Verify before installing:
-
-```bash
-ls /mnt/etc/nixos/
-# expected: configuration.nix  hardware-configuration.nix
-
-grep -A3 swapDevices /mnt/etc/nixos/hardware-configuration.nix
-# must list /dev/disk/by-uuid/... pointing at the swap LV
-```
-
-Then clone this repo, drop the generated hardware config into the host
-directory, and run `nixos-install` straight from the clone (the whole flake
-tree — `hosts/`, `scripts/`, etc. — needs to be present, so install from the
-repo rather than copying individual files):
-
-```bash
-# Minimal ISO needs nix-shell -p git; graphical ISO has git pre-installed
-nix-shell -p git --run "git clone https://github.com/sroberts/nixos-setup.git /tmp/cfg"
-
-# Use the hardware config nixos-generate-config just wrote for THIS disk
-cp /mnt/etc/nixos/hardware-configuration.nix /tmp/cfg/hosts/sjr-fw13/hardware-configuration.nix
-
-# IMPORTANT (LVM path): edit /tmp/cfg/hosts/sjr-fw13/default.nix and replace
-# the hibernation swap block with a single line — the swap LV lives inside
-# the same LUKS container as root, so it's already unlocked; you only need
-# to point resume at it:
-#     boot.resumeDevice = "/dev/vg/swap";
-# (delete the boot.initrd.luks.devices."luks-..." swap line.)
-
-nixos-install --flake /tmp/cfg#sjr-fw13 \
-  --option experimental-features 'nix-command flakes'
-# Set the root password when prompted — DO NOT skip
-reboot
-```
-
-Then proceed to Step 4 (`flake.lock`) and Step 5 (verify), plus add a
-hibernation check:
-
-```bash
-swapon --show                  # 92G swap present
-cat /sys/power/resume          # non-zero device
-systemctl hibernate            # should power off fully, then restore on unlock
-```
-
-Known additional gotchas for this path:
-
-- **Hibernation needs swap ≥ RAM image.** 92 GiB covers ~64 GB RAM
-  comfortably (relies on compression above that). If you have 96 GB and
-  routinely run RAM hot, bump the swap LV before installing.
-- **Don't use random-key swap** (`randomEncryption`). It can't survive
-  the power cycle hibernation requires. Swap must live inside the
-  persistent LUKS container.
-- **Don't skip the root-password prompt at `nixos-install`.** Empty
-  password = locked account = no recovery shell from emergency mode.
-
----
-
-## References
-
-- [NixOS on the Framework Laptop 13 (Framework Guides)](https://guides.frame.work/Guide/NixOS+on+the+Framework+Laptop+13/400)
-- [NixOS Wiki — Hardware/Framework/Laptop 13](https://wiki.nixos.org/wiki/Hardware/Framework/Laptop_13)
-- [nixos-hardware framework-13-7040-amd module](https://github.com/NixOS/nixos-hardware/tree/master/framework/13-inch/7040-amd)
-- [Noctalia shell (Quickshell-based)](https://github.com/noctalia-dev/noctalia-shell)
-- [noctalia-greeter (greetd greeter)](https://github.com/noctalia-dev/noctalia-greeter)
-- [niri-flake (sodiboo)](https://github.com/sodiboo/niri-flake)
-- [niri Getting Started](https://niri-wm.github.io/niri/Getting-Started.html)
-- [lanzaboote (Secure Boot)](https://github.com/nix-community/lanzaboote)
-- [claude-code-nix (sadjow) — hourly-updated flake](https://github.com/sadjow/claude-code-nix)
-- [home-manager manual](https://nix-community.github.io/home-manager/)
+3. Теперь агент (или вы) с хост-системы Fedora можете удаленно выполнять любые команды внутри VM:
+   ```bash
+   ssh gosha20777@192.168.122.X "cd ~/projects/my_projects/nixos-setup && sudo nixos-rebuild switch --flake .#dev"
+   ```
