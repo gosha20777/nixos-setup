@@ -57,16 +57,11 @@
     "rd.udev.log_level=3"
     "udev.log_priority=3"
   ];
-  # FAT32 doesn't support Unix perms, so the ESP defaults to world-readable.
-  # bootctl writes a kernel random-seed file in /boot/loader and (correctly)
-  # complains: any local user could read the seed and learn things about the
-  # kernel's entropy pool. Mount /boot with restrictive masks so files and
-  # directories under the ESP are owner-only (root). Merges with the
-  # /boot entry that nixos-generate-config wrote to hardware-configuration.nix.
-  fileSystems."/boot".options = [
-    "fmask=0077"
-    "dmask=0077"
-  ];
+  # NOTE: the ESP-only /boot fmask/dmask options used to live here, but a
+  # /boot mount only exists on UEFI hosts with an ESP. The current hosts
+  # (dev VM) boot Legacy BIOS with GRUB and have no /boot entry at all;
+  # when a UEFI host lands, set those options in its hosts/<name>/ module
+  # next to its fileSystems."/boot" definition.
 
   ############################################################
   # Disk encryption + hibernation (suspend-to-disk)
