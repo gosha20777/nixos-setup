@@ -1,5 +1,5 @@
 # Per-host module for dev (Gnome Boxes / QEMU on x86_64).
-{ lib, ... }:
+{ lib, pkgs, ... }:
 {
   imports = [
     ./hardware-configuration.nix
@@ -36,4 +36,35 @@
   users.users.gosha20777.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHz1i0hWB0f6oP3+EkA0EodjJrp5R3P9F8rC5sivM1py gosha20777@pc"
   ];
+
+  # VM-specific home-manager settings merge into the shared home.nix via
+  # home-manager.users.<user> (the HM NixOS module is loaded in flake.nix).
+
+  # SPICE session agent: vdagentd (enabled above) only exposes the virtio
+  # channel; the per-session agent is what gives the guest a client-side
+  # cursor (no duplicated host cursor) and a shared clipboard. niri /
+  # wlroots compositors never spawn it themselves — GNOME does, we don't —
+  # so tie it to the graphical session explicitly.
+  home-manager.users.gosha20777 = {
+    systemd.user.services.spice-vdagent = {
+      Unit = {
+        Description = "SPICE session agent (cursor, clipboard sharing)";
+        PartOf = [ "graphical-session.target" ];
+        After = [ "graphical-session.target" ];
+      };
+      Service = {
+        ExecStart = "${pkgs.spice-vdagent}/bin/spice-vdagent";
+        Restart = "on-failure";
+      };
+      Install.WantedBy = [ "graphical-session.target" ];
+    };
+
+    # Pin the VM output to the host's 1920x1080 panel. niri (like all
+    # wlroots compositors) does not implement SPICE-agent dynamic resolution,
+    # so the mode can't follow the viewer window — set it statically instead.
+    programs.niri.settings.outputs."Virtual-1".mode = {
+      width = 1920;
+      height = 1080;
+    };
+  };
 }
