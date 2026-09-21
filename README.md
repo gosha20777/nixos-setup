@@ -40,7 +40,7 @@ modules/
     system/                  #   mimeapps face todo (user-account level)
     agents/                  #   oh-my-pi herdr impeccable
     apps/                    #   typora cyberchef
-assets/                      # binary assets (wallpapers, claude skills)
+assets/                      # binary assets (wallpapers)
 scripts/new-host.sh          # scaffolds hosts/<name>/ on a fresh machine
 docs: INSTALL.md secure-boot.md backup.md CONTRIBUTING.md CLAUDE.md hosts/README.md
 ```
@@ -57,7 +57,7 @@ There is **no** `configuration.nix` / `home.nix` monolith: the shared system is 
   systemSettings.terminal = "kitty";
   ```
   User-level per-host tweaks (bar position, output modes/scales) go in `hosts/<name>/home.nix`, which merges on top of the shared `modules/home` tree.
-- **data/ vs packages/ vs assets/.** `modules/data/` — static texts consumed by modules (starship base toml, Typora theme). `modules/packages/` — derivations for things not in nixpkgs. `assets/` — binaries (wallpapers, skills).
+- **data/ vs packages/ vs assets/.** `modules/data/` — static texts consumed by modules (starship base toml, Typora theme). `modules/packages/` — derivations for things not in nixpkgs. `assets/` — binaries (wallpapers).
 - **Host auto-discovery.** Every *directory* under `hosts/` becomes `nixosConfigurations.<dirname>` (`hosts/common.nix` is a file and doesn't match the filter). Adding a machine = adding a directory; `flake.nix` never changes.
 
 ## Where to start

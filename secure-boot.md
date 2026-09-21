@@ -23,9 +23,8 @@ the same.
 
 ## Prerequisites
 
-- System installed with an encrypted root (either the default Calamares
-  ext4-on-LUKS layout or the manual LVM-on-LUKS appendix path from
-  `INSTALL.md`) and booting normally.
+- System installed with an encrypted root (Calamares "Erase disk" + encryption,
+  or your manual partitioning; see `INSTALL.md`) and booting normally.
 - A UEFI admin password set in firmware.
 - Secure Boot currently **disabled** in BIOS (it was, for the install).
 - On Framework 13 specifically: BIOS 3.05+ (older firmware has the standby
@@ -62,7 +61,7 @@ This generates your platform keys in `/var/lib/sbctl`.
 ## Step 3 — Rebuild (signs the boot chain, still in Secure Boot OFF)
 
 ```bash
-sudo nixos-rebuild switch --flake ~/nixos-setup#<host>
+sudo nixos-rebuild switch --flake ~/Projects/my_projects/nixos-setup#<host>
 ```
 
 lanzaboote replaces systemd-boot and signs the kernel + initrd as a unified image.

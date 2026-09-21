@@ -50,25 +50,16 @@ Modular structure — shared module trees under `modules/` (auto-imported), per-
 - **`modules/nixos/core/`** — Shared system modules, one feature per file (nix, boot, user, locale, network, audio, backup, docker, nix-ld, niri, greeter, portals, shells, fonts, apps). **Auto-imported** on every host: a new file here is a new feature, no import-list edit. Paths containing `/_` are ignored by import-tree (opt-out convention).
 - **`modules/nixos/roles/`** — Hardware-class modules (`laptop.nix`, `desktop.nix`), **not** auto-imported; a host lists the role it wants in its `imports`. The dev VM uses neither.
 - **`modules/home/`** — Shared home-manager modules, one program per file, grouped into `shells/ terminal/ cli/ dev/ desktop/ system/ agents/ apps/`. **Auto-imported** for the user via home-manager `sharedModules`. A program's package, config, and its `home.activation` hooks live together in one file.
-- **`modules/packages/` / `modules/data/` / `assets/`** — custom derivations (qq), static config texts (starship base toml, Typora theme css), and binary assets (wallpapers, skills) respectively.
+- **`modules/packages/` / `modules/data/` / `assets/`** — custom derivations (qq), static config texts (starship base toml, Typora theme css), and binary assets (wallpapers) respectively.
 - **`hosts/<hostname>/`** — Everything machine-specific. `default.nix` imports `../common.nix` + `./hardware-configuration.nix`, sets `networking.hostName`, bootloader/system overrides (the dev VM forces GRUB/BIOS), and attaches `./home.nix` via `home-manager.users.<username>.imports`. `home.nix` carries per-host user overrides (VM: spice-vdagent session agent, Virtual-1 output mode). `hardware-configuration.nix` (committed) encodes filesystems and UUIDs. The only host today is `hosts/dev/`.
 
-### Disk layout — two supported paths
+### Host boot & disk
 
-**Default (Calamares install):** ESP + LUKS-encrypted ext4 root. If the user picked "Swap with Hibernate" in Calamares, a hibernation-sized swap partition is also created and listed in `hardware-configuration.nix`'s `swapDevices`. The hibernation swap unlock + `boot.resumeDevice` live in the host module (`hosts/<hostname>/default.nix`) — they're per-disk LUKS UUIDs. No LVM in this layout.
+The shared default (`modules/nixos/core/boot.nix`) is **UEFI + systemd-boot**. The dev VM overrides it to **Legacy BIOS + GRUB** (no ESP on its single btrfs disk) in `hosts/dev/default.nix` — a UEFI host needs no bootloader overrides at all. Disk encryption and hibernation swap are per-host concerns: their unlock blocks live in the host's `default.nix` (per-disk LUKS UUIDs), sized/laid out at install time; `scripts/new-host.sh` auto-detects the swap LUKS UUID when it can. The Calamares teardown lines in `modules/nixos/core/niri.nix` (`services.xserver.enable = false`, gdm/gnome off) are harmless on any path — they disable things that were never installed.
 
-**Appendix (manual LVM-on-LUKS):**
+### Power
 
-```
-nvme0n1p1  ESP (FAT32, unencrypted)
-nvme0n1p2  LUKS2 → LVM "vg"
-             vg/swap  92 GiB  (encrypted, holds hibernation image)
-             vg/root  rest    (encrypted, ext4)
-```
-
-This path is for users who specifically want the LVM layout (multi-volume management, easier resize). It requires setting `boot.resumeDevice = "/dev/vg/swap"` in the host module (`hosts/<hostname>/default.nix`) before the install, instead of the by-UUID swap unlock the Calamares path uses. The path is a stable LVM device, independent of `hardware-configuration.nix`. Hibernation needs persistent-key encrypted swap ≥ RAM, which is why swap lives *inside* LUKS rather than as a random-key swap partition.
-
-The Calamares teardown lines in `modules/nixos/core/niri.nix` (`services.xserver.enable = false`, `services.displayManager.gdm.enable = false`, `services.desktopManager.gnome.enable = false`) are harmless on the manual path — they're disabling things that were never installed.
+`power-profiles-daemon` (not TLP — TLP misbehaves on Ryzen 7040 platforms) lives in `modules/nixos/roles/laptop.nix`, opt-in via the host's imports; `tlp` is explicitly disabled there. The dev VM imports neither role.
 
 ### niri + Noctalia wiring
 
@@ -79,10 +70,6 @@ System side enables `programs.niri` and `programs.noctalia-greeter` — a Quicks
 The lock screen is Noctalia's own (its own PAM context, raised via `WlSessionLock`). **Noctalia does not subscribe to logind's `Lock` signal**, so `loginctl lock-session` is a no-op — locking must go through `noctalia msg session lock`, which is what the `Super+Alt+L` bind and swayidle's `before-sleep` use. Media/brightness keybinds in `modules/home/desktop/niri.nix` still go through `wpctl`, `playerctl`, and `brightnessctl` (shell-agnostic).
 
 Idle is driven by **Noctalia's own idle manager**, declared in `programs.noctalia.settings.idle.behavior` in `modules/home/desktop/noctalia.nix`: a named `lock` behavior at `timeout = 600` (10 min) running the internal `noctalia:session lock` action. It suspends to RAM and hibernates `HibernateDelaySec` later (3h, set in `modules/nixos/roles/laptop.nix` — only on hosts that import the laptop role). **swayidle** (`modules/home/desktop/swayidle.nix`) is kept for one job only: its `before-sleep` hook locks (via `noctalia msg session lock`, resolved by absolute store path because the unit's PATH is minimal) ahead of a sleep Noctalia didn't initiate — i.e. a lid close — since Noctalia has no lock-on-external-suspend hook.
-
-### Power (Framework 13 / Ryzen 7040)
-
-`power-profiles-daemon` is enabled in `modules/nixos/roles/laptop.nix` (opt-in, not shared); `tlp` is **explicitly disabled** there. This is Framework's recommendation for Ryzen 7040 — TLP misbehaves on this platform. Don't swap them without a reason on a Framework host. The dev VM imports neither role.
 
 ## Editing patterns
 
@@ -105,9 +92,7 @@ The lanzaboote block uses `lib.mkForce` to override systemd-boot; `lib` is alrea
 
 ## What's *not* declarative (by design)
 
-Listed in `home.activation.todoMd` (the generated `~/TODO.md`): authenticating Claude Code / Gemini CLI / `fizzy setup`, signing into 1Password / Gmail / GitHub / Slack / Discord / Signal / Zoom, joining Tailscale, setting wallpaper in Noctalia (its Material You-style theme derives from the wallpaper), syncing noctalia-greeter to the shell palette, Obsidian Sync, Typora license, Chromium extensions, `sudo fwupdmgr update`. These are credentials, account state, and firmware updates — not something Nix should own.
-
-Ollama models are **not** on that list: `services.ollama.loadModels` (when re-added) pulls them declaratively on first start via `ollama-model-loader.service`.
+Listed in `home.activation.todoMd` (the generated `~/TODO.md`): authenticating Claude Code / Gemini CLI, signing into 1Password / Gmail / GitHub / Slack / Discord / Signal / Zoom, joining Tailscale, setting wallpaper in Noctalia (its Material You-style theme derives from the wallpaper), syncing noctalia-greeter to the shell palette, Obsidian Sync, Typora license, Chromium extensions, `sudo fwupdmgr update`. These are credentials, account state, and firmware updates — not something Nix should own.
 
 ## Reference docs in this repo
 
