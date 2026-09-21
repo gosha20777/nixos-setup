@@ -9,7 +9,8 @@
 #   2. writes a hosts/<hostname>/default.nix from a template (hostname filled
 #      in; swap/resume UUID auto-detected from the active swap mapper when
 #      possible, otherwise left as a clearly-marked TODO)
-#   3. git-adds both so the flake can see them
+#   3. writes a hosts/<hostname>/home.nix for per-host user overrides
+#   4. git-adds all three so the flake can see them
 #
 # After it runs, the host is buildable as .#<hostname> — no flake.nix edit
 # needed (flake.nix auto-discovers everything under hosts/). See hosts/README.md.
@@ -105,9 +106,9 @@ cat > "$host_dir/default.nix" <<EOF
     ./hardware-configuration.nix
 
     # TODO: set the nixos-hardware module for THIS machine's model. The list
-    # is at https://github.com/NixOS/nixos-hardware. Default below is the
-    # Framework 13 AMD Ryzen 7040 — change it if this host is different.
-    inputs.nixos-hardware.nixosModules.framework-13-7040-amd
+    # is at https://github.com/NixOS/nixos-hardware — e.g. ThinkPads live
+    # under nixosModules.thinkpad-*. Uncomment one ONLY after checking it:
+    # inputs.nixos-hardware.nixosModules.thinkpad-t14
 
     # Hardware class — pick one (see modules/nixos/roles/):
     #   ../../modules/nixos/roles/laptop.nix
@@ -142,9 +143,8 @@ echo "Scaffolded hosts/$hostname/:"
 echo "  - hardware-configuration.nix (copied from $hw_src)"
 echo "  - default.nix"
 echo "  - home.nix"
-echo
 echo "Next:"
-echo "  1. Review hosts/$hostname/default.nix — set the correct nixos-hardware"
-echo "     module for this model, and confirm/complete the swap block."
+echo "  1. Review hosts/$hostname/default.nix — pick a nixos-hardware module and a"
+echo "     role (laptop/desktop) in the imports, and confirm/complete the swap block."
 echo "  2. Build it:  sudo nixos-rebuild switch --flake .#$hostname"
 echo "  3. Commit:    git commit -m \"hosts: add $hostname\""

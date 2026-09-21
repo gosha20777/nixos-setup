@@ -24,6 +24,6 @@
     dates = "weekly";
     options = "--delete-older-than 30d";
   };
-  nixpkgs.config.allowUnfree = true; # lmstudio, typora, 1password, spotify
+  nixpkgs.config.allowUnfree = true; # google-chrome, typora
   system.stateVersion = "26.05";
 }

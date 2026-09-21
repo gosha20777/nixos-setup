@@ -43,8 +43,9 @@
       #
       # Note we can't simply drop niri-flake for nixpkgs' `niri`: nixpkgs ships
       # the package (26.04, older than the unstable build we run) but NO
-      # programs.niri module, and home.nix's binds/outputs/touchpad are all
-      # written as `programs.niri.settings` with build-time validation.
+      # programs.niri module, and modules/home/desktop/niri.nix's
+      # binds/outputs/touchpad are all written as `programs.niri.settings`
+      # with build-time validation.
     };
 
     noctalia = {
