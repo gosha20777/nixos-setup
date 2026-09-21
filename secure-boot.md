@@ -35,12 +35,10 @@ the same.
 
 ## Step 1 — Add lanzaboote to the flake
 
-In `flake.nix`, uncomment the `lanzaboote` input and the
-`inputs.lanzaboote.nixosModules.lanzaboote` module line.
+In `flake.nix`, uncomment the `lanzaboote` input; in `hosts/common.nix`,
+uncomment the `inputs.lanzaboote.nixosModules.lanzaboote` module line.
 
-In `configuration.nix`:
-1. Add `lib` to the function args: `{ config, pkgs, lib, inputs, ... }:`
-2. Uncomment the SECURE BOOT block:
+In `modules/nixos/core/boot.nix`, uncomment the SECURE BOOT block:
    ```nix
    boot.loader.systemd-boot.enable = lib.mkForce false;
    boot.lanzaboote = {
@@ -48,8 +46,8 @@ In `configuration.nix`:
      pkiBundle = "/var/lib/sbctl";
    };
    ```
-3. Add `sbctl` to `environment.systemPackages` (uncomment the line, or just add
-   `sbctl` to the existing list).
+And add `sbctl` to `environment.systemPackages` in `modules/nixos/core/apps.nix`
+(uncomment the line, or just add `sbctl` to the existing list).
 
 Do **not** rebuild yet.
 

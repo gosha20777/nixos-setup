@@ -1,11 +1,24 @@
 # Per-host module for dev (Gnome Boxes / QEMU on x86_64).
-{ lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 {
   imports = [
+    ../common.nix
     ./hardware-configuration.nix
   ];
 
   networking.hostName = "dev";
+
+  # Ensure Mesa exposes OpenGL 3.3 in the virgl VM (the virtual GPU reports
+  # a lower core profile than niri/Quickshell request).
+  environment.sessionVariables = {
+    MESA_GL_VERSION_OVERRIDE = "3.3";
+    MESA_GLSL_VERSION_OVERRIDE = "330";
+  };
 
   # Gnome Boxes / QEMU guest integrations (clipboard sharing, dynamic resolution, time sync)
   services.qemuGuest.enable = true;
@@ -13,8 +26,8 @@
 
   # The Gnome Boxes VM boots Legacy BIOS and its disk has no ESP (single
   # btrfs partition from the Calamares "Erase disk" install), so the shared
-  # systemd-boot/UEFI config cannot work here. Install GRUB into the MBR
-  # of /dev/vda instead.
+  # systemd-boot/UEFI config (modules/nixos/core/boot.nix) cannot work here.
+  # Install GRUB into the MBR of /dev/vda instead.
   boot.loader.systemd-boot.enable = lib.mkForce false;
   boot.loader.efi.canTouchEfiVariables = lib.mkForce false;
   boot.loader.grub = {
@@ -37,34 +50,8 @@
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHz1i0hWB0f6oP3+EkA0EodjJrp5R3P9F8rC5sivM1py gosha20777@pc"
   ];
 
-  # VM-specific home-manager settings merge into the shared home.nix via
-  # home-manager.users.<user> (the HM NixOS module is loaded in flake.nix).
-
-  # SPICE session agent: vdagentd (enabled above) only exposes the virtio
-  # channel; the per-session agent is what gives the guest a client-side
-  # cursor (no duplicated host cursor) and a shared clipboard. niri /
-  # wlroots compositors never spawn it themselves — GNOME does, we don't —
-  # so tie it to the graphical session explicitly.
-  home-manager.users.gosha20777 = {
-    systemd.user.services.spice-vdagent = {
-      Unit = {
-        Description = "SPICE session agent (cursor, clipboard sharing)";
-        PartOf = [ "graphical-session.target" ];
-        After = [ "graphical-session.target" ];
-      };
-      Service = {
-        ExecStart = "${pkgs.spice-vdagent}/bin/spice-vdagent";
-        Restart = "on-failure";
-      };
-      Install.WantedBy = [ "graphical-session.target" ];
-    };
-
-    # Pin the VM output to the host's 1920x1080 panel. niri (like all
-    # wlroots compositors) does not implement SPICE-agent dynamic resolution,
-    # so the mode can't follow the viewer window — set it statically instead.
-    programs.niri.settings.outputs."Virtual-1".mode = {
-      width = 1920;
-      height = 1080;
-    };
-  };
+  # Per-host home overrides — everything VM-specific at the user level
+  # (SPICE session agent, output mode) lives in ./home.nix and merges on
+  # top of the shared tree (modules/home) auto-imported via common.nix.
+  home-manager.users.${config.systemSettings.username}.imports = [ ./home.nix ];
 }

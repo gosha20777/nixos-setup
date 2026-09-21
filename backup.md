@@ -1,13 +1,13 @@
 # Backups
 
-Time Machine-shaped backups of `/home/sroberts` to an attached USB drive, using
+Time Machine-shaped backups of `/home/gosha20777` to an attached USB drive, using
 [restic](https://restic.net/). Plug the drive in and it backs up; unplug it and
 nothing complains.
 
 Snapshots are versioned, deduplicated, and encrypted. Everything is local — no
 cloud account, no credentials, no third party.
 
-Configured in the *Backups* section of `configuration.nix`.
+Configured in `modules/nixos/core/backup.nix`.
 
 ---
 
@@ -46,8 +46,8 @@ Then `$R snapshots`, `$R mount /mnt/restore`, and so on.
 | `Persistent = true` | A window missed while asleep runs once on the next mount |
 | Retention: 24 hourly, 14 daily, 8 weekly, 12 monthly | Dense recent history, sparse older |
 
-`/home/sroberts` is backed up minus caches, model weights, chat-app state, and
-build artefacts — see `exclude` in `configuration.nix`. As measured on
+`/home/gosha20777` is backed up minus caches, model weights, chat-app state, and
+build artefacts — see `exclude` in `modules/nixos/core/backup.nix`. As measured on
 2026-09-05 that trims ~31 GB down to ~5 GB of genuinely irreplaceable data.
 
 ---
@@ -142,17 +142,17 @@ timestamp, plus a `latest` symlink. `Ctrl-C` unmounts.
 ```bash
 # Recover somewhere safe first and diff before overwriting — do this
 # whenever you are not certain.
-$R restore latest --target /tmp/restore --include /home/sroberts/Documents/notes.md
-diff /tmp/restore/home/sroberts/Documents/notes.md /home/sroberts/Documents/notes.md
+$R restore latest --target /tmp/restore --include /home/gosha20777/Documents/notes.md
+diff /tmp/restore/home/gosha20777/Documents/notes.md /home/gosha20777/Documents/notes.md
 
 # Or straight back to its original path:
-$R restore latest --target / --include /home/sroberts/Documents/notes.md
+$R restore latest --target / --include /home/gosha20777/Documents/notes.md
 ```
 
 ### A whole directory
 
 ```bash
-$R restore latest --target /tmp/restore --include /home/sroberts/Developer/subrosa
+$R restore latest --target /tmp/restore --include /home/gosha20777/Developer/subrosa
 ```
 
 ### From an older snapshot

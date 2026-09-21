@@ -4,6 +4,12 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    # import-tree — auto-import every .nix module under modules/nixos/core
+    # and modules/home (hosts/common.nix wires the trees). A new file in the
+    # tree is a new feature; no flake or import-list edits. Deps-free
+    # callable flake; paths containing "/_" are ignored by default.
+    import-tree.url = "github:denful/import-tree";
+
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -82,55 +88,39 @@
     # };
   };
 
-  # Only the inputs referenced directly in this file are destructured; the rest
-  # (noctalia, claude-code-nix, herdr, …) are reached as `inputs.<name>` from
-  # configuration.nix / home.nix via specialArgs + extraSpecialArgs below.
+  # Only the inputs referenced directly in this file are destructured; the
+  # rest (noctalia, herdr, …) are reached as `inputs.<name>` from the module
+  # tree via specialArgs + extraSpecialArgs (hosts/common.nix wires both).
   outputs =
-    {
-      nixpkgs,
-      home-manager,
-      niri,
-      noctalia-greeter,
-      ...
-    }@inputs:
+    { nixpkgs, ... }@inputs:
     let
       lib = nixpkgs.lib;
 
       # Every directory under ./hosts is a machine. Drop in a new
       # hosts/<hostname>/ (a default.nix + its hardware-configuration.nix) and
       # it becomes nixosConfigurations.<hostname> automatically — no edit to
-      # this file. scripts/new-host.sh scaffolds one; see hosts/README.md.
+      # this file. hosts/common.nix is a FILE and doesn't match the directory
+      # filter. scripts/new-host.sh scaffolds one; see hosts/README.md.
       hostNames = builtins.attrNames (
         lib.filterAttrs (_: type: type == "directory") (builtins.readDir ./hosts)
       );
 
-      # Shared system definition. Only the per-host module (./hosts/<name>)
-      # carries machine-specific state (hardware-configuration.nix, hostname,
-      # the nixos-hardware model module, swap/resume UUIDs); configuration.nix
-      # and home.nix are identical on every host.
+      # A host is one directory under ./hosts: its default.nix imports
+      # hosts/common.nix (the shared module trees + home-manager wiring),
+      # ./hardware-configuration.nix, and any roles (modules/nixos/roles/)
+      # and per-host home overrides (./home.nix) it needs.
       mkHost =
         hostname:
         lib.nixosSystem {
           specialArgs = { inherit inputs; };
           modules = [
             ./hosts/${hostname}
-            ./configuration.nix
-
-            niri.nixosModules.niri
-            noctalia-greeter.nixosModules.default
 
             # ── SECURE BOOT ──
             # Uncomment together with the input in the inputs block and the
-            # block in configuration.nix:
+            # block in modules/nixos/core/boot.nix; the module is wired in
+            # hosts/common.nix (commented there too):
             # inputs.lanzaboote.nixosModules.lanzaboote
-
-            home-manager.nixosModules.home-manager
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.extraSpecialArgs = { inherit inputs; };
-              home-manager.users.gosha20777 = import ./home.nix;
-            }
           ];
         };
     in

@@ -1,0 +1,25 @@
+add_newline = false
+palette = "noctalia"
+
+[character]
+success_symbol = "[➜](bold subtext1)"
+error_symbol = "[➜](bold text)"
+
+[directory]
+style = "text bold"
+
+[git_branch]
+style = "overlay1"
+
+[git_status]
+style = "subtext1"
+
+[cmd_duration]
+style = "overlay0"
+
+[hostname]
+style = "overlay1"
+
+[username]
+style_user = "overlay1"
+style_root = "text bold"

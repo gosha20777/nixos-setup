@@ -1,0 +1,127 @@
+@charset "UTF-8";
+
+/* Static snapshot of the Noctalia m3-tonal-spot palette — see the Nix
+   comment in modules/home/apps/typora.nix for the role ladder and how to
+   refresh it. */
+
+:root {
+  --bg-color:                 #101418;
+  --side-bar-bg-color:        #1c2024;
+  --control-text-color:       #9acbfa;
+  --text-color:               #e0e2e8;
+  --meta-content-color:       #8c9198;
+  --primary-color:            #9acbfa;
+  --active-file-bg-color:     #323539;
+  --active-file-text-color:   #e0e2e8;
+  --active-file-border-color: #9acbfa;
+  --item-hover-bg-color:      #252a30;
+  --item-hover-text-color:    #e0e2e8;
+  --rawblock-edit-panel-bd:   #42474e;
+  --window-border:            #42474e;
+  --select-text-bg-color:     #42474e;
+  --select-text-font-color:   #ffffff;
+  --md-char-color:            #8c9198;
+  --heading-char-color:       #c2c7cf;
+  --code-block-bg-color:      #0a0e12;
+}
+
+html, body, content, #write {
+  background: #101418;
+  color:      #e0e2e8;
+}
+
+/* Chrome: title bar, tabs, status bar, footer */
+header, footer, .typora-quick-open, .megamenu-menu, #top-titlebar,
+.ty-window-control, .typora-sourceview-buttons, #footer-word-count,
+#footer-word-count-info, .footer-item, .footer-item-right {
+  background: #1c2024;
+  color:      #9acbfa;
+  border-color: #42474e;
+}
+
+/* Tab bar */
+.tab-bar, #file-tabs, .file-tab, .file-tab-name {
+  background: #1c2024;
+  color:      #9acbfa;
+  border-color: #42474e;
+}
+.file-tab.active {
+  background: #101418;
+  color:      #e0e2e8;
+}
+
+/* Sidebar */
+#typora-sidebar, .sidebar-content, .sidebar-tabs, .outline-content,
+.file-tree, .file-list-item, .file-node-content, .info-panel-tab,
+.sidebar-footer {
+  background: #1c2024;
+  color:      #9acbfa;
+  border-color: #42474e;
+}
+.file-node-content:hover, .file-list-item:hover, .outline-item:hover {
+  background: #252a30;
+  color:      #e0e2e8;
+}
+.file-node-content.active, .file-list-item.active, .outline-active {
+  background: #323539;
+  color:      #e0e2e8;
+}
+
+/* Menus (hamburger megamenu + right-click context) */
+.megamenu-content, .megamenu-menu-panel, .megamenu-menu-list,
+.megamenu-menu-header, #context-menu, .context-menu, .dropdown-menu,
+.modal-content {
+  background: #1c2024;
+  color:      #e0e2e8;
+  border-color: #42474e;
+}
+.megamenu-menu-list li:hover, .context-menu li:hover,
+.dropdown-menu li:hover, .dropdown-menu a:hover {
+  background: #323539;
+  color:      #ffffff;
+}
+.megamenu-menu-header-title { color: #e0e2e8; }
+
+/* Search / find-replace bar */
+.searchpanel, #typora-search-panel, .search-input, .ty-search-result,
+.ty-find-target, .typora-search-input {
+  background: #1c2024;
+  color:      #e0e2e8;
+  border-color: #42474e;
+}
+
+/* Source mode */
+#typora-source, .CodeMirror, .CodeMirror-gutters {
+  background: #0a0e12;
+  color:      #e0e2e8;
+  border-color: #42474e;
+}
+.CodeMirror-cursor { border-left-color: #e0e2e8; }
+
+/* Headings + inline code */
+h1, h2, h3, h4, h5, h6 { color: #ffffff; }
+code, tt {
+  background: #0a0e12;
+  color:      #e0e2e8;
+}
+pre.md-fences, .md-fences {
+  background:   #0a0e12;
+  color:        #e0e2e8;
+  border-color: #42474e;
+}
+
+/* Links + blockquotes */
+a { color: #e0e2e8; }
+a:hover { color: #ffffff; }
+blockquote {
+  border-left-color: #42474e;
+  color: #9acbfa;
+}
+
+/* Tables + hr */
+table, thead, tbody, tr, th, td {
+  background: #101418;
+  color:      #e0e2e8;
+  border-color: #42474e;
+}
+hr { border-color: #42474e; }

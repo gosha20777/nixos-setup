@@ -24,3 +24,5 @@ result-*
 # would show them as untracked.
 .claude/settings.local.json
 .crush/
+
+tmp/

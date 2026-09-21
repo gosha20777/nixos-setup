@@ -1,0 +1,17 @@
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+{
+  ############################################################
+  # Firmware blobs, fonts
+  ############################################################
+  hardware.enableRedistributableFirmware = true;
+  fonts.packages = with pkgs; [
+    nerd-fonts.jetbrains-mono
+    noto-fonts
+    noto-fonts-color-emoji
+  ];
+}
