@@ -15,9 +15,12 @@
     };
     Service = {
       ExecStart = "${pkgs.spice-vdagent}/bin/spice-vdagent";
-      Restart = "on-failure";
+      # The agent exits cleanly (code 0) when the SPICE client disconnects
+      # (viewer window closed) — on-failure would never restart it then.
+      # always + a short delay makes it re-attach when the viewer reconnects.
+      Restart = "always";
+      RestartSec = 3;
     };
-    Install.WantedBy = [ "graphical-session.target" ];
   };
 
   # Pin the VM output to the host's 1920x1080 panel. niri (like all
