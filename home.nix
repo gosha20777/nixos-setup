@@ -195,6 +195,14 @@ in
       natural-scroll = true;
       dwt = true;
     };
+
+    # VM output: pin the mode to the host's 1920x1080 panel. niri (like all
+    # wlroots compositors) does not implement SPICE-agent dynamic resolution,
+    # so the mode can't follow the viewer window — set it statically instead.
+    outputs."Virtual-1".mode = {
+      width = 1920;
+      height = 1080;
+    };
     # Monitor layout. Outputs are matched by "make model serial" (more
     # stable than connector names — surviving dock swaps / different DP
     # ports). The Dell sits at the origin; the laptop panel is placed to
@@ -509,6 +517,25 @@ in
     events = {
       before-sleep = "${config.programs.noctalia.package}/bin/noctalia msg session lock";
     };
+  };
+
+  # SPICE session agent for the dev VM (Gnome Boxes / virt-manager guests).
+  # vdagentd (system service, configuration.nix) only exposes the virtio
+  # channel; the per-session agent is what gives the guest a client-side
+  # cursor (no more duplicated host cursor) and a shared clipboard. niri /
+  # wlroots compositors never spawn it themselves — GNOME does, we don't —
+  # so tie it to the graphical session explicitly.
+  systemd.user.services.spice-vdagent = {
+    Unit = {
+      Description = "SPICE session agent (cursor, clipboard sharing)";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.spice-vdagent}/bin/spice-vdagent";
+      Restart = "on-failure";
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
   };
 
   # Default terminal for tools that consult $TERMINAL (lazygit edit, fzf,
