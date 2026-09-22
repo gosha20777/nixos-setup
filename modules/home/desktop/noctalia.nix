@@ -46,11 +46,6 @@
       EverforestWarm = (import ../../themes/${systemSettings.theme}).noctalia;
     };
 
-    # Шаблон-вход для niri-градиента → read-only symlink,
-    # user-template ссылается на него через $XDG_CONFIG_HOME.
-    xdg.configFile."noctalia/templates/niri.kdl".source =
-      ../../themes/${systemSettings.theme}/niri.kdl;
-
     # Declarative base config → ~/.config/noctalia/config.toml (v5's TOML
     # format; the module runs `noctalia config validate` at build time).
     #
@@ -174,6 +169,11 @@
       };
     };
   };
+  # Шаблон-вход для niri-градиента → read-only symlink,
+  # user-template ссылается на него через $XDG_CONFIG_HOME.
+  xdg.configFile."noctalia/templates/niri.kdl".source =
+    ../../themes/${systemSettings.theme}/niri.kdl;
+
 
   # Needed for Noctalia's GTK theming pipeline:
   # - python3 runs Scripts/python/src/theming/gtk-refresh.py (postProcess hook)
