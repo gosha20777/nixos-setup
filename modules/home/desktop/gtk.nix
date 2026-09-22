@@ -17,11 +17,9 @@
       name = "Papirus-Dark";
       package = pkgs.papirus-icon-theme.overrideAttrs (old: {
         buildInputs = (old.buildInputs or [ ]) ++ [ pkgs.papirus-folders ];
-        postInstall =
-          (old.postInstall or "")
-          + ''
-            XDG_DATA_DIRS="$out/share" papirus-folders -o -C green --theme Papirus-Dark
-          '';
+        postInstall = (old.postInstall or "") + ''
+          XDG_DATA_DIRS="$out/share" papirus-folders -o -C green --theme Papirus-Dark
+        '';
       });
     };
     cursorTheme = {
