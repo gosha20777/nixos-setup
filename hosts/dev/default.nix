@@ -23,6 +23,9 @@
   # Gnome Boxes / QEMU guest integrations (clipboard sharing, dynamic resolution, time sync)
   services.qemuGuest.enable = true;
   services.spice-vdagentd.enable = true;
+  # Passwordless sudo for dev VM to allow seamless automated rebuilds
+  security.sudo.wheelNeedsPassword = false;
+
 
   # The Gnome Boxes VM boots Legacy BIOS and its disk has no ESP (single
   # btrfs partition from the Calamares "Erase disk" install), so the shared

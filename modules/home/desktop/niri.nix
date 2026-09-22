@@ -50,11 +50,11 @@
         stiffness = 800;
         epsilon = 0.001;
       };
-      window-open = {
+      window-open.easing = {
         duration-ms = 180;
         curve = "ease-out-expo";
       };
-      window-close = {
+      window-close.easing = {
         duration-ms = 150;
         curve = "ease-out-quad";
       };
@@ -69,11 +69,6 @@
         epsilon = 0.01;
       };
       overview-open-close.spring = {
-        damping-ratio = 0.85;
-        stiffness = 800;
-        epsilon = 0.001;
-      };
-      recent-windows-close.spring = {
         damping-ratio = 0.85;
         stiffness = 800;
         epsilon = 0.001;
