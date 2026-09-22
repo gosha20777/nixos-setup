@@ -26,8 +26,11 @@
   # Pin the VM output to the host's 1920x1080 panel. niri (like all
   # wlroots compositors) does not implement SPICE-agent dynamic resolution,
   # so the mode can't follow the viewer window — set it statically instead.
-  programs.niri.settings.outputs."Virtual-1".mode = {
-    width = 1920;
-    height = 1080;
+  programs.niri.settings.outputs."Virtual-1" = {
+    mode = {
+      width = 1920;
+      height = 1080;
+    };
+    scale = 1.3;
   };
 }
