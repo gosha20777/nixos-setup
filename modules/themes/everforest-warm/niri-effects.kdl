@@ -17,7 +17,7 @@ layer-rule {
 
 // Noctalia: матовое стекло под баром/панелями/лаунчером (без xray).
 layer-rule {
-    match namespace="^noctalia-(bar|notification|dock|panel|attached-panel|osd|launcher|clipboard|polkit|session|window-switcher)"
+    match namespace="^noctalia-(bar|notification|dock|osd|launcher|clipboard|polkit|session|window-switcher)"
     background-effect {
         blur true
         xray false

@@ -93,6 +93,8 @@
         default.path = "~/Pictures/Wallpapers/01.jpg";
       };
 
+      niri.backdrop.enabled = true;
+
       shell = {
         avatar_path = "~/Pictures/Avatars/me.jpg";
         polkit_agent = true;
