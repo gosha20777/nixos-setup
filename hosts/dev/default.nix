@@ -26,7 +26,6 @@
   # Passwordless sudo for dev VM to allow seamless automated rebuilds
   security.sudo.wheelNeedsPassword = false;
 
-
   # The Gnome Boxes VM boots Legacy BIOS and its disk has no ESP (single
   # btrfs partition from the Calamares "Erase disk" install), so the shared
   # systemd-boot/UEFI config (modules/nixos/core/boot.nix) cannot work here.

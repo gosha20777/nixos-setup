@@ -129,17 +129,26 @@
           "session"
         ];
         capsule_group = [
-          { members = [ "keyboard_layout" "sysmon" "network" "battery" ]; }
+          {
+            members = [
+              "keyboard_layout"
+              "sysmon"
+              "network"
+              "battery"
+            ];
+          }
         ];
       };
 
       widget = {
         # Логотип NixOS → меню приложений, тонированный акцентом палитры.
         launcher = {
-          custom_image = "${pkgs.runCommand "nixos-icon" { nativeBuildInputs = [ pkgs.resvg ]; } ''
-            mkdir -p $out
-            resvg --width 128 ${../../../assets/icons/nixos.svg} $out/nixos.png
-          ''}/nixos.png";
+          custom_image = "${
+            pkgs.runCommand "nixos-icon" { nativeBuildInputs = [ pkgs.resvg ]; } ''
+              mkdir -p $out
+              resvg --width 128 ${../../../assets/icons/nixos.svg} $out/nixos.png
+            ''
+          }/nixos.png";
           custom_image_colorize = true;
         };
         workspaces = {
@@ -171,9 +180,7 @@
   };
   # Шаблон-вход для niri-градиента → read-only symlink,
   # user-template ссылается на него через $XDG_CONFIG_HOME.
-  xdg.configFile."noctalia/templates/niri.kdl".source =
-    ../../themes/${systemSettings.theme}/niri.kdl;
-
+  xdg.configFile."noctalia/templates/niri.kdl".source = ../../themes/${systemSettings.theme}/niri.kdl;
 
   # Needed for Noctalia's GTK theming pipeline:
   # - python3 runs Scripts/python/src/theming/gtk-refresh.py (postProcess hook)
