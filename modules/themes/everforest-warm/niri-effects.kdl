@@ -1,0 +1,36 @@
+// Everforest Warm — эффекты композитора (blur/прозрачность).
+// Сырой KDL: niri-flake@9ee3e13 не имеет blur/background-effect в схеме.
+
+// Движок блюра: 2 прохода, лёгкое зерно против бандинга, +10% сочности.
+blur {
+    passes 2
+    offset 3.0
+    noise 0.02
+    saturation 1.1
+}
+
+// Noctalia: обои внутри backdrop Overview.
+layer-rule {
+    match namespace="^noctalia-backdrop"
+    place-within-backdrop true
+}
+
+// Noctalia: матовое стекло под баром/панелями/лаунчером (без xray).
+layer-rule {
+    match namespace="^noctalia-(bar|notification|dock|panel|attached-panel|osd|launcher|clipboard|polkit|session|window-switcher)"
+    background-effect {
+        blur true
+        xray false
+    }
+}
+
+// Все окна: скругления 9px + лёгкая прозрачность + блюр-подложка.
+window-rule {
+    geometry-corner-radius 9
+    clip-to-geometry true
+    opacity 0.97
+    background-effect {
+        blur true
+        xray false
+    }
+}

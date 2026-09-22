@@ -27,13 +27,18 @@ in
     };
     terminal = mkOption {
       type = types.str;
-      default = "foot";
+      default = "kitty";
       description = "Primary terminal — used by niri binds and $TERMINAL.";
     };
     terminalAlt = mkOption {
       type = types.str;
-      default = "kitty";
+      default = "foot";
       description = "Secondary terminal — niri Mod+Shift+Return.";
+    };
+    theme = mkOption {
+      type = types.str;
+      default = "everforest-warm";
+      description = "Active theme directory under modules/themes/ (palette for Noctalia, niri effects, foot, fastfetch).";
     };
   };
 }

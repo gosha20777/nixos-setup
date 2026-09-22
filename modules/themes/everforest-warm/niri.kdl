@@ -1,0 +1,32 @@
+layout {
+    focus-ring {
+        off
+    }
+    border {
+        width 2
+        active-gradient from="{{colors.primary.default.hex}}" to="{{colors.secondary.default.hex}}" angle=45
+        inactive-color "{{colors.surface_variant.default.hex}}"
+        urgent-color "{{colors.error.default.hex}}"
+    }
+    shadow {
+        on
+        softness 30
+        spread 5
+        offset x=0 y=5
+        color "{{colors.shadow.default.hex}}70"
+    }
+    tab-indicator {
+        active-color   "{{colors.primary.default.hex}}"
+        inactive-color "{{colors.surface_variant.default.hex}}"
+        urgent-color   "{{colors.error.default.hex}}"
+    }
+    insert-hint {
+        color "{{colors.primary.default.hex}}80"
+    }
+}
+recent-windows {
+    highlight {
+        active-color "{{colors.primary.default.hex}}"
+        urgent-color "{{colors.error.default.hex}}"
+    }
+}

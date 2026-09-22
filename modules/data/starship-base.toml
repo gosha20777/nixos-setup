@@ -1,25 +1,28 @@
+# Everforest Minimal Single-Line (`.theme.md` §4): одна строка,
+# палитра noctalia инжектится Noctalia starship-template.
 add_newline = false
 palette = "noctalia"
 
+format = "$directory$git_branch$git_status$cmd_duration$character"
+
 [character]
-success_symbol = "[➜](bold subtext1)"
-error_symbol = "[➜](bold text)"
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
 
 [directory]
-style = "text bold"
+style = "bold blue"
+truncation_length = 3
+truncation_symbol = "…/"
 
 [git_branch]
-style = "overlay1"
+symbol = "󰘬 "
+style = "bold green"
+format = "[$symbol$branch]($style) "
 
 [git_status]
-style = "subtext1"
+style = "bold maroon"
 
 [cmd_duration]
-style = "overlay0"
-
-[hostname]
-style = "overlay1"
-
-[username]
-style_user = "overlay1"
-style_root = "text bold"
+min_time = 3000
+format = "[$duration]($style) "
+style = "overlay2"

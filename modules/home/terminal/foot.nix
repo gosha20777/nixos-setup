@@ -1,45 +1,46 @@
 # foot — fast, lightweight Wayland terminal (no OpenGL required, works in any
-# VM). Primary terminal: systemSettings.terminal (niri binds, $TERMINAL).
+# VM). Secondary terminal: systemSettings.terminalAlt.
 {
   pkgs,
+  lib,
   systemSettings,
   ...
 }:
+let
+  c = (import ../../themes/${systemSettings.theme}).colors;
+  strip = hex: lib.strings.removePrefix "#" hex;
+in
 {
   programs.foot = {
     enable = true;
     settings = {
       main = {
         term = "xterm-256color";
-        font = "JetBrainsMono Nerd Font:size=11";
+        font = "JetBrainsMono Nerd Font:size=13";
         dpi-aware = "yes";
         pad = "8x8";
       };
       colors = {
-        alpha = 0.95;
-        background = "1e1e2e";
-        foreground = "cdd6f4";
-        regular0 = "45475a";
-        regular1 = "f38ba8";
-        regular2 = "a6e3a1";
-        regular3 = "f9e2af";
-        regular4 = "89b4fa";
-        regular5 = "f5c2e7";
-        regular6 = "94e2d5";
-        regular7 = "bac2de";
-        bright0 = "585b70";
-        bright1 = "f38ba8";
-        bright2 = "a6e3a1";
-        bright3 = "f9e2af";
-        bright4 = "89b4fa";
-        bright5 = "f5c2e7";
-        bright6 = "94e2d5";
-        bright7 = "a6adc8";
+        alpha = 0.92;
+        background = strip c.bg;
+        foreground = strip c.fg;
+        regular0 = strip c.c0;
+        regular1 = strip c.c1;
+        regular2 = strip c.c2;
+        regular3 = strip c.c3;
+        regular4 = strip c.c4;
+        regular5 = strip c.c5;
+        regular6 = strip c.c6;
+        regular7 = strip c.c7;
+        bright0 = strip c.c8;
+        bright1 = strip c.c9;
+        bright2 = strip c.c10;
+        bright3 = strip c.c11;
+        bright4 = strip c.c12;
+        bright5 = strip c.c13;
+        bright6 = strip c.c14;
+        bright7 = strip c.c15;
       };
     };
   };
-
-  # Default terminal for tools that consult $TERMINAL (lazygit edit, fzf,
-  # xdg-terminal-exec helpers, etc.).
-  home.sessionVariables.TERMINAL = systemSettings.terminal;
 }

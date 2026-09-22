@@ -17,6 +17,78 @@
       natural-scroll = true;
       dwt = true;
     };
+    input.keyboard.xkb.layout = "us,ru";
+
+    workspaces = [
+      { name = "🌐 Web"; }
+      { name = "💻 Dev"; }
+      { name = "🎮 Game"; }
+    ];
+
+    layout = {
+      gaps = 6;
+    };
+
+    animations = {
+      workspace-switch.spring = {
+        damping-ratio = 0.85;
+        stiffness = 800;
+        epsilon = 0.001;
+      };
+      horizontal-view-movement.spring = {
+        damping-ratio = 0.85;
+        stiffness = 800;
+        epsilon = 0.001;
+      };
+      window-movement.spring = {
+        damping-ratio = 0.85;
+        stiffness = 800;
+        epsilon = 0.001;
+      };
+      window-resize.spring = {
+        damping-ratio = 0.85;
+        stiffness = 800;
+        epsilon = 0.001;
+      };
+      window-open = {
+        duration-ms = 180;
+        curve = "ease-out-expo";
+      };
+      window-close = {
+        duration-ms = 150;
+        curve = "ease-out-quad";
+      };
+      config-notification-open-close.spring = {
+        damping-ratio = 0.65;
+        stiffness = 900;
+        epsilon = 0.001;
+      };
+      exit-confirmation-open-close.spring = {
+        damping-ratio = 0.6;
+        stiffness = 500;
+        epsilon = 0.01;
+      };
+      overview-open-close.spring = {
+        damping-ratio = 0.85;
+        stiffness = 800;
+        epsilon = 0.001;
+      };
+      recent-windows-close.spring = {
+        damping-ratio = 0.85;
+        stiffness = 800;
+        epsilon = 0.001;
+      };
+    };
+
+    window-rules = [
+      { match.app-id = "^firefox$"; open-on-workspace = "🌐 Web"; }
+      { match.app-id = "^google-chrome$"; open-on-workspace = "🌐 Web"; }
+      { match.app-id = "^kitty$"; open-on-workspace = "💻 Dev"; }
+      { match.app-id = "^foot$"; open-on-workspace = "💻 Dev"; }
+      { match.app-id = "^code$"; open-on-workspace = "💻 Dev"; }
+      { match.app-id = "^obsidian$"; open-on-workspace = "💻 Dev"; }
+      { match.app-id = "^steam$"; open-on-workspace = "🎮 Game"; }
+    ];
     # Monitor layout: outputs are matched by "make model serial" (more
     # stable than connector names — surviving dock swaps / different DP
     # ports). Discover identifier strings with `niri msg outputs`. Layouts
@@ -40,13 +112,9 @@
       "Mod+T".action.spawn = "${systemSettings.terminal}";
       "Mod+Return".action.spawn = "${systemSettings.terminal}";
       "Mod+Shift+Return".action.spawn = "${systemSettings.terminalAlt}";
-      # App launcher — Noctalia's, toggled over IPC. v5: `panel-toggle <id>`.
-      "Mod+Space".action.spawn = [
-        "noctalia"
-        "msg"
-        "panel-toggle"
-        "launcher"
-      ];
+      # Смена раскладки EN/RU на Win+Space (Mod = Super = Win).
+      # Лаунчер доступен по хоткею Mod+D ниже.
+      "Mod+Space".action.switch-layout = "next";
       # Mod+D is an alias for the same launcher — fuzzel used to live here as
       # a second, separately-themed launcher; it was dropped as redundant.
       "Mod+D".action.spawn = [
@@ -296,6 +364,8 @@
     pkgs.writeText "config.kdl" ''
       ${config.programs.niri.finalConfig}
       include "noctalia.kdl"
+
+      ${builtins.readFile ../../themes/${systemSettings.theme}/niri-effects.kdl}
     ''
   );
 }
