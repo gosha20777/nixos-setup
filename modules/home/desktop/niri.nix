@@ -19,11 +19,11 @@
     };
     input.keyboard.xkb.layout = "us,ru";
 
-    workspaces = [
-      { name = "🌐 Web"; }
-      { name = "💻 Dev"; }
-      { name = "🎮 Game"; }
-    ];
+    workspaces = {
+      "01-web".name = "🌐 Web";
+      "02-dev".name = "💻 Dev";
+      "03-game".name = "🎮 Game";
+    };
 
     layout = {
       gaps = 6;
@@ -81,13 +81,28 @@
     };
 
     window-rules = [
-      { match.app-id = "^firefox$"; open-on-workspace = "🌐 Web"; }
-      { match.app-id = "^google-chrome$"; open-on-workspace = "🌐 Web"; }
-      { match.app-id = "^kitty$"; open-on-workspace = "💻 Dev"; }
-      { match.app-id = "^foot$"; open-on-workspace = "💻 Dev"; }
-      { match.app-id = "^code$"; open-on-workspace = "💻 Dev"; }
-      { match.app-id = "^obsidian$"; open-on-workspace = "💻 Dev"; }
-      { match.app-id = "^steam$"; open-on-workspace = "🎮 Game"; }
+      {
+        matches = [
+          { app-id = "^firefox$"; }
+          { app-id = "^google-chrome$"; }
+        ];
+        open-on-workspace = "🌐 Web";
+      }
+      {
+        matches = [
+          { app-id = "^kitty$"; }
+          { app-id = "^foot$"; }
+          { app-id = "^code$"; }
+          { app-id = "^obsidian$"; }
+        ];
+        open-on-workspace = "💻 Dev";
+      }
+      {
+        matches = [
+          { app-id = "^steam$"; }
+        ];
+        open-on-workspace = "🎮 Game";
+      }
     ];
     # Monitor layout: outputs are matched by "make model serial" (more
     # stable than connector names — surviving dock swaps / different DP
