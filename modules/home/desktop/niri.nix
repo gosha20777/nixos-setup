@@ -12,6 +12,11 @@
   # niri input — natural scrolling, tap-to-click, disable-while-typing.
   # Schema is validated at build time by niri-flake.
   programs.niri.settings = {
+    prefer-no-csd = true;
+    cursor = {
+      theme = "graphite-dark";
+      size = 24;
+    };
     input.touchpad = {
       tap = true;
       natural-scroll = true;
@@ -86,7 +91,6 @@
       {
         matches = [
           { app-id = "^kitty$"; }
-          { app-id = "^foot$"; }
           { app-id = "^code$"; }
           { app-id = "^obsidian$"; }
         ];
@@ -104,8 +108,8 @@
     # ports). Discover identifier strings with `niri msg outputs`. Layouts
     # and per-output modes/scales are per-host — hosts/<name>/home.nix.
 
-    # niri upstream default keybinds, verbatim, with the terminal binaries
-    # taken from systemSettings (terminal / terminalAlt). The
+    # niri upstream default keybinds, verbatim, with the terminal binary
+    # taken from systemSettings (terminal). The
     # session/media/lock/brightness binds at the bottom of this block were
     # previously owned by DMS's `enableKeybinds`; with Noctalia in charge of
     # the shell UI we wire them directly to the underlying utilities (wpctl,
@@ -121,7 +125,6 @@
       "Mod+Shift+Slash".action.show-hotkey-overlay = [ ];
       "Mod+T".action.spawn = "${systemSettings.terminal}";
       "Mod+Return".action.spawn = "${systemSettings.terminal}";
-      "Mod+Shift+Return".action.spawn = "${systemSettings.terminalAlt}";
       # Смена раскладки EN/RU на Win+Space (Mod = Super = Win).
       # Лаунчер доступен по хоткею Mod+D ниже.
       "Mod+Space".action.switch-layout = "next";

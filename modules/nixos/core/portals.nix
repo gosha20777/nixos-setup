@@ -17,7 +17,7 @@
   services.accounts-daemon.enable = true;
   programs.dconf.enable = true;
 
-  # gvfs — the GNOME virtual filesystem daemon. Nautilus (in
+  # gvfs — the GNOME virtual filesystem daemon. Nemo (in
   # environment.systemPackages) degrades quietly without it: no Trash, no
   # network mounts (SMB/SFTP), no MTP for phones. Nothing errors, the
   # features are simply absent from the UI, so this is easy to miss.

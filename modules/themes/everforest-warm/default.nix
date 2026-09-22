@@ -1,10 +1,9 @@
 # Everforest Warm Refined — единственный источник цветов системы.
-# Потребляется: noctalia.nix (customPalettes), foot.nix, fastfetch.nix,
-# niri.nix (niri-effects.kdl из этого каталога). Маппинг ролей Material →
-# палитра подобран так, чтобы builtin-шаблоны Noctalia (kitty/niri/starship)
-# выдавали ровно tmp/everforest.conf.
+# Потребляется: noctalia.nix (customPalettes), yazi.nix (theme), fastfetch.nix,
+# niri.nix (niri-effects.kdl из этого каталога). Все цвета строго соответствуют
+# эталону tmp/everforest.conf.
 rec {
-  # Плоские токены для прямых потребителей (foot, fastfetch).
+  # Плоские токены для прямых потребителей (fastfetch).
   colors = {
     bg = "#141617";
     fg = "#E1DACB";
@@ -92,4 +91,6 @@ rec {
       };
     };
   };
+  # Конфигурация темы yazi для programs.yazi.theme
+  yazi = import ./yazi.nix;
 }

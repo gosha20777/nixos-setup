@@ -30,11 +30,11 @@ modules/
                              #   laptop.nix desktop.nix
   home/                      # shared home-manager modules — AUTO-IMPORTED per user
     shells/                  #   fish, bash
-    terminal/                #   foot (config), kitty (package)
+    terminal/                #   kitty (package + config)
     cli/                     #   eza bat fzf zoxide starship jq fd ripgrep mosh gum glow
                              #   railway lazydocker btop fastfetch cava typst yara-x
-                             #   q qq (callPackage -> modules/packages/qq.nix)
-    dev/                     #   git gh mise lazygit neovim vscode c-toolchain crush
+                             #   q qq (callPackage -> modules/packages/qq.nix) htop yazi
+    dev/                     #   git gh mise lazygit neovim vscode c-toolchain crush fresh
     desktop/                 #   niri (binds) noctalia (shell+theme) swayidle gtk
                              #   wayland-tools wallpapers
     system/                  #   mimeapps face todo (user-account level)
@@ -52,7 +52,7 @@ There is **no** `configuration.nix` / `home.nix` monolith: the shared system is 
 - **Auto-import.** `hosts/common.nix` calls `inputs.import-tree ../modules/nixos/core` and `inputs.import-tree ../modules/home` (via home-manager `sharedModules`). Every `.nix` file in those trees becomes a module automatically — **a new file is a new feature**, no import-list edit, no flake edit. Paths containing `/_` are ignored (the opt-out convention, currently unused).
 - **One program = one file.** Each program's package, config, and (if any) its `home.activation` hooks live together in one file — e.g. `cli/starship.nix` owns `programs.starship` + the writable-config seed activation.
 - **Roles are opt-in.** `modules/nixos/roles/{laptop,desktop}.nix` are NOT auto-imported; a host lists them in its `imports` (laptop = lid/hibernate/power daemons, desktop = fwupd/fstrim). The dev VM uses neither.
-- **Host overrides.** `modules/core/settings.nix` declares `options.systemSettings` (username, git identity, terminal, terminalAlt) with defaults; a host overrides any of them with a plain value:
+- **Host overrides.** `modules/core/settings.nix` declares `options.systemSettings` (username, git identity, terminal) with defaults; a host overrides any of them with a plain value:
   ```nix
   systemSettings.terminal = "kitty";
   ```

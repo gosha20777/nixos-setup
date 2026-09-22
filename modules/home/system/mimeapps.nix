@@ -18,6 +18,7 @@
       # Claude Code's URL handler (claude-cli://...) — preserved from the
       # runtime mimeapps.list so `claude` URL launches still work.
       "x-scheme-handler/claude-cli" = "claude-code-url-handler.desktop";
+      "inode/directory" = "nemo.desktop";
     };
   };
 }

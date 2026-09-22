@@ -12,7 +12,7 @@
     google-chrome
     vscode
     telegram-desktop
-    nautilus
+    nemo
     obsidian
 
     typora
