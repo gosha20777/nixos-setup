@@ -12,7 +12,15 @@
     google-chrome
     vscode
     telegram-desktop
-    nemo
+    nemo-with-extensions
+    nemo-preview
+    file-roller
+    p7zip
+    zip
+    ffmpegthumbnailer
+    webp-pixbuf-loader
+    evince
+    gnome-epub-thumbnailer
     obsidian
 
     typora
