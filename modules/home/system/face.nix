@@ -3,7 +3,13 @@
 # файлы фиксированные, заменяются правкой ассета в git.
 {
   home.file = {
-    ".face".source = ../../../assets/avatars/me.jpg;
-    "Pictures/Avatars/me.jpg".source = ../../../assets/avatars/me.jpg;
+    ".face" = {
+      source = ../../../assets/avatars/me.jpg;
+      force = true;
+    };
+    "Pictures/Avatars/me.jpg" = {
+      source = ../../../assets/avatars/me.jpg;
+      force = true;
+    };
   };
 }
