@@ -19,6 +19,7 @@
     inputs.noctalia-greeter.nixosModules.default
     inputs.home-manager.nixosModules.home-manager
     inputs.sops-nix.nixosModules.sops
+    inputs.disko.nixosModules.disko
 
     # ── SECURE BOOT ──
     # Uncomment together with the input in flake.nix and the block in

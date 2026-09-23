@@ -3,15 +3,30 @@
   config,
   lib,
   pkgs,
+  modulesPath,
   ...
 }:
 {
   imports = [
     ../common.nix
-    ./hardware-configuration.nix
+    ../../modules/disko/btrfs-bios.nix
+    (modulesPath + "/profiles/qemu-guest.nix")
   ];
 
   networking.hostName = "dev";
+  nixpkgs.hostPlatform = "x86_64-linux";
+
+  # Disko device override for QEMU virtio disk
+  disko.devices.disk.main.device = "/dev/vda";
+
+  # Hardware kernel modules for QEMU VM
+  boot.initrd.availableKernelModules = [
+    "ahci"
+    "xhci_pci"
+    "virtio_pci"
+    "sr_mod"
+    "virtio_blk"
+  ];
 
   # Ensure Mesa exposes OpenGL 3.3 in the virgl VM (the virtual GPU reports
   # a lower core profile than niri/Quickshell request).
@@ -26,15 +41,10 @@
   # Passwordless sudo for dev VM to allow seamless automated rebuilds
   security.sudo.wheelNeedsPassword = false;
 
-  # The Gnome Boxes VM boots Legacy BIOS and its disk has no ESP (single
-  # btrfs partition from the Calamares "Erase disk" install), so the shared
-  # systemd-boot/UEFI config (modules/nixos/core/boot.nix) cannot work here.
-  # Install GRUB into the MBR of /dev/vda instead.
+  # Legacy BIOS bootloader configuration for /dev/vda
   boot.loader.systemd-boot.enable = lib.mkForce false;
-  boot.loader.efi.canTouchEfiVariables = lib.mkForce false;
   boot.loader.grub = {
     enable = lib.mkForce true;
-    device = "/dev/vda";
     configurationLimit = 10;
   };
 
@@ -52,8 +62,6 @@
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHz1i0hWB0f6oP3+EkA0EodjJrp5R3P9F8rC5sivM1py gosha20777@pc"
   ];
 
-  # Per-host home overrides — everything VM-specific at the user level
-  # (SPICE session agent, output mode) lives in ./home.nix and merges on
-  # top of the shared tree (modules/home) auto-imported via common.nix.
+  # Per-host home overrides
   home-manager.users.${config.systemSettings.username}.imports = [ ./home.nix ];
 }
