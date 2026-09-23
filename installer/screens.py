@@ -168,6 +168,17 @@ class SummaryConfirmScreen:
         )
         console.print(panel)
         console.print()
+
+        if config.dry_run:
+            console.print(
+                Panel(
+                    "[bold warning]РЕЖИМ DRY-RUN — реальные команды НЕ исполняются.[/bold warning]\n"
+                    "[muted]Все действия будут только зафиксированы в журнале. Запустите с --execute для реальной установки.[/muted]",
+                    border_style="orange",
+                )
+            )
+            console.print()
+
         console.print(
             Panel(
                 f"[bold red]ВНИМАНИЕ! ВСЕ СУЩЕСТВУЮЩИЕ ДАННЫЕ НА {config.target_disk.path} БУДУТ БЕЗВОЗВРАТНО УНИЧТОЖЕНЫ![/bold red]\n"

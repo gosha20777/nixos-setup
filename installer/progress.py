@@ -1,47 +1,117 @@
-"""Installation pipeline progress simulation for Mock UI."""
+"""Installation pipeline with visual progress and real service calls.
 
-import time
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
+Long-running steps (disko, nixos-install) stream their live output into a
+Rich panel; every line is also appended to the executor's log file.
+"""
+
+from collections import deque
+
+from rich.live import Live
+from rich.panel import Panel
+from rich.table import Table
+from rich.text import Text
+from rich.rule import Rule
+
 from installer.theme import console
 from installer.models import InstallConfig
+from installer.services.executor import CommandExecutor
+from installer.services import disko_service, secrets_service, nixos_service, repo_service
+import installer.config as config
+
+# Lines shown in the live stream panel
+VIEW_LINES = 12
 
 
-class MockInstallPipeline:
-    """Simulates the backend execution pipeline with visual feedback."""
+class InstallPipeline:
+    """Executes the installation pipeline through services, with visual progress."""
 
-    STEPS = [
-        ("Разметка диска и создание Btrfs субтомов (Disko)...", 2.0),
-        ("Сохранение мастер-ключа Age (~/.config/sops/age/keys.txt)...", 1.0),
-        ("Установка NixOS (nixos-install)... Копирование пакетов из кэша", 3.0),
-        ("Развертывание репозитория в ~/Projects/nixos-setup...", 1.5),
-        ("Настройка прав доступа пользователя и генерация загрузчика...", 1.0),
-    ]
+    def __init__(self, executor: CommandExecutor, repo, config: InstallConfig) -> None:
+        self.executor = executor
+        self.repo = repo
+        self.config = config
 
-    @classmethod
-    def run(cls, config: InstallConfig) -> bool:
+    def run(self) -> bool:
         console.print()
         console.print("[accent]🚀 Запуск процесса установки NixOS...[/accent]")
+        if self.executor.dry_run:
+            console.print(
+                "[warning]РЕЖИМ DRY-RUN — команды будут только зафиксированы, диск не изменится[/warning]"
+            )
         console.print()
 
-        with Progress(
-            SpinnerColumn(spinner_name="dots", style="bold green"),
-            TextColumn("[progress.description]{task.description}"),
-            BarColumn(bar_width=30, style="bg1", complete_style="green"),
-            TimeElapsedColumn(),
-            console=console,
-        ) as progress:
-            total_task = progress.add_task("[bold yellow]Общий прогресс установки[/bold yellow]", total=len(cls.STEPS))
+        cfg = self.config
+        host = cfg.target_host.name
 
-            for step_name, duration in cls.STEPS:
-                sub_task = progress.add_task(f"[fg]{step_name}[/fg]", total=100)
-                # Simulate smooth step execution
-                intervals = 20
-                for _ in range(intervals):
-                    time.sleep(duration / intervals)
-                    progress.update(sub_task, advance=100 / intervals)
-                progress.remove_task(sub_task)
-                progress.update(total_task, advance=1)
-                console.print(f"  [success]✓[/success] {step_name}")
+        # Fast steps: instant capture (or instant real execution)
+        console.print(f"[fg]▸ Сохранение мастер-ключа Age (~/.config/sops/age/keys.txt)...[/fg]")
+        secrets_service.provision(
+            self.executor, config.MOUNT_POINT, cfg.username, cfg.age_master_key
+        )
+        console.print("  [success]✓ Сохранение мастер-ключа Age[/success]")
+
+        # Long step 1: Disko with live streaming output
+        self._stream_step(
+            "Разметка диска и создание Btrfs субтомов (Disko)",
+            disko_service.format_and_mount_cmd(self.repo, host),
+        )
+
+        # Long step 2: NixOS install with live streaming output
+        self._stream_step(
+            "Установка NixOS (nixos-install)... Копирование пакетов из кэша",
+            nixos_service.install_cmd(self.repo, host),
+        )
+
+        # Fast steps: repo deployment
+        console.print("[fg]▸ Развертывание репозитория в ~/Projects/nixos-setup...[/fg]")
+        repo_service.deploy(
+            self.executor, self.repo, config.MOUNT_POINT, cfg.username
+        )
+        console.print("  [success]✓ Развертывание репозитория[/success]")
 
         console.print()
+
+        if self.executor.dry_run:
+            console.print("[warning]DRY-RUN ЗАВЕРШЕН: реальные команды НЕ исполнялись[/warning]")
+            table = Table(
+                title="Захваченные команды (аудит dry-run)",
+                header_style="accent",
+                border_style="muted",
+                show_lines=True,
+            )
+            table.add_column("#", style="bold yellow", width=4)
+            table.add_column("Команда")
+            for i, cmd in enumerate(self.executor.executed, 1):
+                table.add_row(str(i), " ".join(cmd))
+            console.print(table)
         return True
+
+    def _stream_step(self, title: str, cmd: list[str]) -> None:
+        """Run a long command with a live-updating output panel."""
+        if self.executor.dry_run:
+            console.print(f"[fg]▸ {title}[/fg]")
+            self.executor.run_streaming(cmd)
+            console.print("  [success]✓[/success] " + title.split("...")[0])
+            return
+
+        console.print(f"[fg]▸ {title}[/fg]")
+        tail = deque(maxlen=VIEW_LINES)
+
+        with Live(console=console, refresh_per_second=8) as live:
+
+            def on_line(line: str) -> None:
+                tail.append(line)
+                live.update(self._render_stream(tail))
+
+            self.executor.run_streaming(cmd, on_line=on_line)
+
+        console.print("  [success]✓[/success] " + title.split("...")[0])
+
+    @staticmethod
+    def _render_stream(tail: deque) -> Panel:
+        body = Text("\n".join(tail) if tail else "ожидание вывода команды...", style="fg")
+        return Panel(
+            body,
+            title="[accent]▼ live output[/accent]",
+            border_style="muted",
+            padding=(0, 1),
+        )

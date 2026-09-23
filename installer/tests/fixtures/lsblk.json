@@ -1,0 +1,43 @@
+{
+   "blockdevices": [
+      {
+         "name": "zram0",
+         "size": "8G",
+         "model": null,
+         "tran": null,
+         "rm": false,
+         "type": "disk"
+      },{
+         "name": "nvme0n1",
+         "size": "476.9G",
+         "model": "SAMSUNG MZVLB512HBJQ-000L7",
+         "tran": "nvme",
+         "rm": false,
+         "type": "disk",
+         "children": [
+            {
+               "name": "nvme0n1p1",
+               "size": "953.7M",
+               "model": null,
+               "tran": "nvme",
+               "rm": false,
+               "type": "part"
+            },{
+               "name": "nvme0n1p2",
+               "size": "476G",
+               "model": null,
+               "tran": "nvme",
+               "rm": false,
+               "type": "part"
+            }
+         ]
+      },{
+         "name": "sda",
+         "size": "32.0G",
+         "model": "Kingston DataTraveler 3.0",
+         "tran": "usb",
+         "rm": true,
+         "type": "disk"
+      }
+   ]
+}

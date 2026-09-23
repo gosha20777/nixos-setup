@@ -1,5 +1,6 @@
 """Data models for NixOS Installer."""
 
+import re
 from dataclasses import dataclass
 from typing import Optional
 
@@ -12,6 +13,29 @@ class DiskInfo:
     size_gb: float
     is_nvme: bool = False
     is_removable: bool = False
+
+    @classmethod
+    def from_lsblk_entry(cls, entry: dict) -> "DiskInfo":
+        """Build a DiskInfo from a single lsblk -J blockdevice entry.
+
+        Size strings like ``"476.9G"`` are parsed with T/G/M suffixes;
+        unknown formats fall back to 0.0.
+        """
+        return cls(
+            path=f"/dev/{entry['name']}",
+            model=entry.get("model") or "",
+            size_gb=cls._parse_size(entry.get("size", "")),
+            is_nvme=entry.get("tran") == "nvme",
+            is_removable=bool(entry.get("rm", False)),
+        )
+
+    @staticmethod
+    def _parse_size(size: str) -> float:
+        multipliers = {"T": 1024.0, "G": 1.0, "M": 1.0 / 1024}
+        match = re.fullmatch(r"([0-9.]+)([TGM])", size)
+        if match is None:
+            return 0.0
+        return float(match.group(1)) * multipliers[match.group(2)]
 
     @property
     def display_label(self) -> str:
