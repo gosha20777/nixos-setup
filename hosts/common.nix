@@ -18,6 +18,7 @@
     inputs.niri.nixosModules.niri
     inputs.noctalia-greeter.nixosModules.default
     inputs.home-manager.nixosModules.home-manager
+    inputs.sops-nix.nixosModules.sops
 
     # ── SECURE BOOT ──
     # Uncomment together with the input in flake.nix and the block in
@@ -37,6 +38,7 @@
     # stateVersion, …) is declared in modules/nixos/core/user.nix.
     sharedModules = [
       (inputs.import-tree ../modules/home)
+      inputs.sops-nix.homeManagerModules.sops
     ];
   };
 }

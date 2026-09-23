@@ -29,3 +29,6 @@ tmp/
 .theme.md
 .install*
 install-task.md
+keys.txt
+secrets/*.decrypted
+*.key

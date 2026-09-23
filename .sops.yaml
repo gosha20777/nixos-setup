@@ -1,0 +1,8 @@
+keys:
+  - &gosha20777 age1z23l5wjy6lrma8m7tp6dysydwcqg0fvgfwnxq59233mfhwylxscss7hfld
+
+creation_rules:
+  - path_regex: secrets/.*\.yaml$
+    key_groups:
+      - age:
+          - *gosha20777
