@@ -27,3 +27,5 @@ result-*
 
 tmp/
 .theme.md
+.install*
+install-task.md

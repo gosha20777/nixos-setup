@@ -28,8 +28,7 @@
   services.logind.settings.Login.HandleLidSwitch = "suspend-then-hibernate";
 
   services.fwupd.enable = true;
-  # power-profiles-daemon, NOT tlp — TLP misbehaves on Framework/Ryzen
-  # platforms; see CLAUDE.md "Power" before swapping them.
+  # power-profiles-daemon for native Linux power profile management (EPP/platform_profile).
   services.power-profiles-daemon.enable = true;
   services.tlp.enable = false;
   # Noctalia's battery widget (and any UPower consumer) needs the daemon

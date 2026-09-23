@@ -14,10 +14,8 @@ enable in BIOS.** Optionally, bind the LUKS key to the TPM at the end so the dis
 auto-unlocks only when the signed boot chain is intact.
 
 The lanzaboote/`sbctl` steps below are hardware-agnostic — they apply to any
-host built from this flake. The Framework-specific bits (BIOS navigation,
-the Setup-Mode entry quirk, and the firmware-builtin key flag) are flagged
-inline; for other firmware, the equivalent menus differ but the workflow is
-the same.
+host built from this flake. Menu labels differ per firmware vendor, but the
+workflow is the same.
 
 ---
 
@@ -27,8 +25,6 @@ the same.
   or your manual partitioning; see `INSTALL.md`) and booting normally.
 - A UEFI admin password set in firmware.
 - Secure Boot currently **disabled** in BIOS (it was, for the install).
-- On Framework 13 specifically: BIOS 3.05+ (older firmware has the standby
-  drain bug, unrelated to Secure Boot but worth fixing first).
 
 ---
 
@@ -88,9 +84,8 @@ Two flags:
   still validate. Wanted on almost any consumer hardware.
 - `--firmware-builtin` keeps the keys that came pre-provisioned with the
   device firmware. This is what allows `fwupd` BIOS/EC updates to keep
-  validating after Secure Boot is on. Upstream lanzaboote docs call this
-  out specifically for Framework, and the same logic applies to any vendor
-  whose firmware updater is itself signed (Dell, Lenovo, …).
+  validating after Secure Boot is on. This applies to any vendor
+  whose firmware updater is itself signed (Lenovo, Dell, etc.).
 
 Without **both**, you risk locking out legitimate firmware updates.
 
@@ -102,21 +97,9 @@ The general path on most UEFI firmware is: BIOS → Secure Boot menu →
 labels differ per vendor; the goal is an empty PK so the next
 `enroll-keys` run is what populates it.
 
-**Framework 13 quirk.** Do **NOT** use Framework's "Erase all Secure Boot
-Settings" option — the firmware is bugged and that path doesn't reliably
-enter Setup Mode (see the [Framework forum thread](https://community.frame.work/t/cant-enable-secure-boot-setup-mode/57683/5)).
-Instead, in the BIOS:
-
-1. Select **Administer Secure Boot**.
-2. For each of **PK Options**, **KEK Options**, and **DB Options**:
-   - Select **Delete \***.
-   - For each entry inside, press Enter and confirm **Delete this signature**.
-3. Press F10 to save and exit, reboot back into NixOS, then re-run the
-   `sbctl enroll-keys` command above.
-
-On other firmware, look up the vendor's documented Setup Mode entry path
-before clearing keys — getting this wrong is the most common way to land
-in an unbootable state.
+On UEFI firmware (e.g. Lenovo ThinkPad), entering Setup Mode typically
+involves selecting "Reset to Setup Mode" or "Clear All Secure Boot Keys"
+in the BIOS Secure Boot menu.
 
 ## Step 6 — Enable Secure Boot in BIOS
 
@@ -140,8 +123,8 @@ and `Secure Boot:	✓ Enabled`.
 
 With Secure Boot measuring the boot chain, you can enroll the LUKS passphrase into
 the TPM2 so the disk unlocks automatically **only when the boot chain is intact**;
-the passphrase remains a fallback. Any host with a working TPM2 (the Framework
-13 7040, most modern laptops, most modern desktops with discrete or fTPM) can
+the passphrase remains a fallback. Any host with a working TPM2 (most modern
+laptops including ThinkPads, or desktops with discrete or fTPM) can
 do this; check with `systemd-cryptenroll --tpm2-device=list` before enrolling.
 
 ```bash

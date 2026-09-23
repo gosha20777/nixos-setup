@@ -30,11 +30,5 @@
     unzip
     cryptsetup # handy for inspecting/managing the LUKS volume post-install
 
-    # The backup service (modules/nixos/core/backup.nix) brings its own
-    # restic; this is for driving the repo by hand — `restic snapshots`, and
-    # `restic mount` to browse snapshots as directories. Both need
-    # `--repo /mnt/backup/restic/<host>` and the password file (see the
-    # Backups section in backup.md).
-    restic
   ];
 }

@@ -24,7 +24,7 @@ modules/
   nixos/
     core/                    # shared system modules — AUTO-IMPORTED on every host
                              #   nix.nix boot.nix user.nix locale.nix network.nix
-                             #   audio.nix backup.nix docker.nix nix-ld.nix niri.nix
+                             #   audio.nix docker.nix nix-ld.nix niri.nix
                              #   greeter.nix portals.nix shells.nix fonts.nix apps.nix
     roles/                   # hardware-class modules — OPT-IN via host's imports
                              #   laptop.nix desktop.nix
@@ -37,12 +37,11 @@ modules/
     dev/                     #   git gh mise lazygit neovim vscode c-toolchain crush fresh
     desktop/                 #   niri (binds) noctalia (shell+theme) swayidle gtk
                              #   wayland-tools wallpapers
-    system/                  #   mimeapps face todo (user-account level)
+    system/                  #   mimeapps face (user-account level)
     agents/                  #   oh-my-pi herdr impeccable
     apps/                    #   typora cyberchef
 assets/                      # binary assets (wallpapers)
-scripts/new-host.sh          # scaffolds hosts/<name>/ on a fresh machine
-docs: INSTALL.md secure-boot.md backup.md CONTRIBUTING.md CLAUDE.md hosts/README.md
+docs: INSTALL.md secure-boot.md CONTRIBUTING.md CLAUDE.md hosts/README.md
 ```
 
 There is **no** `configuration.nix` / `home.nix` monolith: the shared system is `modules/nixos/core/*`, the shared user is `modules/home/*`.
@@ -63,11 +62,10 @@ There is **no** `configuration.nix` / `home.nix` monolith: the shared system is 
 ## Where to start
 
 - **Fresh install of the dev VM** → `INSTALL.md`.
-- **Adding a new host** → run `scripts/new-host.sh` on the target machine; see `hosts/README.md`.
+- **Adding a new host** → see `hosts/README.md`.
 - **Already running, want a change** → find the program's file under `modules/` (or the host's dir), edit, then `sudo nixos-rebuild switch --flake .#<host>`.
 - **Adding a system feature** → new file in `modules/nixos/core/`; a user program → new file in `modules/home/<category>/`; done.
 - **Enabling Secure Boot** → `secure-boot.md` (the lanzaboote input/module hooks are commented in `flake.nix`, `hosts/common.nix`, `modules/nixos/core/boot.nix`).
-- **Backups** → `backup.md` (restic to the USB drive labelled `timemachine`).
 
 ## Day-to-day commands
 
