@@ -60,18 +60,23 @@
     after = [ "home-manager-${config.systemSettings.username}.service" ];
     wants = [ "home-manager-${config.systemSettings.username}.service" ];
   };
-  environment.systemPackages = with pkgs; [
-    disko
-    git
-    age
-    sops
-    (python3.withPackages (ps: [ ps.rich ]))
+  environment.systemPackages =
+    let
+      installerPython = pkgs.python3.withPackages (ps: [ ps.rich ]);
+    in
+    with pkgs;
+    [
+      disko
+      git
+      age
+      sops
+      installerPython
 
-    # TUI installer launcher — runs the baked flake repo's installer app
-    (pkgs.writeShellScriptBin "nixos-installer" ''
-      exec python3 /etc/iso/repo/installer/main.py --repo /etc/iso/repo "$@"
-    '')
-  ];
+      # TUI installer launcher — runs the baked flake repo's installer app
+      (writeShellScriptBin "nixos-installer" ''
+        exec ${installerPython}/bin/python3 /etc/iso/repo/installer/main.py --repo /etc/iso/repo "$@"
+      '')
+    ];
 
   # Bake the flake repository (including installer/) into the ISO
   environment.etc."iso/repo".source = repoRoot;
