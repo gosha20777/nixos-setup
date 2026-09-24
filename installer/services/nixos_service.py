@@ -23,7 +23,15 @@ def set_user_password(
     The password is piped via stdin (user:pass format) and is never written
     to the log file — only the chroot command itself is logged.
     """
+    # Bare `chpasswd` resolves via the LIVE system's PATH, which does not
+    # exist inside the chroot → exit 127. Use the absolute profile path:
+    # inside the chroot it resolves through the system-1-link symlink
+    # chain into the target's own store (verified against hosts/thinkpad).
     return executor.run(
-        ["chroot", str(mount), "chpasswd"],
+        [
+            "chroot",
+            str(mount),
+            "/nix/var/nix/profiles/system/sw/bin/chpasswd",
+        ],
         stdin_data=f"{username}:{password}\n",
     )
