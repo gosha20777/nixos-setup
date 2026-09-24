@@ -7,8 +7,8 @@ rec {
   colors = {
     bg = "#141617";
     fg = "#E1DACB";
-    selectionBg = "#2C3C40";
-    selectionFg = "#F7F4EC";
+    selectionBg = "#9EC468"; # сочный шалфей (инверсионное выделение)
+    selectionFg = "#141617"; # глубокий графит (высококонтрастный текст внутри выделения)
     accent = "#9EC468"; # шалфей (sage)
     accent2 = "#65B8C7"; # хвойная волна (pine)
     gold = "#E2B862";
@@ -57,9 +57,9 @@ rec {
       mOnSurface = colors.fg;
       mSurfaceVariant = colors.surfaceDark;
       mOnSurfaceVariant = "#8B938D";
-      mOutline = colors.selectionBg;
+      mOutline = colors.surfaceDark;
       mShadow = "#101112";
-      mHover = colors.selectionBg;
+      mHover = "#2C3C40";
       mOnHover = colors.fg;
       terminal = {
         background = colors.bg;
@@ -93,4 +93,8 @@ rec {
   };
   # Конфигурация темы yazi для programs.yazi.theme
   yazi = import ./yazi.nix;
+  # Конфигурация темы vscode для programs.vscode.userSettings
+  vscode = import ./vscode.nix;
+  # Конфигурация темы oh-my-pi
+  omp = import ./omp.nix;
 }

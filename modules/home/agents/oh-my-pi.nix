@@ -7,11 +7,17 @@
   systemSettings,
   ...
 }:
+let
+  theme = import ../../themes/${systemSettings.theme};
+in
 {
   home.packages = [
     inputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
+  # Everforest Warm theme for oh-my-pi
+  home.file.".omp/agent/themes/everforest-warm.json".text = builtins.toJSON theme.omp;
+  xdg.configFile."omp/agent/themes/everforest-warm.json".text = builtins.toJSON theme.omp;
   sops = lib.mkIf systemSettings.sops.enable {
     secrets = {
       openrouter_api_key = { };
@@ -46,7 +52,7 @@
       default: google-antigravity/gemini-3.8-flash:high
     symbolPreset: nerd
     theme:
-      dark: titanium
+      dark: everforest-warm
     setupVersion: 2
     secrets:
       enabled: true

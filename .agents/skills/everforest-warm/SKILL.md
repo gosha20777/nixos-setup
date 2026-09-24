@@ -65,7 +65,7 @@ This table is the **absolute single source of truth** for all Everforest Warm ad
 | **Background 1** | `#1A1D1F` | `rgb(26, 29, 31)` | `204.0°, 8.8%, 11.2%` | Sidebar, activity bar, terminal tab bar, statusbar |
 | **Background 2 (`c0`)**| `#262B2E` | `rgb(38, 43, 46)` | `202.5°, 9.5%, 16.5%` | Toolbars, panel headers, list hover, alternating rows |
 | **Background 3** | `#282D30` | `rgb(40, 45, 48)` | `202.5°, 9.1%, 17.3%` | Inactive borders, input backgrounds, gutter |
-| **Background 4 (Select)**| `#2C3C40`| `rgb(44, 60, 64)` | `192.0°, 18.5%, 21.2%`| Text selection, active list item, cursor line |
+| **Background 4 (`surfaceSelect`)**| `#2C3C40`| `rgb(44, 60, 64)` | `192.0°, 18.5%, 21.2%`| Active list item, cursor line, subtle panel hover |
 | **Background 5** | `#374246` | `rgb(55, 66, 70)` | `196.0°, 12.0%, 24.5%`| Active borders, search result markers, badges |
 
 ### Muted Elements & Grayscale
@@ -114,7 +114,7 @@ All ported colors must be rigorously tested against the background using the WCA
 | **Syntax Accents (Average)** | $6.5:1 \dots 10.0:1$ | $\ge 5.5:1$ | **$6.2:1 \dots 9.7:1$** | Clear differentiation |
 | **Comments (`grey0` on `bg`)** | $5.0:1 \dots 6.0:1$ | $\ge 4.5:1$ | **$5.51:1$** | Readable, non-distracting |
 | **UI Borders (`bg3` on `bg`)** | $1.5:1 \dots 2.2:1$ | $\ge 1.3:1$ | **$1.85:1$** | Crisp spatial bounding |
-| **Selection Highlight (`bg4`)** | $2.0:1 \dots 2.8:1$ | $\ge 1.8:1$ | **$2.36:1$** | Clear highlight without obscuring text |
+| **Text Selection (Sage Inversion)** | $\ge 7.0:1$ | $\ge 7.0:1$ | **$9.12:1$** (`#9EC468` / `#141617`) | Exceeds WCAG AAA ($7:1$) |
 
 ### Python Script for Metric Verification
 
@@ -252,6 +252,7 @@ To ensure cohesive behavior across GTK, Qt, Noctalia (Quickshell), and custom ap
 
 | Widget / Control | State | Token | Hex | Text / Foreground |
 | :--- | :--- | :--- | :--- | :--- |
+| **Text Selection** | Selected | `colors.selectionBg` (Sage) | `#9EC468` | `colors.selectionFg` (`#141617`) |
 | **Primary Button** | Default | `colors.accent` (Sage) | `#9EC468` | `colors.bg` (`#141617`) |
 | **Primary Button** | Hover | `colors.c10` (Bright Sage) | `#AFD874` | `colors.bg` (`#141617`) |
 | **Secondary Button** | Default | `colors.surfaceDark` | `#282D30` | `colors.fg` (`#E1DACB`) |
