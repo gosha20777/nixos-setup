@@ -94,6 +94,10 @@ class CommandExecutor:
             capture_output=True,
             text=True,
             input=stdin_data,
+            # No piped input → child stdin is /dev/null: an unexpected
+            # interactive prompt fails fast on EOF instead of hanging the
+            # installer forever.
+            stdin=None if stdin_data is not None else subprocess.DEVNULL,
         )
         merged = (proc.stdout + proc.stderr).splitlines()
         for line in merged:
@@ -128,6 +132,9 @@ class CommandExecutor:
             stderr=subprocess.STDOUT,
             text=True,
             bufsize=1,
+            # Long-running commands must never block on a prompt: /dev/null
+            # stdin makes an unexpected interactive read abort on EOF.
+            stdin=subprocess.DEVNULL,
         )
         tail: list[str] = []
         try:
@@ -155,7 +162,7 @@ class CommandExecutor:
         Safe to call even in dry-run: lsblk, /proc reads, sysfs checks do not
         mutate anything.
         """
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, stdin=subprocess.DEVNULL)
         if check and proc.returncode != 0:
             raise InstallError(
                 f"Read-only command failed (exit {proc.returncode}): {' '.join(cmd)}\n"
