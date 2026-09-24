@@ -52,7 +52,7 @@
     # v5 splits config into two files: config.toml is the read-only BASE,
     # and runtime changes from settings UI land in ~/.local/state/noctalia/settings.toml.
     settings = {
-      location.address = "";
+      location.address = systemSettings.location;
       weather = {
         enabled = true;
         unit = "celsius";

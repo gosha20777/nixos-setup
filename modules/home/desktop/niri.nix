@@ -22,7 +22,7 @@
       natural-scroll = true;
       dwt = true;
     };
-    input.keyboard.xkb.layout = "us,ru";
+    input.keyboard.xkb.layout = "us,ru,de";
 
     workspaces = {
       "01-web".name = "🌐 Web";

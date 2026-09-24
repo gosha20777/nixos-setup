@@ -52,7 +52,9 @@ class HostInfo:
     arch: str
     boot_mode: str
     disko_layout: str
-
+    timezone: str = "Europe/Berlin"
+    weather_location: str = "Würzburg, Germany"
+    keyboard_layouts: str = "us, ru, de"
     @property
     def display_label(self) -> str:
         return f"{self.name} — {self.description} ({self.arch}, {self.boot_mode})"

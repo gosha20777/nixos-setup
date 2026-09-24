@@ -158,8 +158,8 @@ class PasswordPromptScreen:
 
         while True:
             password = Prompt.ask("[prompt]Новый пароль (ввод скрыт)[/prompt]", password=True)
-            if len(password) < 8:
-                console.print("[error]✗ Пароль должен быть не короче 8 символов[/error]")
+            if not password:
+                console.print("[error]✗ Пароль не может быть пустым[/error]")
                 continue
             confirm = Prompt.ask("[prompt]Повторите пароль[/prompt]", password=True)
             if password == confirm:
@@ -183,6 +183,10 @@ class SummaryConfirmScreen:
         table.add_row("[accent]Мастер-ключ Age:[/accent]", "[success]Настроен и будет сохранен в ~/.config/sops/age/keys.txt[/success]" if config.age_master_key else "[warning]Пропущен[/warning]")
         table.add_row("[accent]Пароль пользователя:[/accent]", "[success]Задан (будет применен через chpasswd)[/success]" if getattr(config, "user_password", "") else "[warning]Не задан — аккаунт останется заблокирован[/warning]")
         table.add_row("[accent]Каталог репозитория:[/accent]", f"{config.repo_dest_path}")
+        if config.target_host:
+            table.add_row("[accent]Часовой пояс:[/accent]", f"{config.target_host.timezone}")
+            table.add_row("[accent]Локация погоды:[/accent]", f"{config.target_host.weather_location}")
+            table.add_row("[accent]Раскладки ввода:[/accent]", f"{config.target_host.keyboard_layouts} (Mod+Space)")
 
         panel = Panel(
             table,

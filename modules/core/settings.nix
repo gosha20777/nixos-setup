@@ -35,6 +35,16 @@ in
       default = "everforest-warm";
       description = "Active theme directory under modules/themes/ (palette for Noctalia, niri effects, fastfetch).";
     };
+    timeZone = mkOption {
+      type = types.str;
+      default = "Europe/Berlin";
+      description = "Primary timezone for the system and desktop clocks.";
+    };
+    location = mkOption {
+      type = types.str;
+      default = "Würzburg, Germany";
+      description = "Default location string for weather and astronomy widgets (Noctalia).";
+    };
     sops = {
       enable = mkOption {
         type = types.bool;
