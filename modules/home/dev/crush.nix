@@ -37,7 +37,7 @@
 #                    one-time `agent-browser install` step.
 #
 # Node is pulled from pkgs.nodejs by absolute store path so crush finds
-# `npx` even when the invocation happens outside a mise-shim shell.
+# `npx` reliably even when PATH is minimal.
 #
 # NOTE: this is a store-path symlink (read-only). Crush's built-in
 # `crush-config` skill writes here to persist model swaps — that call

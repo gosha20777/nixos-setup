@@ -168,6 +168,22 @@
         "type": "github"
       }
     },
+    "lazyvim-starter": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1733936199,
+        "narHash": "sha256-QrpnlDD4r1X4C8PqBhQ+S3ar5C+qDrU1Jm/lPqyMIFM=",
+        "owner": "LazyVim",
+        "repo": "starter",
+        "rev": "803bc181d7c0d6d5eeba9274d9be49b287294d99",
+        "type": "github"
+      },
+      "original": {
+        "owner": "LazyVim",
+        "repo": "starter",
+        "type": "github"
+      }
+    },
     "niri": {
       "inputs": {
         "niri-stable": "niri-stable",
@@ -413,6 +429,7 @@
         "herdr": "herdr",
         "home-manager": "home-manager",
         "import-tree": "import-tree",
+        "lazyvim-starter": "lazyvim-starter",
         "niri": "niri",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_3",

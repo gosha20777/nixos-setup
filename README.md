@@ -57,7 +57,6 @@
 │   │   │   ├── locale.nix          # Локаль, часовой пояс, раскладки клавиатуры
 │   │   │   ├── network.nix         # NetworkManager, firewall
 │   │   │   ├── niri.nix            # Композитор niri (системный модуль, polkit)
-│   │   │   ├── nix-ld.nix          # Запуск некастомизированных ELF бинарников
 │   │   │   ├── nix.nix             # Настройки nix-daemon, flakes, Lix/Nix оптимизации, gc
 │   │   │   ├── portals.nix         # xdg-desktop-portal (gnome, gtk)
 │   │   │   ├── shells.nix          # Системная регистрация fish и bash
@@ -65,12 +64,11 @@
 │   │   └── roles/                  # Опциональные классы оборудования (НЕ автоимпортируются)
 │   │       ├── laptop.nix          # Ноутбучная роль (power-profiles-daemon, upower, закрытие крышки)
 │   │       └── desktop.nix         # Десктопная роль (fstrim, fwupd)
-│   └── home/                       # Пользовательские модули Home-Manager (АВТОИМПОРТ import-tree)
-│       ├── agents/                 # AI-агенты: oh-my-pi (декларативные конфиги/секреты), herdr, impeccable
-│       ├── apps/                   # typora, cyberchef, thunderbird, libreoffice, nemo, kdenlive
+│       ├── agents/                 # AI-агенты: oh-my-pi (декларативные конфиги/секреты), herdr
+│       ├── apps/                   # typora, thunderbird, libreoffice, nemo, kdenlive
 │       ├── cli/                    # eza, bat, fzf, zoxide, starship, jq, ripgrep, yazi, gum, btop...
 │       ├── desktop/                # niri binds, noctalia shell, wayland-tools, gtk, swayidle, wallpapers
-│       ├── dev/                    # git, gh, lazygit, neovim, vscode, mise, c-toolchain, crush
+│       ├── dev/                    # git, gh, lazygit, neovim, vscode, c-toolchain, crush
 │       ├── shells/                 # fish, bash
 │       ├── system/                 # xdg.nix (структура каталогов, закладки, иконки), sops.nix, mimeapps, face
 │       └── terminal/               # kitty (шрифты, паддинги, темы, прозрачность)

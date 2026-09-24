@@ -1,33 +1,27 @@
-# Neovim + LazyVim starter. Theming owned by Noctalia's community `neovim`
-# template (enabled in community_ids, modules/home/desktop/noctalia.nix).
-# Its apply.sh writes:
+# Neovim + LazyVim starter (from flake input `lazyvim-starter`).
+# The starter is fetched at build time and copied to ~/.config/nvim once
+# if missing. Read-only symlinks to /nix/store cannot be used because LazyVim
+# writes lazy-lock.json and Noctalia's neovim template writes theme overrides:
 #   ~/.config/nvim/lua/matugen.lua           — matugen-templated palette
-#                                              (base16 slots derived from
-#                                              Noctalia's Material scheme).
-#   ~/.config/nvim/lua/plugins/base16.lua    — LazyVim spec that installs
-#                                              RRethy/base16-nvim and calls
-#                                              `require('matugen').setup()`.
-# Wallpaper changes send SIGUSR1 to running nvim so the palette live-reloads
-# without restarting. Both files land inside the LazyVim starter clone
-# (home.activation.lazyvimStarter below), which is user-writable —
-# home-manager can't (and shouldn't) manage them. If they're missing after
-# a fresh install, ensure Noctalia has reached api.noctalia.dev at least once
-# and nudge the wallpaper to trigger a template re-apply.
+#   ~/.config/nvim/lua/plugins/base16.lua    — LazyVim spec for base16-nvim
+# Updates to the starter template via `nix flake update lazyvim-starter` apply
+# only to fresh installations; existing configs are user-managed (:Lazy update).
 {
+  inputs,
   pkgs,
   ...
 }:
 {
   home.packages = [ pkgs.neovim ];
 
-  # LazyVim starter — clone once, leave existing config alone
+  # LazyVim starter — copy once from store path, leave existing config alone
   home.activation.lazyvimStarter = {
     after = [ "writeBoundary" ];
     before = [ ];
     data = ''
       if [ ! -e "$HOME/.config/nvim" ]; then
-        ${pkgs.git}/bin/git clone --depth=1 https://github.com/LazyVim/starter "$HOME/.config/nvim"
-        rm -rf "$HOME/.config/nvim/.git"
+        cp -r ${inputs.lazyvim-starter} "$HOME/.config/nvim"
+        chmod -R u+w "$HOME/.config/nvim"
       fi
     '';
   };

@@ -30,8 +30,16 @@
   # activation to complete cleanly without aborting, ensuring wallpapers and starship seed.
   systemSettings.sops.enable = false;
 
-  # Fish greeting hint strictly for live CD users
+  # Home Manager live tweaks: auto-start installer, set scale, and fish hint
   home-manager.users.${config.systemSettings.username} = {
+    programs.niri.settings = {
+      spawn-at-startup = [
+        { argv = [ "kitty" "-e" "nixos-installer" ]; }
+      ];
+      outputs."eDP-1".scale = 1.25;
+      outputs."Virtual-1".scale = 1.25;
+    };
+
     programs.fish.interactiveShellInit = ''
       set -g fish_greeting "🌲 NixOS Everforest Live — для запуска установщика выполните: nixos-installer"
     '';
@@ -46,6 +54,12 @@
     user = config.systemSettings.username;
   };
 
+  # Ensure Home Manager activation completes before greetd starts the session,
+  # preventing races where niri/Noctalia launch before themes, icons, and wallpapers exist.
+  systemd.services.greetd = {
+    after = [ "home-manager-${config.systemSettings.username}.service" ];
+    wants = [ "home-manager-${config.systemSettings.username}.service" ];
+  };
   environment.systemPackages = with pkgs; [
     disko
     git

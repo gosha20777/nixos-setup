@@ -87,6 +87,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # LazyVim starter template — cloned to ~/.config/nvim once at activation
+    # if missing. Flake input downloads at build time (zero network at boot);
+    # updates via `nix flake update lazyvim-starter` apply only to fresh setups.
+    lazyvim-starter = {
+      url = "github:LazyVim/starter";
+      flake = false;
+    };
+
     # ── SECURE BOOT ────────────────────────────────────────────────
     # Uncomment to enable lanzaboote. Do this ONLY after the system is
     # installed and booting (see secure-boot.md). Enabling it before

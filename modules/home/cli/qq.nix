@@ -2,7 +2,7 @@
 # from the derivation in modules/packages/qq.nix.
 # pipx + jsongrep are still NOT installed via Nix (build-time deps in
 # current nixos-unstable cycle through transient failures). Install manually
-# post-boot (mise provides python):
+# post-boot (python3 provides pip):
 #   pip install --user pipx
 #   pipx ensurepath
 #   pipx install jsongrep
