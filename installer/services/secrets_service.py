@@ -19,4 +19,8 @@ def provision(executor: CommandExecutor, mount: Path, username: str, age_key: st
     with tempfile.NamedTemporaryFile("w", suffix=".keys", delete=False) as tmp:
         tmp.write(age_key)
         tmp_path = tmp.name
-    executor.run(["install", "-D", "-m", "600", tmp_path, dest])
+    try:
+        executor.run(["install", "-D", "-m", "600", tmp_path, dest])
+    finally:
+        # The master key must not linger in the live system's /tmp.
+        Path(tmp_path).unlink(missing_ok=True)

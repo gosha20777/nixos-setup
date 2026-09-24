@@ -2,6 +2,7 @@
 """Main entrypoint for NixOS Everforest Live Installer."""
 
 import argparse
+import os
 import sys
 from pathlib import Path
 
@@ -102,6 +103,15 @@ def main() -> None:
 
     executor = CommandExecutor(dry_run=not args.execute, log_file=args.log)
     cfg = InstallConfig()
+    # Real execution mutates disks — refuse to run unprivileged. Dry-run stays
+    # available as non-root for development and UI testing.
+    if args.execute and os.geteuid() != 0:
+        console.print(
+            "[error]✗ Режим --execute требует root. "
+            "Перезапустите через sudo (sudo nixos-installer).[/error]"
+        )
+        sys.exit(1)
+
     cfg.dry_run = not args.execute
 
     try:
@@ -129,6 +139,21 @@ def main() -> None:
                 sys.exit(1)
         config.target_disk = DiskSelectScreen.prompt(detected_disks)
         cfg.target_disk = config.target_disk
+        # Preflight: refuse to destroy a disk that is still mounted anywhere
+        # (e.g. the old system mounted at /mnt/disk for data rescue).
+        if args.execute:
+            busy_mounts = hardware_service.find_disk_mounts(cfg.target_disk.path)
+            if busy_mounts:
+                console.print(
+                    f"[error]✗ Диск {cfg.target_disk.path} смонтирован:[/error]"
+                )
+                for m in busy_mounts:
+                    console.print(f"  [fg]• {m}[/fg]")
+                console.print(
+                    "[warning]Размонтируйте его (sudo umount …) или выберите другой диск. "
+                    "Ничего не изменено.[/warning]"
+                )
+                sys.exit(1)
 
         # Step 3: Age Master Key Prompt
         cfg.age_master_key = AgeKeyPromptScreen.prompt()

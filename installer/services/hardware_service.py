@@ -37,3 +37,17 @@ def get_ram_gb() -> float:
     if match is None:
         return 0.0
     return int(match.group(1)) / 1024 / 1024
+
+
+def find_disk_mounts(disk_path: str) -> list[str]:
+    """Mountpoints whose source is the disk or one of its partitions (/proc/mounts).
+
+    ``startswith`` covers partition suffixes (``/dev/nvme0n1p2`` for disk
+    ``/dev/nvme0n1``); no other device type shares that prefix.
+    """
+    mounts: list[str] = []
+    for line in Path("/proc/mounts").read_text().splitlines():
+        parts = line.split()
+        if len(parts) >= 2 and parts[0].startswith(disk_path):
+            mounts.append(f"{parts[0]} on {parts[1]}")
+    return mounts

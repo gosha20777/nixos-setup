@@ -18,7 +18,7 @@ def _make_repo(tmp_path: Path) -> Path:
 
 
 class TestDryRun:
-    def test_logs_install_cp_chown_git_in_order(self, tmp_path: Path):
+    def test_logs_install_cp_git_chown_in_order(self, tmp_path: Path):
         executor = CommandExecutor(dry_run=True)
         mount = tmp_path / "mnt"
 
@@ -29,11 +29,12 @@ class TestDryRun:
         assert executor.executed[0][1] == "-d"
         assert executor.executed[1][0] == "cp"
         assert executor.executed[1][1] == "-r"
-        assert executor.executed[2][0] == "chown"
-        assert executor.executed[2][1] == "-R"
-        assert executor.executed[3][0] == "git"
-        assert executor.executed[3][1] == "-C"
-        assert config.GITHUB_ORIGIN in executor.executed[3]
+        # git runs while the copy is still root-owned; chown comes last.
+        assert executor.executed[2][0] == "git"
+        assert executor.executed[2][1] == "-C"
+        assert config.GITHUB_ORIGIN in executor.executed[2]
+        assert executor.executed[3][0] == "chown"
+        assert executor.executed[3][1] == "-R"
 
 
 class TestRealDeploy:

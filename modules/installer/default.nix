@@ -22,6 +22,10 @@
   ];
 
   networking.hostName = "live";
+  # Passwordless sudo for the live user: the TUI installer mutates disks and
+  # runs nixos-install, so it must run as root — the launcher elevates via
+  # `sudo -n`. Live-ISO-only: target hosts never import this module.
+  security.sudo.wheelNeedsPassword = false;
   # Fix font rendering in Live ISO: installation-cd-minimal sets mkOverride 500 false,
   # which disables fontconfig entirely. Force it on so JetBrainsMono Nerd Font resolves.
   fonts.fontconfig.enable = lib.mkForce true;
@@ -34,7 +38,13 @@
   home-manager.users.${config.systemSettings.username} = {
     programs.niri.settings = {
       spawn-at-startup = [
-        { argv = [ "kitty" "-e" "nixos-installer" ]; }
+        {
+          argv = [
+            "kitty"
+            "-e"
+            "nixos-installer"
+          ];
+        }
       ];
       outputs."eDP-1".scale = 1.25;
       outputs."Virtual-1".scale = 1.25;
@@ -74,7 +84,7 @@
 
       # TUI installer launcher — runs the baked flake repo's installer app
       (writeShellScriptBin "nixos-installer" ''
-        exec ${installerPython}/bin/python3 /etc/iso/repo/installer/main.py --repo /etc/iso/repo "$@"
+        exec sudo -n ${installerPython}/bin/python3 /etc/iso/repo/installer/main.py --repo /etc/iso/repo "$@"
       '')
     ];
 

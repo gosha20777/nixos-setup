@@ -13,5 +13,8 @@ def deploy(executor: CommandExecutor, repo_src: Path, mount: Path, username: str
     # Create the Projects/ parent first (cp cannot create nested parents)
     executor.run(["install", "-d", str(mount / "home" / username / "Projects")])
     executor.run(["cp", "-r", str(repo_src), dest])
-    executor.run(["chown", "-R", "1000:100", home])
+    # git runs BEFORE chown: the fresh copy is root-owned, so git-as-root sees
+    # no dubious-ownership error; the final chown hands everything to the user
+    # (also fixes the age key's root-created parent dirs from secrets_service).
     executor.run(["git", "-C", dest, "remote", "set-url", "origin", config.GITHUB_ORIGIN])
+    executor.run(["chown", "-R", "1000:100", home])
