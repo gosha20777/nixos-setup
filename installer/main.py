@@ -20,6 +20,7 @@ from installer.screens import (
     HostSelectScreen,
     DiskSelectScreen,
     AgeKeyPromptScreen,
+    PasswordPromptScreen,
     SummaryConfirmScreen,
     CompletionScreen,
 )
@@ -132,12 +133,15 @@ def main() -> None:
         # Step 3: Age Master Key Prompt
         cfg.age_master_key = AgeKeyPromptScreen.prompt()
 
-        # Step 4: Summary & Confirmation
+        # Step 4: User Password for the installed system
+        cfg.user_password = PasswordPromptScreen.prompt()
+
+        # Step 5: Summary & Confirmation
         if not SummaryConfirmScreen.prompt(cfg):
             console.print("\n[warning]● Установка отменена пользователем. Никаких изменений на диск не внесено.[/warning]\n")
             sys.exit(0)
 
-        # Step 5: Installation Pipeline (real services; dry-run unless --execute)
+        # Step 6: Installation Pipeline (real services; dry-run unless --execute)
         pipeline = InstallPipeline(executor, args.repo, cfg)
         try:
             pipeline.run()
@@ -169,7 +173,7 @@ def main() -> None:
                 console.print("[info]Имитация: переход в shell для диагностики (journalctl, lsblk)...[/info]")
             sys.exit(1)
 
-        # Step 6: Completion
+        # Step 7: Completion
         if executor.dry_run:
             console.print(
                 f"\n[muted]Dry-run: всего зафиксировано команд — {len(executor.executed)}. "

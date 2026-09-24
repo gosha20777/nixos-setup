@@ -101,7 +101,7 @@
   # rest (noctalia, herdr, …) are reached as `inputs.<name>` from the module
   # tree via specialArgs + extraSpecialArgs (hosts/common.nix wires both).
   outputs =
-    { nixpkgs, ... }@inputs:
+    { self, nixpkgs, ... }@inputs:
     let
       lib = nixpkgs.lib;
 
@@ -132,9 +132,30 @@
             # inputs.lanzaboote.nixosModules.lanzaboote
           ];
         };
+    # The live installer ISO is NOT a target machine, so it lives outside
+      # hosts/ (auto-discovery must only pick target machines). It boots into
+      # the full shared desktop (modules/installer imports hosts/common.nix)
+      # and runs the Python installer; target installation is network-based
+      # (nixos-install --flake). The module itself is architecture-neutral —
+      # a future ARM image is one line: live-aarch64 = mkLive "aarch64-linux".
+      mkLive =
+        system:
+        lib.nixosSystem {
+          inherit system;
+          specialArgs = {
+            inherit inputs;
+            repoRoot = self.outPath;
+          };
+          modules = [
+            "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+            ./modules/installer
+          ];
+        };
     in
     {
-      nixosConfigurations = lib.genAttrs hostNames mkHost;
+      nixosConfigurations = lib.genAttrs hostNames mkHost // {
+        live-x86_64 = mkLive "x86_64-linux";
+      };
 
       # `nix fmt` formats all .nix files in the tree. pkgs.nixfmt is the RFC 166
       # implementation that ships in nixpkgs. The tree is already nixfmt-clean

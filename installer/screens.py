@@ -145,6 +145,29 @@ class AgeKeyPromptScreen:
             return ""
 
 
+class PasswordPromptScreen:
+    """Screen for setting the installed system's user password."""
+    @staticmethod
+    def prompt() -> str:
+        console.print()
+        console.print("[prompt]▸ Шаг 4: Пароль пользователя целевой системы:[/prompt]")
+        console.print(
+            "[muted]На fresh-системе аккаунт заблокирован — задайте пароль для входа в рабочий стол и sudo.[/muted]"
+        )
+        console.print()
+
+        while True:
+            password = Prompt.ask("[prompt]Новый пароль (ввод скрыт)[/prompt]", password=True)
+            if len(password) < 8:
+                console.print("[error]✗ Пароль должен быть не короче 8 символов[/error]")
+                continue
+            confirm = Prompt.ask("[prompt]Повторите пароль[/prompt]", password=True)
+            if password == confirm:
+                console.print("[success]✓ Пароль задан (будет применен к установленной системе)[/success]")
+                return password
+            console.print("[error]✗ Пароли не совпадают — попробуйте снова[/error]")
+
+
 class SummaryConfirmScreen:
     """Final summary review and destructive confirmation."""
     @staticmethod
@@ -158,6 +181,7 @@ class SummaryConfirmScreen:
         table.add_row("[accent]Разметка Disko:[/accent]", "Btrfs (субтомы @, @home, @nix, @log, @snapshots)")
         table.add_row("[accent]Файл подкачки:[/accent]", "zramSwap в RAM (25% памяти = 8.0 GB, сжатие zstd)")
         table.add_row("[accent]Мастер-ключ Age:[/accent]", "[success]Настроен и будет сохранен в ~/.config/sops/age/keys.txt[/success]" if config.age_master_key else "[warning]Пропущен[/warning]")
+        table.add_row("[accent]Пароль пользователя:[/accent]", "[success]Задан (будет применен через chpasswd)[/success]" if getattr(config, "user_password", "") else "[warning]Не задан — аккаунт останется заблокирован[/warning]")
         table.add_row("[accent]Каталог репозитория:[/accent]", f"{config.repo_dest_path}")
 
         panel = Panel(

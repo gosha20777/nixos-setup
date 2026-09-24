@@ -3,7 +3,7 @@
 from pathlib import Path
 
 MOUNT_POINT = Path("/mnt")
-DEFAULT_REPO = Path("/iso/repo")
+DEFAULT_REPO = Path("/etc/iso/repo")
 USERNAME = "gosha20777"
 REPO_DEST = "Projects/nixos-setup"
 GITHUB_ORIGIN = "git@github.com:gosha20777/nixos-setup.git"

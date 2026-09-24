@@ -64,6 +64,7 @@ class InstallConfig:
     target_host: Optional[HostInfo] = None
     target_disk: Optional[DiskInfo] = None
     age_master_key: str = ""
+    user_password: str = ""
     username: str = "gosha20777"
     repo_dest_path: str = "~/Projects/nixos-setup"
     dry_run: bool = True

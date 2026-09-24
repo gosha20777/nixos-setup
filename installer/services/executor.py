@@ -64,13 +64,27 @@ class CommandExecutor:
         with open(self.log_file, "a") as f:
             f.write(f"[{datetime.now():%H:%M:%S}] {line}\n")
 
-    def run(self, cmd: list[str], check: bool = True) -> CommandResult:
-        """Execute (or capture in dry-run) a potentially mutating command."""
+    def run(
+        self,
+        cmd: list[str],
+        check: bool = True,
+        stdin_data: Optional[str] = None,
+    ) -> CommandResult:
+        """Execute (or capture in dry-run) a potentially mutating command.
+
+        ``stdin_data`` is piped to the command's stdin in real mode; it is
+        deliberately NOT written to the log (used for passwords).
+        """
         self.executed.append(list(cmd))
         self._log(f"$ {' '.join(cmd)}")
         if self.dry_run:
             return CommandResult(exit_code=0, stdout="", stderr="")
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            input=stdin_data,
+        )
         merged = (proc.stdout + proc.stderr).splitlines()
         for line in merged:
             self._log(line)

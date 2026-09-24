@@ -43,11 +43,20 @@ class InstallPipeline:
         host = cfg.target_host.name
 
         # Fast steps: instant capture (or instant real execution)
-        console.print(f"[fg]▸ Сохранение мастер-ключа Age (~/.config/sops/age/keys.txt)...[/fg]")
+        console.print("[fg]▸ Сохранение мастер-ключа Age (~/.config/sops/age/keys.txt)...[/fg]")
         secrets_service.provision(
             self.executor, config.MOUNT_POINT, cfg.username, cfg.age_master_key
         )
         console.print("  [success]✓ Сохранение мастер-ключа Age[/success]")
+
+        console.print("[fg]▸ Установка пароля пользователя целевой системы...[/fg]")
+        if cfg.user_password:
+            nixos_service.set_user_password(
+                self.executor, config.MOUNT_POINT, cfg.username, cfg.user_password
+            )
+            console.print("  [success]✓ Пароль пользователя установлен[/success]")
+        else:
+            console.print("  [warning]! Пароль пропущен — аккаунт останется заблокирован[/warning]")
 
         # Long step 1: Disko with live streaming output
         self._stream_step(
