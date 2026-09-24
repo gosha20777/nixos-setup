@@ -122,6 +122,7 @@
           "clock"
         ];
         end = [
+          "weather"
           "media"
           "keyboard_layout"
           "sysmon"
@@ -133,6 +134,7 @@
         capsule_group = [
           {
             members = [
+              "weather"
               "keyboard_layout"
               "sysmon"
               "network"

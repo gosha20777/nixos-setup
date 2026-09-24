@@ -8,6 +8,30 @@
   systemSettings,
   ...
 }:
+let
+  # Умное переключение раскладок. Индексы жёстко связаны с
+  # input.keyboard.xkb.layout "us,ru,de" ниже (0/1/2) — меняются вместе.
+  # Одиночный Win+Space: тумблер EN<->RU (из DE — в EN); быстрое двойное
+  # нажатие (<=400 мс) — немецкий. Текущая раскладка всегда читается живьём
+  # из `niri msg`, поэтому рассинхрона состояния нет; state-файл хранит
+  # только время последнего нажатия для окна двойного тапа.
+  layoutSwitch = pkgs.writeShellScriptBin "layout-switch" ''
+    now=$(date +%s%3N)
+    state="''${XDG_RUNTIME_DIR:-/tmp}/layout-switch.last"
+    prev=$(cat "$state" 2>/dev/null || echo 0)
+    cur=$(niri msg -j keyboard-layouts | sed -n 's/.*"current_idx":\([0-9]\+\).*/\1/p')
+    if (( now - prev < 400 )); then
+      rm -f "$state"
+      niri msg action switch-layout 2
+    else
+      printf '%s' "$now" >"$state"
+      case "$cur" in
+        0) niri msg action switch-layout 1 ;;
+        *) niri msg action switch-layout 0 ;;
+      esac
+    fi
+  '';
+in
 {
   # niri input — natural scrolling, tap-to-click, disable-while-typing.
   # Schema is validated at build time by niri-flake.
@@ -125,9 +149,11 @@
       "Mod+Shift+Slash".action.show-hotkey-overlay = [ ];
       "Mod+T".action.spawn = "${systemSettings.terminal}";
       "Mod+Return".action.spawn = "${systemSettings.terminal}";
-      # Смена раскладки EN/RU на Win+Space (Mod = Super = Win).
+      # Смена раскладки на Win+Space (Mod = Super = Win): одиночное нажатие —
+      # тумблер EN<->RU, из немецкого — в английский; быстрое двойное нажатие —
+      # немецкий. Скрипт см. в let layoutSwitch выше.
       # Лаунчер доступен по хоткею Mod+D ниже.
-      "Mod+Space".action.switch-layout = "next";
+      "Mod+Space".action.spawn = [ (lib.getExe layoutSwitch) ];
       # Mod+D is an alias for the same launcher — fuzzel used to live here as
       # a second, separately-themed launcher; it was dropped as redundant.
       "Mod+D".action.spawn = [
