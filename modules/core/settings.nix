@@ -35,5 +35,12 @@ in
       default = "everforest-warm";
       description = "Active theme directory under modules/themes/ (palette for Noctalia, niri effects, fastfetch).";
     };
+    sops = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Enable sops-nix secret provisioning. Disabled on live installer media to prevent activation failures when no Age key is present.";
+      };
+    };
   };
 }

@@ -132,7 +132,7 @@
             # inputs.lanzaboote.nixosModules.lanzaboote
           ];
         };
-    # The live installer ISO is NOT a target machine, so it lives outside
+      # The live installer ISO is NOT a target machine, so it lives outside
       # hosts/ (auto-discovery must only pick target machines). It boots into
       # the full shared desktop (modules/installer imports hosts/common.nix)
       # and runs the Python installer; target installation is network-based

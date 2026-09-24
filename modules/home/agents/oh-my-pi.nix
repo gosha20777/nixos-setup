@@ -2,7 +2,9 @@
 {
   config,
   inputs,
+  lib,
   pkgs,
+  systemSettings,
   ...
 }:
 {
@@ -10,7 +12,7 @@
     inputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
-  sops = {
+  sops = lib.mkIf systemSettings.sops.enable {
     secrets = {
       openrouter_api_key = { };
       ollama_api_key = { };

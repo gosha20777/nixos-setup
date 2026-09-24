@@ -22,6 +22,20 @@
   ];
 
   networking.hostName = "live";
+  # Fix font rendering in Live ISO: installation-cd-minimal sets mkOverride 500 false,
+  # which disables fontconfig entirely. Force it on so JetBrainsMono Nerd Font resolves.
+  fonts.fontconfig.enable = lib.mkForce true;
+
+  # Disable sops in live session (no Age key present on boot). This allows Home Manager
+  # activation to complete cleanly without aborting, ensuring wallpapers and starship seed.
+  systemSettings.sops.enable = false;
+
+  # Fish greeting hint strictly for live CD users
+  home-manager.users.${config.systemSettings.username} = {
+    programs.fish.interactiveShellInit = ''
+      set -g fish_greeting "🌲 NixOS Everforest Live — для запуска установщика выполните: nixos-installer"
+    '';
+  };
 
   # Passwordless live user for desktop autologin (installation-device style)
   users.users.${config.systemSettings.username}.initialHashedPassword = "";
