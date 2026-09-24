@@ -1,98 +1,113 @@
 # oh-my-pi theme configuration for Everforest Warm.
-# Conforms to oh-my-pi theme schema and .agents/skills/everforest-warm/SKILL.md.
+# Inspired by Tokyo-Night, Titanium, and Taiga.
+# Deep, muted, neutral-dark slate backgrounds with a vibrant, fully balanced
+# 16-color distribution avoiding any single hue overrepresentation.
 let
   inherit ((import ./default.nix)) colors;
-  # Elevated structural surfaces & visible borders for TUI clarity
-  border = "#3C4A44"; # crisp forest slate (CR 1.95:1 to #141617)
-  borderMuted = "#303D37"; # subtle inner border
-  statusLineBg = "#1E2724"; # grounded forest dock
-  userMessageBg = "#262C30"; # warm slate card
-  customMessageBg = "#202E27"; # rich forest model card
-  toolPendingBg = "#1E2C2E"; # deep teal charcoal
-  toolSuccessBg = "#1D2E24"; # deep forest moss
-  toolErrorBg = "#332024"; # deep wine coral
-  selectedBg = "#2C3C40"; # selection_background из kitty.conf
-  grey1 = "#8B938D";
-  grey2 = "#A5ADA7";
-  mdHr = "#374246";
+
+  # Taiga/Titanium inspired deep muted neutral-dark backgrounds:
+  statusLineBg = "#0F1112"; # Pitch black-slate dock
+  userMessageBg = "#1A1D1E"; # Deep subtle slate card
+  customMessageBg = "#17191A"; # Very muted neutral-dark slate (no green tint)
+  toolPendingBg = "#111314"; # Deepest shadow
+  toolSuccessBg = "#131A15"; # Hint of green shadow
+  toolErrorBg = "#1C1314"; # Hint of red shadow
+  selectedBg = "#23282A"; # Muted neutral selection
+
+  # Quiet structural borders
+  border = "#2A2F32";
+  borderMuted = "#1D2123";
+  statusLineSep = "#2A2F32";
+
+  grey1 = "#8B938D"; # wolf gray
+  grey2 = "#828C85"; # smoke gray
 in
 {
   name = "everforest-warm";
   colors = {
-    accent = colors.accent;
+    # Main accent: Frost Teal (cool, elegant, like Titanium)
+    accent = colors.c4;
     inherit border;
-    borderAccent = colors.c10;
+    borderAccent = colors.c12; # Sky blue focus
     inherit borderMuted;
-    success = colors.accent;
-    error = colors.coral;
-    warning = colors.apricot;
+
+    success = colors.c2; # Sage green
+    error = colors.c1; # Coral red
+    warning = colors.c3; # Amber yellow
     muted = grey1;
-    dim = colors.smoke;
-    text = colors.fg;
+    dim = grey2;
+    text = "";
     thinkingText = grey1;
 
     inherit selectedBg;
     inherit userMessageBg;
-    userMessageText = colors.c15;
+    userMessageText = colors.c15; # Bright white
     inherit customMessageBg;
-    customMessageText = colors.fg;
-    customMessageLabel = colors.c14;
+    customMessageText = colors.fg; # Cream
+    customMessageLabel = colors.c5; # Orchid Magenta badge
+
     inherit toolPendingBg;
     inherit toolSuccessBg;
     inherit toolErrorBg;
-    toolTitle = colors.accent2;
-    toolOutput = grey2;
+    toolTitle = colors.c3; # Amber yellow
+    toolOutput = grey1;
 
-    mdHeading = colors.c10;
-    mdLink = colors.c12;
-    mdLinkUrl = grey1;
-    mdCode = colors.c11;
+    # Markdown elements: Tokyo-Night inspired vibrant hierarchy
+    mdHeading = colors.c2; # Sage Green
+    mdLink = colors.c12; # Sky Blue
+    mdLinkUrl = grey2;
+    mdCode = colors.c13; # Rose Pink (excellent contrast and highly readable for inline code)
     mdCodeBlock = colors.fg;
     mdCodeBlockBorder = border;
-    mdQuote = colors.fg;
-    mdQuoteBorder = colors.gold;
-    inherit mdHr;
-    mdListBullet = colors.apricot;
+    mdQuote = grey1;
+    mdQuoteBorder = colors.c4; # Frost Teal
+    mdHr = statusLineSep;
+    mdListBullet = colors.c1; # Coral Red (adds red to markdown!)
 
-    toolDiffAdded = colors.c10;
-    toolDiffRemoved = colors.coral;
-    toolDiffContext = colors.smoke;
+    # Diffs
+    toolDiffAdded = colors.c10; # Lime green
+    toolDiffRemoved = colors.c1; # Coral red
+    toolDiffContext = grey2;
 
-    syntaxComment = grey1;
-    syntaxKeyword = colors.coral;
-    syntaxFunction = colors.accent;
-    syntaxVariable = colors.fg;
-    syntaxString = colors.gold;
-    syntaxNumber = colors.c5;
-    syntaxType = colors.accent2;
-    syntaxOperator = colors.apricot;
+    # Syntax in code snippets: Fully distributed semantic colors
+    syntaxComment = grey2; # Smoke gray
+    syntaxKeyword = colors.c5; # Orchid Magenta keywords
+    syntaxFunction = colors.c12; # Sky Blue functions
+    syntaxVariable = colors.fg; # Cream variables
+    syntaxString = colors.c2; # Sage green strings
+    syntaxNumber = colors.c9; # Apricot Orange numbers
+    syntaxType = colors.c3; # Amber Yellow types
+    syntaxOperator = colors.c1; # Coral Red operators (adds red to code!)
     syntaxPunctuation = grey2;
 
-    thinkingOff = colors.c0; # color0 из kitty.conf (#262B2E)
-    thinkingMinimal = colors.smoke; # color8 из kitty.conf (#828C85)
-    thinkingLow = colors.accent2; # color4 из kitty.conf (#65B8C7)
-    thinkingMedium = colors.c6; # color6 из kitty.conf (#52BFA3)
-    thinkingHigh = colors.accent; # color2 из kitty.conf (#9EC468)
-    thinkingXhigh = colors.gold; # color3 из kitty.conf (#E2B862)
-    thinkingMax = colors.apricot; # color9 из kitty.conf (#F2874B)
+    # Thinking stages: Cool -> Warm -> Hot progression
+    thinkingOff = colors.c0;
+    thinkingMinimal = grey2;
+    thinkingLow = colors.c4; # Frost Teal
+    thinkingMedium = colors.c6; # Aqua Mint
+    thinkingHigh = colors.c3; # Amber Yellow
+    thinkingXhigh = colors.c9; # Apricot Orange
+    thinkingMax = colors.c1; # Coral Red
 
-    bashMode = colors.c14; # color14 из kitty.conf (#69D3B7)
-    pythonMode = colors.c13; # color13 из kitty.conf (#E592B1)
+    bashMode = colors.c6; # Aqua mint
+    pythonMode = colors.c11; # Bright Amber
 
     inherit statusLineBg;
-    statusLineSep = colors.surfaceDark; # inactive_border_color из kitty.conf (#282D30)
-    statusLineModel = colors.c13;
-    statusLinePath = colors.c12;
-    statusLineGitClean = colors.accent;
-    statusLineGitDirty = colors.apricot;
-    statusLineContext = colors.c14;
-    statusLineSpend = colors.c11;
-    statusLineStaged = colors.c10;
-    statusLineDirty = colors.gold;
-    statusLineUntracked = colors.coral;
-    statusLineOutput = colors.fg;
-    statusLineCost = colors.apricot;
-    statusLineSubagents = colors.c5;
+    inherit statusLineSep;
+
+    # Status bar elements: Distinct, balanced tokens
+    statusLineModel = colors.c5; # Orchid Magenta
+    statusLinePath = colors.c12; # Sky Blue
+    statusLineGitClean = colors.c2; # Sage green
+    statusLineGitDirty = colors.c3; # Amber yellow
+    statusLineContext = colors.c14; # Bright Mint
+    statusLineSpend = colors.c11; # Bright Amber
+    statusLineStaged = colors.c10; # Lime
+    statusLineDirty = colors.c3; # Amber yellow
+    statusLineUntracked = colors.c1; # Coral Red
+    statusLineOutput = colors.fg; # Cream
+    statusLineCost = colors.c9; # Apricot orange
+    statusLineSubagents = colors.c4; # Frost Teal
   };
   export = {
     pageBg = colors.bg;
