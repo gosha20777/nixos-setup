@@ -15,6 +15,7 @@ callback so the TUI can display live progress, and errors carry the last
 ``TAIL_LINES`` output lines for display.
 """
 
+import os
 import subprocess
 from dataclasses import dataclass
 from datetime import datetime
@@ -52,7 +53,16 @@ class CommandExecutor:
         self.log_file = log_file
         if log_file is not None:
             log_file.parent.mkdir(parents=True, exist_ok=True)
-            with open(log_file, "a") as f:
+            try:
+                handle = open(log_file, "a")
+            except PermissionError:
+                # fs.protected_regular: O_CREAT on an existing file owned by
+                # another uid in a sticky world-writable dir (/tmp) is denied
+                # even to root — a stale log from a non-root run blocks a
+                # root run and vice versa. Rotate it and start fresh.
+                os.replace(log_file, log_file.with_suffix(log_file.suffix + ".old"))
+                handle = open(log_file, "a")
+            with handle as f:
                 f.write(
                     f"\n=== NixOS installer log started "
                     f"{datetime.now():%Y-%m-%d %H:%M:%S} ===\n"
