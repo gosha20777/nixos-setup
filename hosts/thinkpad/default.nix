@@ -78,12 +78,81 @@
   services.throttled = {
     enable = true;
     extraConfig = ''
+      [GENERAL]
+      Enabled: True
+      Sysfs_Power_Path: /sys/class/power_supply/AC*/online
+      Autoreload: True
+
       [BATTERY]
-      # Cap long-term power limit (PL1) to 20W and short-term (PL2) to 30W on battery
-      PL1_Tdp_W = 20
-      PL2_Tdp_W = 30
-      Trip_Temp_C = 80
+      Update_Rate_s: 30
+      PL1_Tdp_W: 16
+      PL1_Duration_s: 28
+      PL2_Tdp_W: 22
+      PL2_Duration_S: 0.002
+      Trip_Temp_C: 75
+      cTDP: 1
+
+      [AC]
+      Update_Rate_s: 5
+      PL1_Tdp_W: 28
+      PL1_Duration_s: 28
+      PL2_Tdp_W: 35
+      PL2_Duration_S: 0.002
+      Trip_Temp_C: 87
+      cTDP: 0
     '';
+  };
+
+  # ── Fan Control: Ультра-плавный профиль (0 RPM до 60°C, возврат в BIOS на 90°C) ──
+  services.thinkfan = {
+    enable = true;
+    levels = [
+      [
+        0
+        0
+        60
+      ]
+      [
+        1
+        53
+        65
+      ]
+      [
+        2
+        59
+        70
+      ]
+      [
+        3
+        64
+        75
+      ]
+      [
+        4
+        69
+        80
+      ]
+      [
+        5
+        74
+        84
+      ]
+      [
+        6
+        78
+        87
+      ]
+      [
+        7
+        82
+        90
+      ]
+      [
+        "level auto"
+        85
+        32767
+      ]
+    ];
   };
 
   # Automatically switch power-profiles-daemon on AC/battery events
