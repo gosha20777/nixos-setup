@@ -22,7 +22,7 @@ in
     };
     gitEmail = mkOption {
       type = types.str;
-      default = "gosha20777@users.noreply.github.com";
+      default = "gosha20777@live.ru";
       description = "git commit author email (home/dev/git.nix).";
     };
     terminal = mkOption {

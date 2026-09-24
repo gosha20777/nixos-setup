@@ -128,9 +128,11 @@
 options.systemSettings = {
   username    = mkOption { type = types.str;  default = "gosha20777"; };
   gitUsername = mkOption { type = types.str;  default = "gosha20777"; };
-  gitEmail    = mkOption { type = types.str;  default = "gosha20777@users.noreply.github.com"; };
+  gitEmail    = mkOption { type = types.str;  default = "gosha20777@live.ru"; };
   terminal    = mkOption { type = types.str;  default = "kitty"; };
   theme       = mkOption { type = types.str;  default = "everforest-warm"; };
+  timeZone    = mkOption { type = types.str;  default = "Europe/Berlin"; };
+  location    = mkOption { type = types.str;  default = "Würzburg, Germany"; };
   sops.enable = mkOption { type = types.bool; default = true; };
 };
 ```
