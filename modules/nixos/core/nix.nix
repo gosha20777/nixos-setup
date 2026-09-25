@@ -17,13 +17,9 @@
   # (first install, niri/noctalia/claude-code together). 256 MiB silences the
   # "download buffer is full" warnings without meaningful memory cost.
   nix.settings.download-buffer-size = 256 * 1024 * 1024;
-  # Weekly GC keeps /nix/store bounded; the 30-day window preserves enough
-  # rollback headroom for a bad kernel or flake bump.
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 30d";
-  };
+  # GC is handled by nh (programs.nh.clean in modules/nixos/core/nh.nix)
+  # with a generation limit (--keep 3) instead of a fixed time window.
+  nix.gc.automatic = false;
   nixpkgs.config.allowUnfree = true; # google-chrome, typora
   nixpkgs.overlays = [
     (final: prev: {

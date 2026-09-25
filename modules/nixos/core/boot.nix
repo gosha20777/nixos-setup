@@ -13,7 +13,7 @@
   # Cap /boot entries. The ESP is 1G; each generation writes a kernel + initrd
   # + entry. 10 entries ≈ 30 days of weekly rebuilds and keeps /boot well under
   # the fail line where nixos-rebuild switch dies mid-activation.
-  boot.loader.systemd-boot.configurationLimit = 10;
+  boot.loader.systemd-boot.configurationLimit = 3;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
