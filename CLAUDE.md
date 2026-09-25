@@ -22,9 +22,10 @@ We work directly on the host machine. To keep changes safe, deliberate, and pred
   2. The user inspects the changes.
   3. Only when the user explicitly requests to commit, perform `git add`, `git commit`, and `git push`.
 - **Do NOT run `sudo` rebuild commands**: Agents MUST NOT run `sudo nixos-rebuild switch`, `sudo nixos-rebuild test`, `sudo nixos-rebuild boot`, or any other `sudo` commands for rebuilding without the user. Only the user runs rebuilds or explicitly commands them.
+- **Agents MUST use pure Nix commands ONLY (NEVER run `nh`)**: `nh` (`nh os switch`, `nh clean`, etc.) is strictly a convenience tool for the human user. Agents MUST ONLY run standard `nix` commands (`nix flake check`, `nix fmt`, `nix eval`, `nix build`).
+- **Eliminate evaluation warnings immediately**: Agents MUST watch for any Nix evaluation warnings (e.g. obsolete options, renamed settings, deprecated syntax) during `nix flake check` or evaluation, and actively fix them in repo configuration files. Upstream flake-input warnings outside repo control (specifically `stdenv.isLinux` / `stdenv.isDarwin` deprecated warnings originating from `home-manager` internals) are known and ignored until upstream bumps.
 - **Validation only (no sudo)**: Agents perform type validation, flake checks, and dry evaluation that do not require root (e.g. `nix flake check --no-build`).
 - **Formatting is mandatory**: `nix fmt` MUST be run on all changed `.nix` files before finishing work. Formatting drift breaks CI (`.github/workflows/check.yml`).
-
 ### CI & Quality Gates
 - CI (`.github/workflows/check.yml`) gates every PR and push to `main`: `nix flake check --no-build`, `nix fmt --check` over every `.nix` file, and a drvPath eval of every discovered host's closure. There are no unit tests — a NixOS config is verified by evaluating and checking it. Because every host's `hardware-configuration.nix` is committed, CI evaluates with no stubbing.
 ## Commands

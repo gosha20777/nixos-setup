@@ -59,45 +59,45 @@ in
     };
 
     animations = {
-      workspace-switch.spring = {
+      workspace-switch.kind.spring = {
         damping-ratio = 0.85;
         stiffness = 800;
         epsilon = 0.001;
       };
-      horizontal-view-movement.spring = {
+      horizontal-view-movement.kind.spring = {
         damping-ratio = 0.85;
         stiffness = 800;
         epsilon = 0.001;
       };
-      window-movement.spring = {
+      window-movement.kind.spring = {
         damping-ratio = 0.85;
         stiffness = 800;
         epsilon = 0.001;
       };
-      window-resize.spring = {
+      window-resize.kind.spring = {
         damping-ratio = 0.85;
         stiffness = 800;
         epsilon = 0.001;
       };
-      window-open.easing = {
+      window-open.kind.easing = {
         duration-ms = 180;
         curve = "ease-out-expo";
       };
-      window-close.easing = {
+      window-close.kind.easing = {
         duration-ms = 150;
         curve = "ease-out-quad";
       };
-      config-notification-open-close.spring = {
+      config-notification-open-close.kind.spring = {
         damping-ratio = 0.65;
         stiffness = 900;
         epsilon = 0.001;
       };
-      exit-confirmation-open-close.spring = {
+      exit-confirmation-open-close.kind.spring = {
         damping-ratio = 0.6;
         stiffness = 500;
         epsilon = 0.01;
       };
-      overview-open-close.spring = {
+      overview-open-close.kind.spring = {
         damping-ratio = 0.85;
         stiffness = 800;
         epsilon = 0.001;

@@ -35,10 +35,9 @@
   # Thumbnail management service (D-Bus Thumbnailer1) for Nemo and GTK file dialogs
   services.tumbler.enable = true;
 
-  # Background file indexing and instant search
-  services.gnome.tracker.enable = true;
-  services.gnome.tracker-miners.enable = true;
-
+  # Background file indexing and instant search (GNOME 46+ renamed tracker -> tinysparql, tracker-miners -> localsearch)
+  services.gnome.tinysparql.enable = true;
+  services.gnome.localsearch.enable = true;
   # gvfs — the GNOME virtual filesystem daemon. Nemo (in
   # environment.systemPackages) degrades quietly without it: no Trash, no
   # network mounts (SMB/SFTP), no MTP for phones. Nothing errors, the
