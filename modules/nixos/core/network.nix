@@ -24,7 +24,7 @@
           gateway = "vpngw.uni-wuerzburg.de";
           usergroup = "Standard (MFA)";
           protocol = "anyconnect";
-          useragent = "AnyConnect - OpenConnect";
+          useragent = "AnyConnect";
         };
       };
     };
