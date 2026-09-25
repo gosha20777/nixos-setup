@@ -36,12 +36,17 @@ All builds go through the flake. Determine `<host>` from `hostname` (e.g. `think
 nix fmt                                 # Mandatory: format nix files
 nix flake check --no-build              # Evaluate and check flake outputs
 
-# User commands (agents do NOT run sudo rebuilds without the user):
-sudo nixos-rebuild switch --flake .#<host>   # Rebuild and switch
+# Daily commands (recommended: nh CLI):
+nh os switch                           # Rebuild and switch (auto-detects host & flake path)
+nh os test                             # Test change without boot default
+nh os boot                             # Build and make default for next boot
+nh clean all --keep 3                  # Clean old generations (keeps 3 latest system & user states)
+
+# Fallback user commands (agents do NOT run sudo rebuilds without the user):
+sudo nixos-rebuild switch --flake .#<host>   # Classic rebuild and switch
 sudo nixos-rebuild test --flake .#<host>     # Test change without boot default
 sudo nixos-rebuild build --flake .#<host>    # Build closure without activation
 sudo nixos-rebuild --rollback switch        # Roll back last activation
-
 # Dependency updates:
 nix flake update                        # Bump all inputs
 nix flake update noctalia               # Bump single input (Nix 2.19+ positional)

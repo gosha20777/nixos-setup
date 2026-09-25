@@ -140,18 +140,27 @@
 Все операции выполняются через Flake-команды из корня репозитория:
 
 ```bash
-# Применить изменения конфигурации к текущей машине:
-sudo nixos-rebuild switch --flake .#<host>
+# === Рекомендуемый способ через Nix Helper (nh) ===
+# Собрать и применить изменения (автоматически определяет хост и выводит diff пакетов):
+nh os switch
 
 # Протестировать изменения без добавления в загрузочное меню:
-sudo nixos-rebuild test --flake .#<host>
+nh os test
 
-# Собрать систему для следующей перезагрузки:
-sudo nixos-rebuild boot --flake .#<host>
+# Собрать конфигурацию для следующей загрузки:
+nh os boot
+
+# Очистить старые поколения (оставить ровно 3 последних системных и пользовательских):
+nh clean all --keep 3
+
+# === Классический способ через nixos-rebuild ===
+# Применить изменения конфигурации к текущей машине:
+sudo nixos-rebuild switch --flake .#<host>
 
 # Откатить последнее переключение назад:
 sudo nixos-rebuild --rollback switch
 
+# === Обслуживание Flake и тесты ===
 # Обновить все зависимости флейка (обновит flake.lock):
 nix flake update
 
@@ -167,9 +176,6 @@ nix shell nixpkgs#python3Packages.rich -c python3 installer/main.py --mock
 # Собрать загрузочный Live CD ISO-образ:
 nix build "path:.#nixosConfigurations.live-x86_64.config.system.build.isoImage" -o result-iso
 
-# Очистить старые системные и пользовательские поколения:
-nix-collect-garbage -d
-sudo nix-collect-garbage -d
 ```
 
 ---
