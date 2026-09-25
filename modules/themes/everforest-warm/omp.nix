@@ -7,13 +7,13 @@ let
 
   # Taiga/Titanium inspired deep muted neutral-dark backgrounds:
   statusLineBg = "#0F1112"; # Pitch black-slate dock
-  userMessageBg = "#1A1D1E"; # Deep subtle slate card
+  userMessageBg = "#224330"; # Brighter, distinct forest green card for user prompts
   customMessageBg = "#17191A"; # Very muted neutral-dark slate (no green tint)
   toolPendingBg = "#111314"; # Deepest shadow
   toolSuccessBg = "#131A15"; # Hint of green shadow
   toolErrorBg = "#1C1314"; # Hint of red shadow
   selectedBg = "#23282A"; # Muted neutral selection
-
+  quoteBorderOrange = "#D47238"; # Rich darker burnt orange for quote bar
   # Quiet structural borders
   border = "#2A2F32";
   borderMuted = "#1D2123";
@@ -56,13 +56,13 @@ in
     mdHeading = colors.c2; # Sage Green
     mdLink = colors.c12; # Sky Blue
     mdLinkUrl = grey2;
-    mdCode = colors.c13; # Rose Pink (excellent contrast and highly readable for inline code)
+    mdCode = colors.c11; # Bright Yellow (high contrast, crisp inline code)
     mdCodeBlock = colors.fg;
     mdCodeBlockBorder = border;
-    mdQuote = grey1;
-    mdQuoteBorder = colors.c4; # Frost Teal
+    mdQuote = colors.c14; # Bright Aqua / Vivid Turquoise
+    mdQuoteBorder = quoteBorderOrange; # Darker warm burnt orange bar
     mdHr = statusLineSep;
-    mdListBullet = colors.c1; # Coral Red (adds red to markdown!)
+    mdListBullet = colors.c4; # Blue (#65B8C7) for ordered list numbers and bullets
 
     # Diffs
     toolDiffAdded = colors.c10; # Lime green
