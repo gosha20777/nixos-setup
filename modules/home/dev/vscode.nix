@@ -35,7 +35,7 @@ in
           builtins.toJSON {
             "editor.fontSize" = 24;
             "editor.semanticHighlighting.enabled" = true;
-            "workbench.colorTheme" = "Default Dark+";
+            "workbench.colorTheme" = "Dark Modern";
           }
         );
       in
