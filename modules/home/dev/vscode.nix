@@ -32,11 +32,14 @@ in
     data =
       let
         themeSettings = pkgs.writeText "vscode-theme-settings.json" (
-          builtins.toJSON {
+          builtins.toJSON ({
             "editor.fontSize" = 24;
             "editor.semanticHighlighting.enabled" = true;
-            "workbench.colorTheme" = "Dark Modern";
-          }
+            "workbench.colorTheme" = "Default Dark Modern";
+            "workbench.colorCustomizations" = theme.vscode.colorCustomizations;
+            "editor.tokenColorCustomizations" = theme.vscode.tokenColorCustomizations;
+            "editor.semanticTokenColorCustomizations" = theme.vscode.semanticTokenColorCustomizations;
+          })
         );
       in
       ''
