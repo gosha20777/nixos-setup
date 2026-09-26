@@ -1,0 +1,13 @@
+id          = "local/dictation"
+name        = "Dictation"
+version     = "1.0.0"
+icon        = "microphone-2"
+description = "Voice dictation widget with Groq AI"
+
+[[widget]]
+id    = "status"
+entry = "widget.luau"
+
+  [widget.actions]
+  left  = "exec noctalia-dictation toggle"
+  right = "exec noctalia-dictation stop"

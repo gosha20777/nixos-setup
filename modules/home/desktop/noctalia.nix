@@ -119,6 +119,7 @@
         ];
         center = [
           "cat"
+          "dictation"
           "clock"
         ];
         end = [
@@ -169,9 +170,13 @@
           hide_when_single_layout = false;
         };
         cat.type = "noctalia/bongocat:cat";
+        dictation.type = "local/dictation:status";
       };
 
-      plugins.enabled = [ "noctalia/bongocat" ];
+      plugins.enabled = [
+        "noctalia/bongocat"
+        "local/dictation"
+      ];
 
       idle.behavior = {
         lock = {
