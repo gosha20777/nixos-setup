@@ -7,6 +7,9 @@
   systemSettings,
   ...
 }:
+let
+  noctalia-bongocat = pkgs.callPackage ../../packages/noctalia-bongocat { };
+in
 {
   imports = [
     inputs.noctalia.homeModules.default
@@ -93,7 +96,7 @@
         default.path = "~/Pictures/Wallpapers/01.jpg";
       };
 
-      niri.backdrop.enabled = true;
+      backdrop.enabled = true;
 
       shell = {
         avatar_path = "~/Pictures/Avatars/me.jpg";
@@ -101,12 +104,13 @@
         font_family = "JetBrainsMono Nerd Font";
       };
 
-      # Парящая капсула (floating pill bar): отступ от краёв 180px, отплытие
-      # от верхней кромки 6px, лёгкая прозрачность с блюром (layer-rule).
+      # Парящая капсула (floating pill bar): отступ от краёв 45px (для оптимального
+      # баланса и достаточного пространства на scale 1.3), отплытие от верхней
+      # кромки 6px, лёгкая прозрачность с блюром (layer-rule).
       bar.default = {
         position = "top";
         background_opacity = 0.85;
-        margin_ends = 180;
+        margin_ends = 45;
         margin_edge = 6;
         radius = 16;
         thickness = 34;
@@ -116,30 +120,36 @@
         start = [
           "launcher"
           "workspaces"
+          "cpu_temp"
+          "ram_usage"
         ];
         center = [
           "cat"
-          "dictation"
           "clock"
+          "audio_visualizer"
         ];
         end = [
           "weather"
-          "media"
+          "dictation"
+          "tray"
           "keyboard_layout"
-          "sysmon"
           "network"
+          "net_speed"
           "battery"
-          "control-center"
-          "session"
         ];
         capsule_group = [
           {
+            id = "sysinfo";
             members = [
-              "weather"
-              "keyboard_layout"
-              "sysmon"
+              "cpu_temp"
+              "ram_usage"
+            ];
+          }
+          {
+            id = "netinfo";
+            members = [
               "network"
-              "battery"
+              "net_speed"
             ];
           }
         ];
@@ -157,27 +167,73 @@
           custom_image_colorize = true;
         };
         workspaces = {
-          show_labels = true;
-          label_source = "name";
+          display = "name";
+        };
+        cpu_temp = {
+          type = "sysmon";
+          stat = "cpu_temp";
+          display = "text";
+          glyph = "thermometer";
+          show_label = true;
+        };
+        ram_usage = {
+          type = "sysmon";
+          stat = "ram_pct";
+          display = "text";
+          glyph = "memory";
+          show_label = true;
+        };
+        cat = {
+          type = "local/bongocat:cat";
+          input_devices = [
+            "/dev/input/by-path/platform-i8042-serio-0-event-kbd"
+          ];
+          audio_spectrum = false;
         };
         clock.format = "{:%H:%M  %a, %d %b}";
-        sysmon.stat = "cpu_temp";
-        media.hide_when_no_media = true;
+        audio_visualizer = {
+          width = 50.0;
+          bands = 12;
+          mirrored = false;
+          centered = false;
+          show_when_idle = false;
+        };
+        weather = {
+          show_condition = false;
+          show_temperature = true;
+        };
+        dictation.type = "local/dictation:status";
+        tray = {
+          drawer = true;
+        };
         keyboard_layout = {
-          show_glyph = true;
+          show_icon = false;
           show_label = true;
           display = "short";
           hide_when_single_layout = false;
         };
-        cat.type = "noctalia/bongocat:cat";
-        dictation.type = "local/dictation:status";
+        network = {
+          show_label = false;
+        };
+        net_speed = {
+          type = "sysmon";
+          stat = "net_rx";
+          display = "text";
+          glyph = "";
+          network_speed_unit = "auto";
+          network_speed_compact = true;
+          show_label = true;
+        };
+        battery = {
+          display_mode = "graphic";
+          show_label = true;
+        };
       };
 
       plugins.enabled = [
-        "noctalia/bongocat"
+        "local/bongocat"
         "local/dictation"
       ];
-
       idle.behavior = {
         lock = {
           timeout = 600;
@@ -191,6 +247,11 @@
   # user-template ссылается на него через $XDG_CONFIG_HOME.
   xdg.configFile."noctalia/templates/niri.kdl".source = ../../themes/${systemSettings.theme}/niri.kdl;
 
+  xdg.configFile."noctalia/plugins/bongocat" = {
+    source = "${noctalia-bongocat}/share/noctalia-plugins/bongocat";
+    force = true;
+  };
+
   # Needed for Noctalia's GTK theming pipeline:
   # - python3 runs Scripts/python/src/theming/gtk-refresh.py (postProcess hook)
   # - glib provides gsettings, which the script calls to push color-scheme
@@ -198,5 +259,6 @@
   home.packages = with pkgs; [
     python3
     glib
+    evtest
   ];
 }
