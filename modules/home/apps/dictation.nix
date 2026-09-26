@@ -14,10 +14,14 @@ in
   home.packages = [ noctalia-dictation ];
 
   # 1. Noctalia native Luau plugin (linked cleanly from package output, 0 inline code in nix)
-  xdg.configFile."noctalia/plugins/catalog.toml".source =
-    "${noctalia-dictation}/share/noctalia-plugins/dictation/catalog.toml";
-  xdg.configFile."noctalia/plugins/dictation".source =
-    "${noctalia-dictation}/share/noctalia-plugins/dictation";
+  xdg.configFile."noctalia/plugins/catalog.toml" = {
+    source = "${noctalia-dictation}/share/noctalia-plugins/dictation/catalog.toml";
+    force = true;
+  };
+  xdg.configFile."noctalia/plugins/dictation" = {
+    source = "${noctalia-dictation}/share/noctalia-plugins/dictation";
+    force = true;
+  };
 
   # 2. SOPS YAML configuration for the headless daemon
   sops = lib.mkIf systemSettings.sops.enable {
