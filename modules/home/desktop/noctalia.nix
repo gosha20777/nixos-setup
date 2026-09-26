@@ -135,6 +135,7 @@ in
           "tray"
           "keyboard_layout"
           "network"
+          "battery"
           "control-center"
         ];
       };
