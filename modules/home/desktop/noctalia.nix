@@ -120,8 +120,7 @@ in
         start = [
           "launcher"
           "workspaces"
-          "cpu_temp"
-          "ram_usage"
+          "group:sysinfo"
         ];
         center = [
           "cat"
@@ -133,8 +132,7 @@ in
           "dictation"
           "tray"
           "keyboard_layout"
-          "network"
-          "net_speed"
+          "group:netinfo"
           "battery"
         ];
         capsule_group = [
@@ -169,12 +167,16 @@ in
         workspaces = {
           display = "name";
         };
+        # CPU/RAM: единая капсула "sysinfo" — огонь + температура, чип + проценты.
+        # label_min_width фиксирует бокс под текст (8.4 px/симв. JetBrainsMono
+        # при fontSizeBody 14), чтобы скачущие цифры не двигали панель.
         cpu_temp = {
           type = "sysmon";
           stat = "cpu_temp";
           display = "text";
-          glyph = "thermometer";
+          glyph = "flame";
           show_label = true;
+          label_min_width = 43.0;
         };
         ram_usage = {
           type = "sysmon";
@@ -182,6 +184,7 @@ in
           display = "text";
           glyph = "memory";
           show_label = true;
+          label_min_width = 34.0;
         };
         cat = {
           type = "local/bongocat:cat";
@@ -215,14 +218,19 @@ in
         network = {
           show_label = false;
         };
+        # Скорость загрузки: в капсуле "netinfo" рядом с иконкой Wi-Fi.
+        # glyph = "U+20" — пустой слот (.notdef в tabler.ttf пуст, advance 0):
+        # стрелка загрузки не рисуется. Максимум строки "1000.0k" (7 симв. =
+        # 58.8 px) — резервируем 60, чтобы смена цифр не сдвигала соседей.
         net_speed = {
           type = "sysmon";
           stat = "net_rx";
           display = "text";
-          glyph = "";
+          glyph = "U+20";
           network_speed_unit = "auto";
           network_speed_compact = true;
           show_label = true;
+          label_min_width = 60.0;
         };
         battery = {
           display_mode = "graphic";

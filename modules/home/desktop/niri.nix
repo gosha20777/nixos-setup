@@ -49,9 +49,9 @@ in
     input.keyboard.xkb.layout = "us,ru,de";
 
     workspaces = {
-      "01-web".name = "🌐 Web";
-      "02-dev".name = "💻 Dev";
-      "03-game".name = "🎮 Game";
+      "01-web".name = "󰖟 Web";
+      "02-dev".name = "󰅩 Dev";
+      "03-game".name = "󰊴 Game";
     };
 
     layout = {
@@ -110,7 +110,7 @@ in
           { app-id = "^firefox$"; }
           { app-id = "^google-chrome$"; }
         ];
-        open-on-workspace = "🌐 Web";
+        open-on-workspace = "󰖟 Web";
       }
       {
         matches = [
@@ -118,13 +118,13 @@ in
           { app-id = "^code$"; }
           { app-id = "^obsidian$"; }
         ];
-        open-on-workspace = "💻 Dev";
+        open-on-workspace = "󰅩 Dev";
       }
       {
         matches = [
           { app-id = "^steam$"; }
         ];
-        open-on-workspace = "🎮 Game";
+        open-on-workspace = "󰊴 Game";
       }
     ];
     # Monitor layout: outputs are matched by "make model serial" (more
