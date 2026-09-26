@@ -120,7 +120,9 @@ in
         start = [
           "launcher"
           "workspaces"
-          "group:sysinfo"
+          "cpu_temp"
+          "ram_usage"
+          "net_speed"
         ];
         center = [
           "cat"
@@ -132,24 +134,8 @@ in
           "dictation"
           "tray"
           "keyboard_layout"
-          "group:netinfo"
+          "network"
           "battery"
-        ];
-        capsule_group = [
-          {
-            id = "sysinfo";
-            members = [
-              "cpu_temp"
-              "ram_usage"
-            ];
-          }
-          {
-            id = "netinfo";
-            members = [
-              "network"
-              "net_speed"
-            ];
-          }
         ];
       };
 
@@ -167,9 +153,11 @@ in
         workspaces = {
           display = "name";
         };
-        # CPU/RAM: единая капсула "sysinfo" — огонь + температура, чип + проценты.
-        # label_min_width фиксирует бокс под текст (8.4 px/симв. JetBrainsMono
-        # при fontSizeBody 14), чтобы скачущие цифры не двигали панель.
+        # CPU/RAM/скорость: плоские виджеты без капсул (capsule-группы рисовались
+        # непрозрачными плашками поверх полупрозрачного бара). Огонь + °C,
+        # чип + GiB, скорость после RAM. label_min_width фиксирует бокс под
+        # текст (8.4 px/симв. JetBrainsMono при fontSizeBody 14), чтобы
+        # скачущие цифры не двигали панель.
         cpu_temp = {
           type = "sysmon";
           stat = "cpu_temp";
@@ -180,11 +168,11 @@ in
         };
         ram_usage = {
           type = "sysmon";
-          stat = "ram_pct";
+          stat = "ram_used";
           display = "text";
           glyph = "memory";
           show_label = true;
-          label_min_width = 34.0;
+          label_min_width = 68.0;
         };
         cat = {
           type = "local/bongocat:cat";
@@ -199,7 +187,7 @@ in
           bands = 12;
           mirrored = false;
           centered = false;
-          show_when_idle = false;
+          show_when_idle = true;
         };
         weather = {
           show_condition = false;
@@ -218,10 +206,11 @@ in
         network = {
           show_label = false;
         };
-        # Скорость загрузки: в капсуле "netinfo" рядом с иконкой Wi-Fi.
-        # glyph = "U+20" — пустой слот (.notdef в tabler.ttf пуст, advance 0):
-        # стрелка загрузки не рисуется. Максимум строки "1000.0k" (7 симв. =
-        # 58.8 px) — резервируем 60, чтобы смена цифр не сдвигала соседей.
+        # Скорость загрузки: в start-секции после RAM. Слот иконки sysmon
+        # всегда резервируется фабрикой — glyph = "U+20" рисует пустой
+        # .notdef из tabler.ttf (advance 0), стрелка не видна. 6 символов
+        # ("85.0k"/"14.8M") = 50.4 px — резервируем 52; артефакт "1000.0k"
+        # на границе 1 MB/s живёт один опрос и принят.
         net_speed = {
           type = "sysmon";
           stat = "net_rx";
@@ -230,7 +219,7 @@ in
           network_speed_unit = "auto";
           network_speed_compact = true;
           show_label = true;
-          label_min_width = 60.0;
+          label_min_width = 52.0;
         };
         battery = {
           display_mode = "graphic";
