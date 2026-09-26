@@ -1,8 +1,14 @@
 id          = "local/dictation"
 name        = "Dictation"
 version     = "1.0.0"
+min_noctalia = "5.0.0"
+plugin_api  = 14
+author      = "custom"
+license     = "MIT"
 icon        = "microphone-2"
 description = "Voice dictation widget with Groq AI"
+dependencies = []
+tags        = ["audio", "dictation"]
 
 [[widget]]
 id    = "status"

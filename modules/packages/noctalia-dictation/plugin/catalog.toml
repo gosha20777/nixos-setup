@@ -2,6 +2,7 @@
 id = "local/dictation"
 name = "Dictation"
 version = "1.0.0"
+min_noctalia = "5.0.0"
 updated_at = 1790000000
 added_at = 1790000000
 author = "custom"
