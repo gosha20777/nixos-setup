@@ -135,7 +135,7 @@ in
           "tray"
           "keyboard_layout"
           "network"
-          "battery"
+          "control-center"
         ];
       };
 
@@ -182,12 +182,23 @@ in
           audio_spectrum = false;
         };
         clock.format = "{:%H:%M  %a, %d %b}";
+        # Волна в цвет основного текста панели (on_surface = #E1DACB,
+        # кремовый Everforest Warm), а не в primary-шалфей. Оба конца
+        # градиента — один цвет.
         audio_visualizer = {
           width = 50.0;
           bands = 12;
           mirrored = false;
           centered = false;
           show_when_idle = true;
+          color_1 = "on_surface";
+          color_2 = "on_surface";
+        };
+        # Кнопка Control Center (конец end-секции): открывает дефолтную
+        # вкладку Home — в отличие от клика по часам (захардкожен "calendar").
+        # Глиф — официальная "noctalia"-иконка фабрики.
+        control-center = {
+          glyph = "settings";
         };
         weather = {
           show_condition = false;
@@ -206,21 +217,22 @@ in
         network = {
           show_label = false;
         };
-        # Скорость загрузки: в start-секции после RAM. Слот иконки sysmon
-        # всегда резервируется фабрикой — glyph = "U+20" рисует пустой
-        # .notdef из tabler.ttf (advance 0), стрелка не видна. 6 символов
-        # ("85.0k"/"14.8M") = 50.4 px — резервируем 52; артефакт "1000.0k"
-        # на границе 1 MB/s живёт один опрос и принят.
+        # Скорость загрузки: в start-секции после RAM. Стрелка download —
+        # дефолтный глиф net_rx из SysmonWidget::glyphName, окрашивается
+        # динамическим цветом значения (растёт трафик → теплеет).
+        # 6 символов ("85.0k"/"14.8M") = 50.4 px — резервируем 52;
+        # артефакт "1000.0k" на границе 1 MB/s живёт один опрос и принят.
         net_speed = {
           type = "sysmon";
           stat = "net_rx";
           display = "text";
-          glyph = "U+20";
+          glyph = "download";
           network_speed_unit = "auto";
           network_speed_compact = true;
           show_label = true;
           label_min_width = 52.0;
         };
+
         battery = {
           display_mode = "graphic";
           show_label = true;
