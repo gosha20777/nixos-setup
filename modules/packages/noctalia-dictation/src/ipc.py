@@ -1,7 +1,9 @@
 import os
 import socket
+import subprocess
 import sys
 import threading
+import time
 from pathlib import Path
 from typing import Callable, List
 from models import StateResponse
@@ -123,6 +125,21 @@ def send_ipc_command(command: str) -> str:
     """Send one-off command to running daemon and return response."""
     socket_path = get_socket_path()
     if not socket_path.exists():
+        try:
+            subprocess.run(
+                ["systemctl", "--user", "start", "noctalia-dictation"],
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            for _ in range(20):
+                time.sleep(0.05)
+                if socket_path.exists():
+                    break
+        except Exception:
+            pass
+
+    if not socket_path.exists():
         raise ConnectionError("noctalia-dictation daemon is not running")
 
     with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
@@ -134,24 +151,31 @@ def send_ipc_command(command: str) -> str:
 
 
 def stream_ipc_events() -> None:
-    """Stream NDJSON events from daemon to stdout indefinitely."""
+    """Stream NDJSON events from daemon to stdout indefinitely with auto-reconnect."""
     socket_path = get_socket_path()
-    if not socket_path.exists():
-        print('{"state":"idle","error":"daemon not running"}', flush=True)
-        sys.exit(0)
 
-    with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
-        client.connect(str(socket_path))
-        client.sendall(b"stream\n")
+    while True:
+        try:
+            if not socket_path.exists():
+                print('{"state":"idle","error":null}', flush=True)
+                time.sleep(1.0)
+                continue
 
-        buffer = ""
-        while True:
-            chunk = client.recv(1024).decode("utf-8")
-            if not chunk:
-                break
-            buffer += chunk
-            while "\n" in buffer:
-                line, buffer = buffer.split("\n", 1)
-                line = line.strip()
-                if line:
-                    print(line, flush=True)
+            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
+                client.connect(str(socket_path))
+                client.sendall(b"stream\n")
+
+                buffer = ""
+                while True:
+                    chunk = client.recv(1024).decode("utf-8")
+                    if not chunk:
+                        break
+                    buffer += chunk
+                    while "\n" in buffer:
+                        line, buffer = buffer.split("\n", 1)
+                        line = line.strip()
+                        if line:
+                            print(line, flush=True)
+        except Exception:
+            print('{"state":"idle","error":null}', flush=True)
+            time.sleep(1.0)

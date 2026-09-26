@@ -55,8 +55,8 @@ in
   systemd.user.services.noctalia-dictation = {
     Unit = {
       Description = "Noctalia Voice Dictation Headless Daemon";
-      PartOf = [ "wayland.systemd.target" ];
-      After = [ "wayland.systemd.target" ];
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
     };
 
     Service = {
@@ -69,7 +69,7 @@ in
     };
 
     Install = {
-      WantedBy = [ "wayland.systemd.target" ];
+      WantedBy = [ "graphical-session.target" ];
     };
   };
 }
