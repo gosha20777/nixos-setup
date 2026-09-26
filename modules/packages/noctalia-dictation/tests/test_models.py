@@ -34,7 +34,7 @@ def test_dictation_config_defaults():
     assert config.base_url == "https://api.groq.com/openai/v1"
     assert config.stt_model == "whisper-large-v3-turbo"
     assert config.refinement_model == "qwen/qwen3.8-27b"
-    assert config.silence_duration_seconds == 1.5
+    assert config.silence_duration_seconds == 3.0
     assert config.vad_aggressiveness == 2
     assert config.sample_rate == 16000
     assert "Ты — помощник" in config.system_prompt

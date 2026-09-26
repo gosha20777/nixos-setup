@@ -32,7 +32,7 @@ in
         base_url: "https://api.groq.com/openai/v1"
         stt_model: "whisper-large-v3-turbo"
         refinement_model: "qwen/qwen3.8-27b"
-        silence_duration_seconds: 1.5
+        silence_duration_seconds: 3.0
         vad_aggressiveness: 2
         sample_rate: 16000
         system_prompt: |

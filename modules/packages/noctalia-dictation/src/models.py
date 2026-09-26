@@ -16,7 +16,7 @@ class DictationConfig(BaseModel):
     stt_model: str = Field(default="whisper-large-v3-turbo", description="Speech to text model")
     refinement_model: str = Field(default="qwen/qwen3.8-27b", description="LLM model for prompt cleanup")
     system_prompt: str = Field(default=DEFAULT_SYSTEM_PROMPT, description="System prompt for LLM")
-    silence_duration_seconds: float = Field(default=1.5, ge=0.5, le=10.0, description="Silence threshold for auto-stop")
+    silence_duration_seconds: float = Field(default=3.0, ge=0.5, le=10.0, description="Silence threshold for auto-stop")
     vad_aggressiveness: int = Field(default=2, ge=0, le=3, description="WebRTC VAD aggressiveness (0-3)")
     sample_rate: int = Field(default=16000, description="Audio sample rate in Hz")
 

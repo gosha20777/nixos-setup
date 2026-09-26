@@ -310,7 +310,7 @@ in
       "Mod+W".action.toggle-column-tabbed-display = [ ];
 
       # Voice dictation toggle (noctalia-dictation IPC)
-      "Mod+Alt+V".action.spawn = [
+      "Mod+M".action.spawn = [
         "noctalia-dictation"
         "toggle"
       ];
