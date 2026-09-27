@@ -145,8 +145,14 @@ in
     # NOTE: v5 replaced the `noctalia ipc call <target> <fn>` surface with
     # `noctalia msg <command…>`.
     binds = {
-      # Help + spawn
-      "Mod+Shift+Slash".action.show-hotkey-overlay = [ ];
+      # Help: нативная панель-читшит Noctalia вместо встроенного оверлея
+      # niri (то не surface — не стилизуется; см. packages/noctalia-keybind-cheatsheet).
+      "Mod+Shift+Slash".action.spawn = [
+        "noctalia"
+        "msg"
+        "panel-toggle"
+        "local/keybind-cheatsheet:cheatsheet"
+      ];
       "Mod+T".action.spawn = "${systemSettings.terminal}";
       "Mod+Return".action.spawn = "${systemSettings.terminal}";
       # Смена раскладки на Win+Space (Mod = Super = Win): одиночное нажатие —

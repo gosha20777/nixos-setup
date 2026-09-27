@@ -9,6 +9,7 @@
 }:
 let
   noctalia-bongocat = pkgs.callPackage ../../packages/noctalia-bongocat { };
+  noctalia-keybind-cheatsheet = pkgs.callPackage ../../packages/noctalia-keybind-cheatsheet { };
 in
 {
   imports = [
@@ -238,6 +239,7 @@ in
       plugins.enabled = [
         "local/bongocat"
         "local/dictation"
+        "local/keybind-cheatsheet"
       ];
       idle.behavior = {
         lock = {
@@ -254,6 +256,11 @@ in
 
   xdg.configFile."noctalia/plugins/bongocat" = {
     source = "${noctalia-bongocat}/share/noctalia-plugins/bongocat";
+    force = true;
+  };
+
+  xdg.configFile."noctalia/plugins/keybind-cheatsheet" = {
+    source = "${noctalia-keybind-cheatsheet}/share/noctalia-plugins/keybind-cheatsheet";
     force = true;
   };
 

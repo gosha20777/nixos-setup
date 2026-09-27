@@ -33,9 +33,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   '';
 
   meta = {
-    description = "Searchable keybind cheatsheet panel for Noctalia (niri/hyprland/mango)";
-    homepage = "https://noctalia.dev/plugins/kenn/keybind-cheatsheet";
-    license = licenses.mit;
-    platforms = platforms.linux;
+    license = lib.licenses.mit;
+    platforms = lib.platforms.linux;
   };
 })
