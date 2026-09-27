@@ -9,6 +9,15 @@ blur {
     saturation 1.1
 }
 
+// Читшит «Important Hotkeys» — не окно и не layer surface: niri рисует
+// его сам (hotkey_overlay.rs), window/layer-правила к нему не
+// применяются, вид захардкожен (серый квадрат с голубой рамкой).
+// Единственный рычаг — не показывать на старте; вручную вызывается
+// Mod+Shift+/.
+hotkey-overlay {
+    skip-at-startup
+}
+
 // Noctalia: обои внутри backdrop Overview.
 layer-rule {
     match namespace="^noctalia-backdrop"
