@@ -57,11 +57,14 @@
     };
 
     noctalia = {
-      # Pinned to the v5.0.0 beta tag (major bump from the v4 line). Beta: expect
-      # schema/module changes vs 4.x — re-verify programs.noctalia options
-      # and the seeded settings.json after bumping. Move to the stable v5.0.0 tag
-      # once it ships.
-      url = "github:noctalia-dev/noctalia-shell/v5.0.0-beta2";
+      # On the stable v5 line (the v4→v5 beta migration is done). Re-pinned
+      # from v5.0.0-beta2 (Jul 2026): the plugin manifest schema moved to
+      # canonical `plugin_api` in v5.0.0-beta.9, so current community plugins
+      # (keybind cheatsheet et al.) require >=5.0.x. After every bump,
+      # re-verify programs.noctalia option names in
+      # modules/home/desktop/noctalia.nix (widget/settings renames surface as
+      # eval errors) and the seeded config.toml migration.
+      url = "github:noctalia-dev/noctalia-shell/v5.2.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

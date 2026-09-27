@@ -15,7 +15,7 @@
   #     the greeter rejects that reply as invalid credentials.
   #   - keyboard.layout: greeter runs before the session's input config, so
   #     the layout has to be told explicitly.
-  programs.noctalia-greeter = {
+  services.displayManager.noctalia-greeter = {
     enable = true;
     settings = {
       auth.allow_empty_password = false;
