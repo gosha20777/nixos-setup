@@ -233,11 +233,6 @@ in
           show_label = true;
           label_min_width = 52.0;
         };
-
-        battery = {
-          display_mode = "graphic";
-          show_label = true;
-        };
       };
 
       plugins.enabled = [
