@@ -25,12 +25,36 @@ layer-rule {
 }
 
 // Все окна: скругления 9px + лёгкая прозрачность + блюр-подложка.
+// xray true: блюр показывает обои (контрастнее, дешевле GPU) и не
+// пропадает в анимациях — non-xray путь экспериментальный (niri
+// Window-Effects.md): блюр мигал при открытии/закрытии/перетаскивании.
+// draw-border-with-background false: по SSD-эвристике niri рисует
+// бордюр CSD-окон (Chromium/Electron/Qt) с непрозрачной подложкой
+// на всё окно — она перекрывает блюр и выглядит зелёной заливкой
+// (niri FAQ: "windows using CSD can have an arbitrary shape"). Наш
+// clip-to-geometry + radius 9 закрывает те же артефакты, подложка
+// не нужна — рамка рисуется по кромке у всех окон одинаково.
 window-rule {
     geometry-corner-radius 9
     clip-to-geometry true
+    draw-border-with-background false
     opacity 0.97
     background-effect {
         blur true
-        xray false
+        xray true
     }
+}
+
+// Исключения по прозрачности (правила ниже глобального — их opacity
+// перекрывает 0.97). VS Code чуть плотнее дефолта; браузер и Kdenlive
+// (видео) — полностью непрозрачные: видео не должно просвечивать.
+window-rule {
+    match app-id="^code$"
+    opacity 0.98
+}
+
+window-rule {
+    match app-id="^google-chrome$"
+    match app-id="^org.kde.kdenlive$"
+    opacity 1.0
 }
