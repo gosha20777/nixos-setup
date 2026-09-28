@@ -4,6 +4,9 @@
   pkgs,
   ...
 }:
+let
+  theme = import ../../themes/${config.systemSettings.theme};
+in
 {
   # noctalia-greeter on tty1 — a Quickshell-based login screen that mirrors
   # Noctalia Shell's palette/wallpaper (imperative sync via Settings → Shell →
@@ -20,6 +23,7 @@
     settings = {
       auth.allow_empty_password = false;
       keyboard.layout = "us";
+      appearance = theme.greeter;
     };
   };
 }

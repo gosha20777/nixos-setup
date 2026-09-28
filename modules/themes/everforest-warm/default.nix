@@ -101,4 +101,6 @@ rec {
   plymouth = import ./plymouth.nix { inherit colors; };
   # Конфигурация интерфейса загрузчика limine
   limine = import ./limine.nix { inherit colors; };
+  # Конфигурация экрана входа noctalia-greeter
+  greeter = import ./greeter.nix { inherit colors; };
 }
