@@ -36,6 +36,7 @@
   # Silence upstream nixpkgs warning from installation-cd-minimal profile:
   # NixOS 26.11 recommends setting boot.zfs.forceImportRoot explicitly.
   boot.zfs.forceImportRoot = false;
+  boot.loader.limine.enable = lib.mkForce false;
 
   # Home Manager live tweaks: auto-start installer, set scale, and fish hint
   home-manager.users.${config.systemSettings.username} = {

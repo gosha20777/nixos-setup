@@ -43,6 +43,7 @@
 
   # Legacy BIOS bootloader configuration for /dev/vda
   boot.loader.systemd-boot.enable = lib.mkForce false;
+  boot.loader.limine.enable = lib.mkForce false;
   boot.loader.grub = {
     enable = lib.mkForce true;
     configurationLimit = 10;
