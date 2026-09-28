@@ -97,4 +97,8 @@ rec {
   vscode = import ./vscode.nix;
   # Конфигурация темы oh-my-pi
   omp = import ./omp.nix;
+  # Конфигурация заставки plymouth
+  plymouth = import ./plymouth.nix { inherit colors; };
+  # Конфигурация интерфейса загрузчика limine
+  limine = import ./limine.nix { inherit colors; };
 }

@@ -4,15 +4,30 @@
   plymouth,
   imagemagick,
   nixos-icons,
+  python3,
+  bgColor ? "141617",
+  surfaceColor ? "282D30",
+  fgColor ? "E1DACB",
+  accentColor ? "9EC468",
 }:
 
+let
+  strip = hex: lib.removePrefix "#" hex;
+  cleanBg = strip bgColor;
+  cleanSurface = strip surfaceColor;
+  cleanFg = strip fgColor;
+  cleanAccent = strip accentColor;
+in
 stdenv.mkDerivation {
   pname = "plymouth-theme-everforest";
   version = "1.0";
 
   dontUnpack = true;
 
-  nativeBuildInputs = [ imagemagick ];
+  nativeBuildInputs = [
+    imagemagick
+    python3
+  ];
 
   buildPhase = ''
         runHook preBuild
@@ -20,34 +35,46 @@ stdenv.mkDerivation {
         themeDir="$out/share/plymouth/themes/everforest"
         mkdir -p "$themeDir"
 
+        # Compute normalized RGB color matrix for ImageMagick tinting
+        calc_matrix() {
+          hex="''${1#\#}"
+          python3 -c "
+    r = int('$hex'[0:2], 16) / 255.0
+    g = int('$hex'[2:4], 16) / 255.0
+    b = int('$hex'[4:6], 16) / 255.0
+    print(f'{r:.3f} 0 0  0 {g:.3f} 0  0 0 {b:.3f}')
+    "
+        }
+
+        fgMatrix=$(calc_matrix "${cleanFg}")
+        accentMatrix=$(calc_matrix "${cleanAccent}")
+
         # Copy base spinner assets
         cp -r ${plymouth}/share/plymouth/themes/spinner/* "$themeDir/"
 
-        # Recolor spinner frames to Everforest warm fg (#E1DACB)
-        # RGB multiplier: 225/255 = 0.882, 218/255 = 0.855, 203/255 = 0.796
+        # Recolor spinner frames to warm fg
         for f in "$themeDir"/animation-*.png; do
-          magick "$f" -colorspace sRGB -channel RGB -color-matrix "0.882 0 0  0 0.855 0  0 0 0.796" "$f.tmp"
+          magick "$f" -colorspace sRGB -channel RGB -color-matrix "$fgMatrix" "$f.tmp"
           mv "$f.tmp" "$f"
         done
 
         # Recolor dialog inputs & icons to warm fg
         for f in entry.png lock.png capslock.png keyboard.png key.png; do
           if [ -f "$themeDir/$f" ]; then
-            magick "$themeDir/$f" -colorspace sRGB -channel RGB -color-matrix "0.882 0 0  0 0.855 0  0 0 0.796" "$themeDir/$f.tmp"
+            magick "$themeDir/$f" -colorspace sRGB -channel RGB -color-matrix "$fgMatrix" "$themeDir/$f.tmp"
             mv "$themeDir/$f.tmp" "$themeDir/$f"
           fi
         done
 
-        # Recolor password bullet to accent sage (#9EC468)
-        # RGB multiplier: 158/255 = 0.620, 196/255 = 0.769, 104/255 = 0.408
+        # Recolor password bullet to accent
         if [ -f "$themeDir/bullet.png" ]; then
-          magick "$themeDir/bullet.png" -colorspace sRGB -channel RGB -color-matrix "0.620 0 0  0 0.769 0  0 0 0.408" "$themeDir/bullet.tmp"
+          magick "$themeDir/bullet.png" -colorspace sRGB -channel RGB -color-matrix "$accentMatrix" "$themeDir/bullet.tmp"
           mv "$themeDir/bullet.tmp" "$themeDir/bullet.png"
         fi
 
-        # Create watermark (NixOS logo, 128x128) tinted with warm fg (#E1DACB)
+        # Create watermark (NixOS logo, 128x128) tinted with warm fg
         magick ${nixos-icons}/share/icons/hicolor/128x128/apps/nix-snowflake-white.png \
-          -colorspace sRGB -channel RGB -color-matrix "0.882 0 0  0 0.855 0  0 0 0.796" \
+          -colorspace sRGB -channel RGB -color-matrix "$fgMatrix" \
           "$themeDir/watermark.png"
 
         # Remove the old spinner.plymouth file
@@ -74,10 +101,10 @@ stdenv.mkDerivation {
     WatermarkVerticalAlignment=.42
     Transition=none
     TransitionDuration=0.0
-    BackgroundStartColor=0x141617
-    BackgroundEndColor=0x141617
-    ProgressBarBackgroundColor=0x282D30
-    ProgressBarForegroundColor=0x9EC468
+    BackgroundStartColor=0x${cleanBg}
+    BackgroundEndColor=0x${cleanBg}
+    ProgressBarBackgroundColor=0x${cleanSurface}
+    ProgressBarForegroundColor=0x${cleanAccent}
     DialogClearsFirmwareBackground=false
     MessageBelowAnimation=true
 
