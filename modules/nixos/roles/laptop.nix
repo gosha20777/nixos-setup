@@ -11,21 +11,13 @@
   ...
 }:
 {
-  # Idle escalation timing (Noctalia in modules/home/desktop/noctalia.nix
-  # triggers the actions via programs.noctalia.settings.idle.behavior):
-  # lock @ 10 min, then `systemctl suspend-then-hibernate` @ 15 min. That
-  # suspends to RAM and, HibernateDelaySec later, wakes and hibernates to
-  # disk — hibernate lands at 3h 15m total idle. The long delay favors
-  # quick lid-open resume for the common short-break case; hibernate still
-  # catches the laptop before the battery drains overnight.
-  systemd.sleep.settings.Sleep.HibernateDelaySec = 10800; # 3h
-
-  # Closing the lid suspends to RAM, then hibernates HibernateDelaySec later —
-  # the same suspend-then-hibernate escalation the idle timeout uses. Applies
-  # on battery and AC (HandleLidSwitchExternalPower defaults to this value);
-  # HandleLidSwitchDocked defaults to "ignore", so an external display keeps
-  # the session alive with the lid shut.
-  services.logind.settings.Login.HandleLidSwitch = "suspend-then-hibernate";
+  # Closing the lid suspends to RAM (S3 deep sleep) with immediate fast wake.
+  # Applies equally on battery and AC.
+  # HandleLidSwitchDocked is "ignore", so an external display keeps
+  # the session alive with the lid shut (clamshell mode).
+  services.logind.settings.Login.HandleLidSwitch = "suspend";
+  services.logind.settings.Login.HandleLidSwitchExternalPower = "suspend";
+  services.logind.settings.Login.HandleLidSwitchDocked = "ignore";
 
   services.fwupd.enable = true;
   # power-profiles-daemon for native Linux power profile management (EPP/platform_profile).
