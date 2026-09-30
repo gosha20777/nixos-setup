@@ -28,6 +28,10 @@
       url_style = "dotted";
       include = "themes/noctalia.conf";
     };
+    keybindings = {
+      "ctrl+c" = "copy_and_clear_or_interrupt";
+      "ctrl+v" = "paste_from_clipboard";
+    };
   };
 
   # Терминал по умолчанию для lazygit/fzf/xdg-terminal-exec.
