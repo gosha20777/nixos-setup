@@ -23,14 +23,6 @@
     scale = 1.3;
   };
 
-  # Handle hardware lid close directly in Niri (libinput grabs the switch, bypassing logind).
-  # Clamshell logic: if only 1 display is active (built-in eDP-1), suspend to RAM.
-  # If external monitors are connected (>1 output), ignore lid close.
-  programs.niri.settings.switch-events.lid-close.action.spawn = [
-    "sh"
-    "-c"
-    "if [ $(${config.programs.niri.package}/bin/niri msg outputs | ${pkgs.gnugrep}/bin/grep -c '^Output') -le 1 ]; then ${pkgs.systemd}/bin/systemctl suspend; fi"
-  ];
   # Noctalia bar: add caffeine widget in center beside clock
   programs.noctalia.settings.bar.default.center = lib.mkForce [
     "cat"

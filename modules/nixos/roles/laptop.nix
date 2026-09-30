@@ -13,11 +13,12 @@
 {
   # Closing the lid suspends to RAM (S3 deep sleep) with immediate fast wake.
   # Applies equally on battery and AC.
-  # HandleLidSwitchDocked is "ignore", so an external display keeps
-  # the session alive with the lid shut (clamshell mode).
+  # HandleLidSwitchDocked is "suspend" so hybrid GPU (NVIDIA) ports don't trigger false docked ignores.
+  # LidSwitchIgnoreInhibited ensures closing the lid always suspends, even if apps hold inhibitors.
   services.logind.settings.Login.HandleLidSwitch = "suspend";
   services.logind.settings.Login.HandleLidSwitchExternalPower = "suspend";
-  services.logind.settings.Login.HandleLidSwitchDocked = "ignore";
+  services.logind.settings.Login.HandleLidSwitchDocked = "suspend";
+  services.logind.settings.Login.LidSwitchIgnoreInhibited = "yes";
 
   services.fwupd.enable = true;
   # power-profiles-daemon for native Linux power profile management (EPP/platform_profile).
