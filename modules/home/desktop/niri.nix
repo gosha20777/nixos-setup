@@ -153,54 +153,71 @@ in
         "panel-toggle"
         "local/keybind-cheatsheet:cheatsheet"
       ];
-      "Mod+T".action.spawn = "${systemSettings.terminal}";
+      # Quick application launch
       "Mod+Return".action.spawn = "${systemSettings.terminal}";
-      # Смена раскладки на Win+Space (Mod = Super = Win): одиночное нажатие —
-      # тумблер EN<->RU, из немецкого — в английский; быстрое двойное нажатие —
-      # немецкий. Скрипт см. в let layoutSwitch выше.
-      # Лаунчер доступен по хоткею Mod+D ниже.
-      "Mod+Space".action.spawn = [ (lib.getExe layoutSwitch) ];
-      # Mod+D is an alias for the same launcher — fuzzel used to live here as
-      # a second, separately-themed launcher; it was dropped as redundant.
+      "Mod+Shift+Return".action.spawn = [
+        "${systemSettings.terminal}"
+        "-e"
+        "btop"
+      ];
+      "Mod+T".action.spawn = [ "telegram-desktop" ];
+      "Mod+B".action.spawn = [ "google-chrome-stable" ];
+      "Mod+E".action.spawn = [ "nemo" ];
+      "Mod+Shift+E".action.spawn = [
+        "${systemSettings.terminal}"
+        "-e"
+        "yazi"
+      ];
+
+      # Noctalia panels & system overlays
       "Mod+D".action.spawn = [
         "noctalia"
         "msg"
         "panel-toggle"
         "launcher"
       ];
+      "Mod+A".action.spawn = [
+        "noctalia"
+        "msg"
+        "panel-toggle"
+        "control-center"
+      ];
+      "Mod+Escape".action.spawn = [
+        "noctalia"
+        "msg"
+        "panel-toggle"
+        "session"
+      ];
+      "Mod+O".action.toggle-overview = [ ];
+
+      # Keyboard layout switcher (Win+Space)
+      "Mod+Space".action.spawn = [ (lib.getExe layoutSwitch) ];
 
       # Window
       "Mod+Q".action.close-window = [ ];
 
-      # Column focus (arrows + vim keys)
+      # Global Spatial Navigation (Arrows)
+      # Horizontal ribbon = columns
       "Mod+Left".action.focus-column-left = [ ];
       "Mod+Right".action.focus-column-right = [ ];
-      "Mod+H".action.focus-column-left = [ ];
-      "Mod+L".action.focus-column-right = [ ];
+      # Vertical stack = workspaces
+      "Mod+Up".action.focus-workspace-up = [ ];
+      "Mod+Down".action.focus-workspace-down = [ ];
+      # Local vertical = windows inside column
+      "Mod+Alt+Up".action.focus-window-up = [ ];
+      "Mod+Alt+Down".action.focus-window-down = [ ];
 
-      # Window focus within column (arrows). Vim J/K is reassigned below
-      # to workspace switching — niri's workspaces only run vertically,
-      # so J/K is the natural fit for them.
-      "Mod+Down".action.focus-window-down = [ ];
-      "Mod+Up".action.focus-window-up = [ ];
+      # Moving windows and columns (Shift = Move)
+      "Mod+Shift+Left".action.move-column-left = [ ];
+      "Mod+Shift+Right".action.move-column-right = [ ];
+      "Mod+Shift+Up".action.move-column-to-workspace-up = [ ];
+      "Mod+Shift+Down".action.move-column-to-workspace-down = [ ];
+      "Mod+Alt+Shift+Up".action.move-window-up = [ ];
+      "Mod+Alt+Shift+Down".action.move-window-down = [ ];
 
-      # Vim-style workspace focus. Mod+U/I below still works as a
-      # secondary binding (niri upstream default).
-      "Mod+J".action.focus-workspace-down = [ ];
-      "Mod+K".action.focus-workspace-up = [ ];
-
-      # Column / window move (Ctrl = move). Vim Ctrl+J/K mirrors the
-      # focus binding above and moves the current column to the
-      # workspace below/above. Arrow Ctrl+Down/Up keeps within-column
-      # window movement so that primitive isn't lost.
-      "Mod+Ctrl+Left".action.move-column-left = [ ];
-      "Mod+Ctrl+Right".action.move-column-right = [ ];
-      "Mod+Ctrl+H".action.move-column-left = [ ];
-      "Mod+Ctrl+L".action.move-column-right = [ ];
-      "Mod+Ctrl+Down".action.move-window-down = [ ];
-      "Mod+Ctrl+Up".action.move-window-up = [ ];
-      "Mod+Ctrl+J".action.move-column-to-workspace-down = [ ];
-      "Mod+Ctrl+K".action.move-column-to-workspace-up = [ ];
+      # Workspace reordering
+      "Mod+Ctrl+Alt+Up".action.move-workspace-up = [ ];
+      "Mod+Ctrl+Alt+Down".action.move-workspace-down = [ ];
 
       # First / last column
       "Mod+Home".action.focus-column-first = [ ];
@@ -208,40 +225,17 @@ in
       "Mod+Ctrl+Home".action.move-column-to-first = [ ];
       "Mod+Ctrl+End".action.move-column-to-last = [ ];
 
-      # Monitor focus (Shift = monitor)
-      "Mod+Shift+Left".action.focus-monitor-left = [ ];
-      "Mod+Shift+Right".action.focus-monitor-right = [ ];
-      "Mod+Shift+Down".action.focus-monitor-down = [ ];
-      "Mod+Shift+Up".action.focus-monitor-up = [ ];
-      "Mod+Shift+H".action.focus-monitor-left = [ ];
-      "Mod+Shift+L".action.focus-monitor-right = [ ];
-      "Mod+Shift+J".action.focus-monitor-down = [ ];
-      "Mod+Shift+K".action.focus-monitor-up = [ ];
+      # Multi-monitor control (Ctrl = Monitor)
+      "Mod+Ctrl+Left".action.focus-monitor-left = [ ];
+      "Mod+Ctrl+Right".action.focus-monitor-right = [ ];
+      "Mod+Ctrl+Down".action.focus-monitor-down = [ ];
+      "Mod+Ctrl+Up".action.focus-monitor-up = [ ];
 
       # Move column to monitor (Shift+Ctrl)
       "Mod+Shift+Ctrl+Left".action.move-column-to-monitor-left = [ ];
       "Mod+Shift+Ctrl+Right".action.move-column-to-monitor-right = [ ];
       "Mod+Shift+Ctrl+Down".action.move-column-to-monitor-down = [ ];
       "Mod+Shift+Ctrl+Up".action.move-column-to-monitor-up = [ ];
-      "Mod+Shift+Ctrl+H".action.move-column-to-monitor-left = [ ];
-      "Mod+Shift+Ctrl+L".action.move-column-to-monitor-right = [ ];
-      "Mod+Shift+Ctrl+J".action.move-column-to-monitor-down = [ ];
-      "Mod+Shift+Ctrl+K".action.move-column-to-monitor-up = [ ];
-
-      # Workspace focus / move (Page keys + u/i)
-      "Mod+Page_Down".action.focus-workspace-down = [ ];
-      "Mod+Page_Up".action.focus-workspace-up = [ ];
-      "Mod+U".action.focus-workspace-down = [ ];
-      "Mod+I".action.focus-workspace-up = [ ];
-      "Mod+Ctrl+Page_Down".action.move-column-to-workspace-down = [ ];
-      "Mod+Ctrl+Page_Up".action.move-column-to-workspace-up = [ ];
-      "Mod+Ctrl+U".action.move-column-to-workspace-down = [ ];
-      "Mod+Ctrl+I".action.move-column-to-workspace-up = [ ];
-      "Mod+Shift+Page_Down".action.move-workspace-down = [ ];
-      "Mod+Shift+Page_Up".action.move-workspace-up = [ ];
-      "Mod+Shift+U".action.move-workspace-down = [ ];
-      "Mod+Shift+I".action.move-workspace-up = [ ];
-
       # Scroll wheel = workspaces / columns
       "Mod+WheelScrollDown" = {
         cooldown-ms = 150;
@@ -322,19 +316,17 @@ in
       ];
 
       # Screenshots
+      "Mod+Shift+S".action.screenshot = [ ];
       "Print".action.screenshot = [ ];
       "Ctrl+Print".action.screenshot-screen = [ ];
       "Alt+Print".action.screenshot-window = [ ];
 
-      # Session
-      "Mod+Shift+E".action.quit = [ ];
+      # Session & power
       "Mod+Shift+P".action.power-off-monitors = [ ];
       "Mod+Ctrl+Shift+T".action.toggle-debug-tint = [ ];
 
-      # Lock. Noctalia does NOT subscribe to logind's Lock signal, so
-      # `loginctl lock-session` is a no-op here — lock through Noctalia's IPC,
-      # which raises its WlSessionLock directly.
-      "Super+Alt+L".action.spawn = [
+      # Lock screen (Noctalia WlSessionLock)
+      "Mod+L".action.spawn = [
         "noctalia"
         "msg"
         "session"
