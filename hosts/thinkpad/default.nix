@@ -30,6 +30,12 @@
   # Intel CPU microcode updates
   hardware.cpu.intel.updateMicrocode = lib.mkDefault true;
 
+  # Примечание по датчику крышки (Lid Switch):
+  # evtest /dev/input/event4 не фиксирует событий даже при поднесении магнита к рамке экрана.
+  # Есть подозрение, что физический датчик Холла или жила в шлейфе матрицы сдохли.
+  # TODO: проверить реакцию датчика на чистом Fedora Live CD, чтобы окончательно исключить ядро/драйвер.
+  # evtest /dev/input/event4
+
   # Hardware quirks & deep power saving
   boot = {
     # Fix ACPI battery reporting glitch on boot (ArchWiki)
