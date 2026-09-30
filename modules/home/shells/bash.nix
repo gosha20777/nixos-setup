@@ -6,10 +6,10 @@
   programs.bash = {
     enable = true;
     shellAliases = {
-      ls = "eza";
-      ll = "eza -l";
-      la = "eza -la";
-      tree = "eza --tree";
+      ls = "eza --icons --group-directories-first";
+      ll = "eza -l --icons --group-directories-first --header --git";
+      la = "eza -la --icons --group-directories-first --header --git";
+      tree = "eza --tree --icons";
       cat = "bat";
     };
     initExtra = ''
