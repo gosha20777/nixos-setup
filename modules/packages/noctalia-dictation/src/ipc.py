@@ -3,6 +3,7 @@ import os
 import socket
 import sys
 import threading
+import time
 from pathlib import Path
 from typing import Callable, List
 from models import StateResponse
@@ -140,23 +141,38 @@ def send_ipc_command(command: str) -> str:
 
 
 def stream_ipc_events() -> None:
-    """Stream NDJSON events from daemon to stdout indefinitely."""
+    """Stream NDJSON events from daemon to stdout indefinitely.
+
+    Reconnects forever: the daemon restarts on every nixos-rebuild switch,
+    which closes the socket and kills this stream. If this process exited,
+    the bar widget (spawned once at Noctalia startup and never respawned)
+    would freeze in its last state forever. A short backoff keeps the stream
+    alive across daemon restarts so the widget keeps updating.
+    """
     socket_path = get_socket_path()
-    if not socket_path.exists():
-        raise ConnectionError("noctalia-dictation daemon is not running")
 
-    with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
-        client.connect(str(socket_path))
-        client.sendall(b"stream\n")
+    while True:
+        try:
+            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
+                client.connect(str(socket_path))
+                client.sendall(b"stream\n")
 
-        buffer = ""
-        while True:
-            chunk = client.recv(1024).decode("utf-8")
-            if not chunk:
-                break
-            buffer += chunk
-            while "\n" in buffer:
-                line, buffer = buffer.split("\n", 1)
-                line = line.strip()
-                if line:
-                    print(line, flush=True)
+                buffer = ""
+                while True:
+                    chunk = client.recv(1024).decode("utf-8")
+                    if not chunk:
+                        break
+                    buffer += chunk
+                    while "\n" in buffer:
+                        line, buffer = buffer.split("\n", 1)
+                        line = line.strip()
+                        if line:
+                            print(line, flush=True)
+
+            # Daemon closed the stream (restart): reset the widget to idle
+            # while it is down, then reconnect.
+            print('{"state":"idle","error":null}', flush=True)
+        except (ConnectionError, OSError):
+            # Daemon down or not yet started — retry silently
+            pass
+        time.sleep(2.0)

@@ -136,7 +136,6 @@ class DictationService:
     def _start_recording(self) -> None:
         self._set_state("recording")
         logger.info("Recording started...")
-        self.notifier.notify_recording_started()
         self.recorder.start()
 
     def _stop_and_process(self) -> None:

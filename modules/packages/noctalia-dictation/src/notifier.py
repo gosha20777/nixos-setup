@@ -59,9 +59,6 @@ class Notifier:
         except Exception as e:
             logger.warning("Failed to send notification '%s': %s", summary, e)
 
-    def notify_recording_started(self) -> None:
-        self._send("Диктовка", "Микрофон включён — говорите", transient=True, expire_ms=1500)
-
     def notify_correction_captured(self, count: int, threshold: int) -> None:
         self._send("Диктовка", f"Правка сохранена ({count}/{threshold})", transient=True, expire_ms=2500)
 

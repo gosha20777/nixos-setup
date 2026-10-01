@@ -8,7 +8,7 @@ from notifier import Notifier
 
 
 def _make_notifier(monkeypatch, sent):
-    """Notifier with stubbed notify-send; records (summary, body) into `sent`."""
+    """Notifier with stubbed notify-send; records command lines into `sent`."""
 
     class FakeProc:
         def __init__(self):
@@ -26,9 +26,9 @@ def test_dedupe_suppresses_identical_notification(monkeypatch):
     sent: list = []
     n = _make_notifier(monkeypatch, sent)
 
-    n.notify_recording_started()
-    n.notify_recording_started()
-    n.notify_recording_started()
+    n.notify_correction_rejected()
+    n.notify_correction_rejected()
+    n.notify_correction_rejected()
 
     # Three identical notifications within the window -> only one notify-send
     assert len(sent) == 1
@@ -38,8 +38,8 @@ def test_different_notifications_are_not_suppressed(monkeypatch):
     sent: list = []
     n = _make_notifier(monkeypatch, sent)
 
-    n.notify_recording_started()
     n.notify_correction_rejected()
+    n.notify_correction_captured(2, 10)
     n.notify_learning_success()
 
     assert len(sent) == 3
@@ -55,8 +55,8 @@ def test_expired_window_allows_repeat(monkeypatch):
     clock = {"t": 100.0}
     monkeypatch.setattr(notifier_module.time, "monotonic", lambda: clock["t"])
 
-    n.notify_recording_started()
+    n.notify_correction_rejected()
     clock["t"] += 20.0  # beyond dedupe_window=10
-    n.notify_recording_started()
+    n.notify_correction_rejected()
 
     assert len(sent) == 2

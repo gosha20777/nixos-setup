@@ -187,6 +187,7 @@ nix build "path:.#nixosConfigurations.live-x86_64.config.system.build.isoImage" 
 * **`docs/secrets-sops-age.md`** — Исчерпывающий runbook по управлению секретами через `sops-nix`, правила шифрования, восстановление ключей и защита от утечек.
 * **`docs/hardware-thinkpad.md`** — Аппаратное включение ThinkPad P1 Gen 2: гибридная графика NVIDIA Turing RTD3 (D3Cold 0W), PRIME offload, `throttled`, Intel Speed Shift и профили питания.
 * **`docs/installer-live-cd.md`** — Архитектура модульного Python-установщика (MVC/MVVM), стриминг логов, тестирование и пошаговая установка с флешки.
+* **`docs/dictation.md`** — Голосовая диктовка `noctalia-dictation`: пайплайн Whisper → refine-LLM → wtype, самообучение на исправлениях (PRIMARY-выделение, similarity-guard, Agentic Core Memory), уведомления и IPC.
 * **`secure-boot.md`** — Пошаговое руководство по включению Secure Boot через `lanzaboote` и `sbctl` (выполняется строго после первой успешной загрузки системы).
 * **`display-scaling.md`** — Математическая биометрическая модель расчета масштабирования интерфейса и шрифтов под индивидуальные параметры зрения.
 * **`CONTRIBUTING.md`** — Правила работы с ветками, пул-реквестами и критерии проверок перед слиянием.
