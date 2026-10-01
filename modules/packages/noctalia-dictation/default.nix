@@ -5,6 +5,7 @@
   makeWrapper,
   wtype,
   wl-clipboard,
+  libnotify,
 }:
 let
   pythonEnv = python3Packages.python.withPackages (ps: [
@@ -46,6 +47,7 @@ stdenv.mkDerivation {
         lib.makeBinPath [
           wtype
           wl-clipboard
+          libnotify
         ]
       }
 

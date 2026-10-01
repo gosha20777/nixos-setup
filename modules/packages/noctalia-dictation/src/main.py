@@ -17,8 +17,18 @@ from config import atomic_write_text, load_config
 import injector
 from ipc import IPCServer, send_ipc_command, stream_ipc_events
 from models import StateResponse
+from notifier import Notifier
+from similarity import correction_score
 
 logger = logging.getLogger("noctalia-dictation")
+
+# Minimum similarity (SequenceMatcher ratio after normalization) between the
+# user's selection and the last dictation for it to count as a correction.
+# Below this the selection is treated as unrelated text and ignored.
+CORRECTION_SIMILARITY_THRESHOLD = 0.5
+# Corrections required before the learning cycle runs.
+CORRECTIONS_PER_LEARNING_CYCLE = 10
+
 
 
 def _extract_json_payload(raw: str) -> dict:
@@ -50,6 +60,7 @@ class DictationService:
         self.stop_event = threading.Event()
         self.correction_count = 0
         self.last_dictation: Optional[dict[str, str]] = None
+        self.notifier = Notifier()
         self._is_learning_running = False
         self._learning_lock = threading.Lock()
         self.recorder = AudioRecorder(
@@ -125,6 +136,7 @@ class DictationService:
     def _start_recording(self) -> None:
         self._set_state("recording")
         logger.info("Recording started...")
+        self.notifier.notify_recording_started()
         self.recorder.start()
 
     def _stop_and_process(self) -> None:
@@ -167,7 +179,7 @@ class DictationService:
 
             try:
                 proc = subprocess.run(
-                    ["wl-paste", "--no-newline"],
+                    ["wl-paste", "--primary", "--no-newline"],
                     capture_output=True,
                     text=True,
                     timeout=2.0,
@@ -175,14 +187,28 @@ class DictationService:
                 )
                 corrected_text = proc.stdout.strip()
             except Exception as e:
-                return f"error: failed to read clipboard: {e}"
+                return f"error: failed to read selection: {e}"
 
             if not corrected_text:
-                return "ignored: clipboard is empty"
+                return "ignored: selection is empty"
 
-            # Ignore no-op corrections: clipboard identical to what we produced teaches nothing
-            if corrected_text == self.last_dictation["refined"]:
-                return "ignored: clipboard matches previous dictation (nothing to learn)"
+            # A PRIMARY selection is just "the last thing the user highlighted"
+            # — it may be unrelated text from another window. Only accept it as
+            # a correction if it resembles the last dictation.
+            score = correction_score(
+                corrected_text,
+                self.last_dictation["raw"],
+                self.last_dictation["refined"],
+            )
+            if score < CORRECTION_SIMILARITY_THRESHOLD:
+                logger.info(
+                    "Correction rejected (similarity %.2f < %.2f): '%s'",
+                    score,
+                    CORRECTION_SIMILARITY_THRESHOLD,
+                    corrected_text[:80],
+                )
+                self.notifier.notify_correction_rejected()
+                return "ignored: selection doesn't look like a correction of the last dictation"
 
             record = {
                 "raw": self.last_dictation["raw"],
@@ -196,11 +222,12 @@ class DictationService:
             except Exception as e:
                 logger.error("Failed to write history: %s", e)
 
-            logger.info("Correction captured: '%s'", corrected_text)
+            logger.info("Correction captured (similarity %.2f): '%s'", score, corrected_text)
             self.last_dictation = None
             self.correction_count += 1
+            self.notifier.notify_correction_captured(self.correction_count, CORRECTIONS_PER_LEARNING_CYCLE)
 
-            if self.correction_count >= 10:
+            if self.correction_count >= CORRECTIONS_PER_LEARNING_CYCLE:
                 with self._learning_lock:
                     if not self._is_learning_running:
                         self._is_learning_running = True
@@ -316,8 +343,10 @@ class DictationService:
                     self.correction_count = 0
 
                 logger.info("Learning Cycle Success: Memory and vocabulary updated")
+                self.notifier.notify_learning_success()
         except Exception as e:
             logger.error("Learning Cycle Error: %s", e, exc_info=True)
+            self.notifier.notify_learning_error(str(e))
         finally:
             with self._learning_lock:
                 self._is_learning_running = False
