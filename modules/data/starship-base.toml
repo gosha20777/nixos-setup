@@ -4,6 +4,7 @@ add_newline = false
 palette = "noctalia"
 
 format = "$directory$git_branch$git_status$cmd_duration$character"
+right_format = "$python$nix_shell$rust$dotnet$nodejs"
 
 [character]
 success_symbol = "[❯](bold green)"
@@ -26,3 +27,32 @@ style = "bold maroon"
 min_time = 3000
 format = "[$duration]($style) "
 style = "overlay2"
+
+# ── Right prompt: Environments & Languages ──
+
+[python]
+symbol = "󰌠 "
+style = "bold flamingo"
+format = '[\($symbol$virtualenv\)]($style)'
+detect_extensions = []
+detect_files = []
+
+[nix_shell]
+symbol = " "
+style = "bold flamingo"
+format = '[\($symbol$state\)]($style)'
+
+[rust]
+symbol = "󱘗 "
+style = "bold flamingo"
+format = '[\($symbol$version\)]($style)'
+
+[dotnet]
+symbol = "󰌛 "
+style = "bold flamingo"
+format = '[\($symbol$version\)]($style)'
+
+[nodejs]
+symbol = "󰌞 "
+style = "bold flamingo"
+format = '[\($symbol$version\)]($style)'
