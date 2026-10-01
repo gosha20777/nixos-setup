@@ -1,3 +1,4 @@
+import logging
 import os
 import socket
 import sys
@@ -5,6 +6,8 @@ import threading
 from pathlib import Path
 from typing import Callable, List
 from models import StateResponse
+
+logger = logging.getLogger("noctalia-dictation")
 
 
 def get_socket_path() -> Path:
@@ -33,8 +36,8 @@ class IPCServer:
         if self.socket_path.exists():
             try:
                 self.socket_path.unlink()
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning("Failed to remove stale socket %s: %s", self.socket_path, e)
 
         self._server_sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self._server_sock.bind(str(self.socket_path))
@@ -64,7 +67,9 @@ class IPCServer:
             try:
                 conn, _ = self._server_sock.accept()
                 threading.Thread(target=self._handle_client, args=(conn,), daemon=True).start()
-            except Exception:
+            except Exception as e:
+                if self._running:
+                    logger.error("IPC accept error: %s", e)
                 break
 
     def _handle_client(self, conn: socket.socket) -> None:
@@ -91,6 +96,7 @@ class IPCServer:
                     response = self.on_command(data)
                 conn.sendall(f"{response}\n".encode("utf-8"))
         except Exception as e:
+            logger.error("Error handling IPC client: %s", e)
             try:
                 conn.sendall(f"error: {e}\n".encode("utf-8"))
                 conn.close()

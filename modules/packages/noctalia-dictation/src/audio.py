@@ -1,13 +1,16 @@
 import io
+import logging
+import queue
 import threading
 import wave
 from typing import Callable, Optional
 import sounddevice as sd
 import webrtcvad
 
+logger = logging.getLogger("noctalia-dictation")
+
 CHANNELS = 1
 FRAME_DURATION_MS = 30  # webrtcvad accepts 10, 20, or 30 ms
-
 
 class AudioRecorder:
     def __init__(
@@ -30,6 +33,9 @@ class AudioRecorder:
         self._is_recording = False
         self._has_spoken = False
         self._silent_frames_count = 0
+        self._silence_signaled = False
+        self._event_queue: queue.Queue[str] = queue.Queue()
+        self._worker_thread: Optional[threading.Thread] = None
         self._lock = threading.Lock()
 
     def start(self) -> None:
@@ -40,6 +46,11 @@ class AudioRecorder:
             self._is_recording = True
             self._has_spoken = False
             self._silent_frames_count = 0
+            self._silence_signaled = False
+
+            # Worker thread processes events outside real-time audio callback
+            self._worker_thread = threading.Thread(target=self._event_worker, daemon=True)
+            self._worker_thread.start()
 
             self._stream = sd.RawInputStream(
                 samplerate=self.sample_rate,
@@ -65,23 +76,43 @@ class AudioRecorder:
             if is_speech:
                 self._has_spoken = True
                 self._silent_frames_count = 0
-            elif self._has_spoken:
+            elif self._has_spoken and not self._silence_signaled:
                 self._silent_frames_count += 1
                 if self._silent_frames_count >= self.silence_limit_frames:
-                    if self.on_silence:
-                        threading.Thread(target=self.on_silence, daemon=True).start()
+                    self._silence_signaled = True
+                    self._event_queue.put("silence")
+
+    def _event_worker(self) -> None:
+        while True:
+            try:
+                event = self._event_queue.get(timeout=0.1)
+            except queue.Empty:
+                with self._lock:
+                    if not self._is_recording:
+                        break
+                continue
+
+            if event == "stop":
+                break
+            elif event == "silence":
+                if self.on_silence:
+                    try:
+                        self.on_silence()
+                    except Exception as e:
+                        logger.error("Error in on_silence callback: %s", e)
 
     def stop(self) -> bytes:
         with self._lock:
             if not self._is_recording:
                 return b""
             self._is_recording = False
+            self._event_queue.put("stop")
             if self._stream is not None:
                 try:
                     self._stream.stop()
                     self._stream.close()
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.warning("Error stopping audio stream: %s", e)
                 self._stream = None
 
             wav_buffer = io.BytesIO()

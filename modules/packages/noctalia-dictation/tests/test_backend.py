@@ -100,3 +100,50 @@ def test_read_memory_context(tmp_path):
 
     # Missing file returns empty
     assert _read_memory_context(str(tmp_path / "nonexistent.md")) == ""
+
+def test_transcribe_and_refine_tag_stripping(monkeypatch):
+    config = DictationConfig(api_key="gsk_mock_key")
+
+    def mock_handler(request: httpx.Request):
+        url = str(request.url)
+        if url.endswith("/audio/transcriptions"):
+            return httpx.Response(200, text="привет мир")
+        elif url.endswith("/chat/completions"):
+            return httpx.Response(
+                200,
+                json={
+                    "choices": [
+                        {
+                            "message": {
+                                "content": "<raw_transcript>Привет мир.</raw_transcript>"
+                            }
+                        }
+                    ]
+                },
+            )
+        return httpx.Response(404)
+
+    mock_client = httpx.Client(transport=httpx.MockTransport(mock_handler))
+    monkeypatch.setattr(httpx, "Client", lambda **kwargs: mock_client)
+
+    dummy_wav = b"RIFF" + b"\x00" * 100
+    result = transcribe_and_refine(dummy_wav, config)
+    assert result == "Привет мир."
+
+
+def test_extract_json_and_word_truncation():
+    from main import _extract_json_payload, _truncate_word_boundary
+
+    # 1. Plain JSON
+    assert _extract_json_payload('{"new_vocab": ["abc"]}') == {"new_vocab": ["abc"]}
+
+    # 2. Markdown fenced JSON
+    fenced = "```json\n{\"new_vocab\": [\"abc\"], \"new_memory\": \"rules\"}\n```"
+    assert _extract_json_payload(fenced) == {"new_vocab": ["abc"], "new_memory": "rules"}
+
+    # 3. Word boundary truncation
+    long_text = "слово1 слово2 слово3 слово4 слово5"
+    truncated = _truncate_word_boundary(long_text, 20)
+    assert len(truncated) <= 20
+    assert not truncated.endswith("сло")  # Does not cut inside word
+    assert truncated == "слово1 слово2 слово3"
