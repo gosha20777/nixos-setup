@@ -169,11 +169,48 @@
       };
 
       # `nix fmt` formats all .nix files in the tree. pkgs.nixfmt is the RFC 166
-      # implementation that ships in nixpkgs. The tree is already nixfmt-clean
-      # and CI enforces it (`nix fmt --check` in .github/workflows/check.yml),
-      # so running this is a no-op unless you introduced drift.
+      # implementation that ships in nixpkgs; the tree is already nixfmt-clean
+      # and CI enforces it (`nix fmt -- --check` in .github/workflows/check.yml).
+      #
+      # The wrapper exists because Nix ≥ 2.24 runs the formatter with NO
+      # arguments for a bare `nix fmt`, and nixfmt 1.5.0 deprecates bare
+      # invocation (treats it as anonymous stdin and dies on empty input).
+      # So: no args -> walk the git tree ourselves; any args (CI's
+      # `nix fmt -- --check <files…>`, or explicit paths) -> pass through.
       formatter = lib.genAttrs [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ] (
-        sys: nixpkgs.legacyPackages.${sys}.nixfmt
+        sys:
+        let
+          pkgs = nixpkgs.legacyPackages.${sys};
+        in
+        pkgs.writeShellApplication {
+          name = "fmt";
+          runtimeInputs = [
+            pkgs.nixfmt
+            pkgs.git
+            pkgs.findutils
+          ];
+          text = ''
+            # Bare `nix fmt` / `nix fmt -- --check`: walk the tree ourselves
+            # (Nix >= 2.24 passes no file args; nixfmt 1.5.0 can't do bare runs).
+            if [ "$#" -eq 0 ] || { [ "$#" -eq 1 ] && [ "$1" = "--check" ]; }; then
+              check=()
+              if [ "$#" -eq 1 ]; then
+                check=(--check)
+              fi
+              if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+                # Tracked + untracked (non-ignored) .nix files, NUL-safe
+                git ls-files --cached --others --exclude-standard -z -- '*.nix' \
+                  | xargs -0 -r nixfmt "''${check[@]}"
+              else
+                find . -name '*.nix' -not -path './.git/*' -print0 \
+                  | xargs -0 -r nixfmt "''${check[@]}"
+              fi
+              exit $?
+            fi
+            # Any other args (CI's `nix fmt -- --check <files…>`, explicit paths): pass through
+            exec nixfmt "$@"
+          '';
+        }
       );
     };
 }
