@@ -52,6 +52,12 @@
          [ "$(${pkgs.coreutils}/bin/cat "$STAMP" 2>/dev/null)" != "$SRC" ]; then
         ${pkgs.coreutils}/bin/rm -f "$DEST"
         ${pkgs.coreutils}/bin/install -m 0644 "$SRC" "$DEST"
+        PALETTE="$HOME/.cache/noctalia/starship-palette.toml"
+        if [ -f "$PALETTE" ]; then
+          printf '\n# >>> NOCTALIA STARSHIP PALETTE >>>\n' >> "$DEST"
+          ${pkgs.coreutils}/bin/cat "$PALETTE" >> "$DEST"
+          printf '\n# <<< NOCTALIA STARSHIP PALETTE <<<\n' >> "$DEST"
+        fi
         printf '%s' "$SRC" > "$STAMP"
       fi
     '';
