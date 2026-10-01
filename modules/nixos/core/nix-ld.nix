@@ -28,6 +28,7 @@
       libxrender
       libice
       libsm
+      libxcb
     ];
   };
 }
