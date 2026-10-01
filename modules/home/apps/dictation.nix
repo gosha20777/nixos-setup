@@ -44,9 +44,10 @@ in
           Твоя задача — преобразовать распознанный голос в чистый, грамотный и готовый к использованию текст:
           1. Исправь оговорки, заикания, слова-паразиты («э-э», «ну типа», «короче»).
           2. Расставь знаки препинания и заглавные буквы.
-          3. Сохрани оригинальный язык (русский, английский или смешанный).
-          4. Точно и корректно форматируй технические термины, имена библиотек, флаги CLI и синтаксис кода (например, asyncio, flake.nix, git commit, Docker, Python).
-          5. Не добавляй никаких пояснений, комментариев, мета-текста или кавычек от себя. Возвращай ИСКЛЮЧИТЕЛЬНО очищенный текст.
+          3. ЗАПРЕЩЕНО добавлять переносы строк (\n) или списки, если пользователь явно не продиктовал их («новая строка», «абзац»). Весь текст должен идти сплошным монолитом.
+          4. Сохрани оригинальный язык (русский, английский или смешанный).
+          5. Точно и корректно форматируй технические термины, имена библиотек, флаги CLI и синтаксис кода (например, asyncio, flake.nix, git commit, Docker, Python).
+          6. Не добавляй никаких пояснений, комментариев, мета-текста или кавычек от себя. Возвращай ИСКЛЮЧИТЕЛЬНО очищенный текст.
       '';
     };
   };
@@ -71,5 +72,65 @@ in
     Install = {
       WantedBy = [ "graphical-session.target" ];
     };
+  };
+
+  # 4. Writable seed files for Micro-Memory (vocabulary.json and memory.md).
+  # Seeded with rich developer defaults, but preserved as plain writable files
+  # so the self-learning reflection loop can update them without Home Manager collisions.
+  home.activation.dictationMemorySeed = {
+    after = [ "writeBoundary" ];
+    before = [ ];
+    data =
+      let
+        defaultVocab = pkgs.writeText "default-vocabulary.json" (
+          builtins.toJSON [
+            "NixOS"
+            "flake.nix"
+            "nixpkgs"
+            "niri"
+            "Wayland"
+            "Noctalia"
+            "PyTorch"
+            "CUDA"
+            "OpenCV"
+            "direnv"
+            "uv"
+            "ruff"
+            "basedpyright"
+            "Neovim"
+            "Starship"
+            "Kitty"
+            "btrfs"
+            "systemd"
+            "journalctl"
+            "git commit"
+            "pull request"
+            "asyncio"
+            "Everforest"
+          ]
+        );
+
+        defaultMemory = pkgs.writeText "default-memory.md" ''
+          # Developer Profile & Style Rules
+          - Стек: NixOS, Niri, Wayland, Python, PyTorch, CUDA, Neovim, Rust.
+          - Предпочитай технические термины на английском (например, feature, refactoring, pull request, build).
+          - Команды CLI и имена файлов пиши точно (flake.nix, git commit).
+          - Запрещены лишние вводные фразы и мета-комментарии.
+        '';
+      in
+      ''
+        DIR="$HOME/.config/noctalia-dictation"
+        ${pkgs.coreutils}/bin/mkdir -p "$DIR"
+
+        # Seed vocabulary.json if missing or empty
+        if [ ! -s "$DIR/vocabulary.json" ] || [ "$(${pkgs.coreutils}/bin/cat "$DIR/vocabulary.json" 2>/dev/null)" = "[]" ]; then
+          ${pkgs.coreutils}/bin/install -m 0644 "${defaultVocab}" "$DIR/vocabulary.json"
+        fi
+
+        # Seed memory.md if missing or empty
+        if [ ! -s "$DIR/memory.md" ]; then
+          ${pkgs.coreutils}/bin/install -m 0644 "${defaultMemory}" "$DIR/memory.md"
+        fi
+      '';
   };
 }

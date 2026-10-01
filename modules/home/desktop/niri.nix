@@ -309,12 +309,15 @@ in
       "Mod+Shift+V".action.switch-focus-between-floating-and-tiling = [ ];
       "Mod+W".action.toggle-column-tabbed-display = [ ];
 
-      # Voice dictation toggle (noctalia-dictation IPC)
+      # Voice dictation toggle & capture correction (noctalia-dictation IPC)
       "Mod+M".action.spawn = [
         "noctalia-dictation"
         "toggle"
       ];
-
+      "Mod+Shift+M".action.spawn = [
+        "noctalia-dictation"
+        "capture-correction"
+      ];
       # Screenshots
       "Mod+Shift+S".action.screenshot = [ ];
       "Print".action.screenshot = [ ];

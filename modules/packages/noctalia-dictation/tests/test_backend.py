@@ -1,3 +1,4 @@
+import json
 import sys
 from pathlib import Path
 import httpx
@@ -71,3 +72,31 @@ def test_transcribe_and_refine_llm_failure_fallback(monkeypatch):
     # Should fallback to raw transcript if LLM refinement fails
     result = transcribe_and_refine(dummy_wav, config)
     assert result == "сырой текст без обработки"
+
+
+def test_build_whisper_prompt_smart_truncation(tmp_path):
+    from backend import _build_whisper_prompt
+
+    vocab_file = tmp_path / "vocab.json"
+    # Create 50 words of 15 characters each
+    words = [f"word_{i:03d}_longterm" for i in range(50)]
+    vocab_file.write_text(json.dumps(words), encoding="utf-8")
+
+    prompt = _build_whisper_prompt(str(vocab_file))
+    assert len(prompt) <= 400
+    # Ensure the last word is not truncated mid-word
+    assert not prompt.endswith("longt")
+    assert prompt.startswith("word_000_longterm")
+
+
+def test_read_memory_context(tmp_path):
+    from backend import _read_memory_context
+
+    mem_file = tmp_path / "memory.md"
+    mem_file.write_text("Пиши код аккуратно.\n", encoding="utf-8")
+
+    mem = _read_memory_context(str(mem_file))
+    assert mem == "Пиши код аккуратно."
+
+    # Missing file returns empty
+    assert _read_memory_context(str(tmp_path / "nonexistent.md")) == ""

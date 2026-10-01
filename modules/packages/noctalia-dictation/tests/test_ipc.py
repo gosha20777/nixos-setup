@@ -11,8 +11,9 @@ from ipc import IPCServer
 from models import StateResponse
 
 
-def test_ipc_server_command_and_broadcast(tmp_path, monkeypatch):
-    test_sock_path = tmp_path / "test_dictation.sock"
+def test_ipc_server_command_and_broadcast(monkeypatch):
+    import os
+    test_sock_path = Path(f"/tmp/test_dict_{os.getpid()}.sock")
     monkeypatch.setattr("ipc.get_socket_path", lambda: test_sock_path)
 
     current_state = StateResponse(state="idle")
