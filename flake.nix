@@ -98,6 +98,19 @@
       flake = false;
     };
 
+    # rmpc — MPD TUI client. Pinned to a master commit (not a release):
+    # album_art.custom_loader (per-station radio covers via
+    # modules/data/rmpc/radio_cover_loader) exists only on master; last
+    # release v0.11.0 predates it. Upstream ships its own crane-based
+    # flake; nixpkgs is deliberately NOT followed (their build is pinned
+    # against their own lock). Built from source on first switch (cached
+    # afterwards). Bump with `nix flake update rmpc` after re-verifying
+    # modules/data/rmpc/{config,theme}.ron against master's changelog
+    # (breaking theme/Browser-pane changes happen between releases).
+    rmpc = {
+      url = "github:mierak/rmpc/fbc57536abcd8dc7deb4dc7b42614c896a2992a3";
+    };
+
     # ── SECURE BOOT ────────────────────────────────────────────────
     # Uncomment to enable lanzaboote. Do this ONLY after the system is
     # installed and booting (see secure-boot.md). Enabling it before

@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# rmpc custom_loader: per-radio-station album art.
+# Protocol (rmpc album_art docs): always exit 0.
+#   display custom image:  "size: <bytes>\naction: display\n<raw bytes>"
+#   defer to MPD/default:  "action: fallback\n"
+set -u
+covers="$HOME/.local/share/rmpc/covers"
+cover=""
+case "${FILE:-}" in
+  http://station.waveradio.org/soviet.mp3|http://station.waveradio.org/soviet)
+    cover="sovietwave.png" ;;
+  http://station.waveradio.org/provodach.mp3|http://station.waveradio.org/provodach)
+    cover="provodach.png" ;;
+  https://radio.plaza.one/mp3)
+    cover="nightwave.png" ;;
+  http://nashe1.hostingradio.ru/ultra-192.mp3)
+    cover="ultra.png" ;;
+  http://strm112.1.fm/x_mobile_mp3)
+    cover="1fm.png" ;;
+  https://hls-01-radiorecord.hostingradio.ru/record-rock/playlist.m3u8)
+    cover="record.png" ;;
+esac
+if [ -n "$cover" ] && [ -f "$covers/$cover" ]; then
+  echo "size: $(stat -c%s "$covers/$cover")"
+  echo "action: display"
+  cat "$covers/$cover"
+else
+  echo "action: fallback"
+fi
+exit 0

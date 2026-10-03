@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
+  <defs>
+    <linearGradient id="vsun" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E592B1"/>
+      <stop offset="0.55" stop-color="#D67B9D"/>
+      <stop offset="1" stop-color="#8B4A68"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="600" fill="#141617"/>
+  <!-- stars -->
+  <g fill="#F7F4EC">
+    <circle cx="110" cy="100" r="2.2" opacity="0.9"/>
+    <circle cx="205" cy="66" r="1.6" opacity="0.6"/>
+    <circle cx="430" cy="80" r="2.0" opacity="0.8"/>
+    <circle cx="500" cy="170" r="1.6" opacity="0.6"/>
+    <circle cx="88" cy="200" r="1.8" opacity="0.7"/>
+    <circle cx="520" cy="245" r="1.8" opacity="0.7"/>
+  </g>
+  <!-- vaporwave sun -->
+  <circle cx="300" cy="265" r="125" fill="url(#vsun)"/>
+  <g fill="#141617">
+    <rect x="0" y="280" width="600" height="4"/>
+    <rect x="0" y="297" width="600" height="6"/>
+    <rect x="0" y="317" width="600" height="8"/>
+    <rect x="0" y="340" width="600" height="10"/>
+    <rect x="0" y="366" width="600" height="13"/>
+  </g>
+  <!-- chrome mountains -->
+  <polygon points="90,395 175,325 235,395" fill="#1A1D1F" stroke="#D67B9D" stroke-width="2"/>
+  <polygon points="365,395 430,335 510,395" fill="#1A1D1F" stroke="#D67B9D" stroke-width="2"/>
+  <!-- horizon + grid -->
+  <line x1="70" y1="395" x2="530" y2="395" stroke="#D67B9D" stroke-width="3"/>
+  <g stroke="#D67B9D" stroke-width="2" opacity="0.35">
+    <line x1="300" y1="395" x2="-80" y2="600"/>
+    <line x1="300" y1="395" x2="40" y2="600"/>
+    <line x1="300" y1="395" x2="160" y2="600"/>
+    <line x1="300" y1="395" x2="260" y2="600"/>
+    <line x1="300" y1="395" x2="340" y2="600"/>
+    <line x1="300" y1="395" x2="440" y2="600"/>
+    <line x1="300" y1="395" x2="560" y2="600"/>
+    <line x1="300" y1="395" x2="680" y2="600"/>
+  </g>
+  <g stroke="#D67B9D" stroke-width="2">
+    <line x1="70" y1="412" x2="530" y2="412" opacity="0.50"/>
+    <line x1="70" y1="433" x2="530" y2="433" opacity="0.45"/>
+    <line x1="70" y1="458" x2="530" y2="458" opacity="0.40"/>
+    <line x1="70" y1="488" x2="530" y2="488" opacity="0.35"/>
+    <line x1="70" y1="523" x2="530" y2="523" opacity="0.30"/>
+    <line x1="70" y1="562" x2="530" y2="562" opacity="0.25"/>
+  </g>
+</svg>

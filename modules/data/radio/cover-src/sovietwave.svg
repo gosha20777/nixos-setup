@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
+  <defs>
+    <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F3C775"/>
+      <stop offset="0.55" stop-color="#F2874B"/>
+      <stop offset="1" stop-color="#F26E74"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="600" fill="#141617"/>
+  <!-- stars -->
+  <g fill="#F3C775">
+    <circle cx="120" cy="115" r="2.5" opacity="0.9"/>
+    <circle cx="180" cy="70" r="1.8" opacity="0.7"/>
+    <circle cx="420" cy="88" r="2.2" opacity="0.8"/>
+    <circle cx="485" cy="150" r="1.6" opacity="0.6"/>
+    <circle cx="92" cy="215" r="1.8" opacity="0.7"/>
+    <circle cx="512" cy="228" r="2.0" opacity="0.7"/>
+  </g>
+  <g fill="#9EC468">
+    <circle cx="240" cy="60" r="1.6" opacity="0.6"/>
+    <circle cx="360" cy="140" r="1.4" opacity="0.5"/>
+  </g>
+  <!-- synthwave sun -->
+  <circle cx="300" cy="250" r="120" fill="url(#sun)"/>
+  <!-- stripe cuts -->
+  <g fill="#141617">
+    <rect x="0" y="265" width="600" height="4"/>
+    <rect x="0" y="282" width="600" height="5"/>
+    <rect x="0" y="302" width="600" height="7"/>
+    <rect x="0" y="325" width="600" height="9"/>
+    <rect x="0" y="351" width="600" height="12"/>
+  </g>
+  <!-- horizon -->
+  <line x1="70" y1="395" x2="530" y2="395" stroke="#9EC468" stroke-width="3"/>
+  <!-- perspective grid -->
+  <g stroke="#65B8C7" stroke-width="2" opacity="0.35">
+    <line x1="300" y1="395" x2="-80" y2="600"/>
+    <line x1="300" y1="395" x2="40" y2="600"/>
+    <line x1="300" y1="395" x2="160" y2="600"/>
+    <line x1="300" y1="395" x2="260" y2="600"/>
+    <line x1="300" y1="395" x2="340" y2="600"/>
+    <line x1="300" y1="395" x2="440" y2="600"/>
+    <line x1="300" y1="395" x2="560" y2="600"/>
+    <line x1="300" y1="395" x2="680" y2="600"/>
+  </g>
+  <g stroke="#65B8C7" stroke-width="2">
+    <line x1="70" y1="410" x2="530" y2="410" opacity="0.50"/>
+    <line x1="70" y1="430" x2="530" y2="430" opacity="0.45"/>
+    <line x1="70" y1="455" x2="530" y2="455" opacity="0.40"/>
+    <line x1="70" y1="485" x2="530" y2="485" opacity="0.35"/>
+    <line x1="70" y1="520" x2="530" y2="520" opacity="0.30"/>
+    <line x1="70" y1="560" x2="530" y2="560" opacity="0.25"/>
+  </g>
+</svg>
