@@ -42,26 +42,26 @@ class InstallPipeline:
         cfg = self.config
         host = cfg.target_host.name
 
-        # Порядок критичен: disko создаёт маунты в /mnt, nixos-install активирует
-        # пользователей и /home в цели — только после этого ключ Age попадает в
-        # реальный субтом @home, а chroot chpasswd видит созданного пользователя.
+        # 1. Disko создаёт разметку и маунты в /mnt (включая субтом @home)
         self._stream_step(
             "Разметка диска и создание Btrfs субтомов (Disko)",
             disko_service.format_and_mount_cmd(self.repo, host),
         )
 
-        self._stream_step(
-            "Установка NixOS (nixos-install)... Копирование пакетов из кэша",
-            nixos_service.install_cmd(self.repo, host),
-        )
-
-        # Fast steps: instant capture (or instant real execution)
+        # 2. Ключ Age сохраняется в смонтированный @home ДО nixos-install, чтобы
+        # скрипт активации системы (setupSecrets / sops-install-secrets) успешно
+        # расшифровал секреты хоста во время сборки и первичной активации.
         console.print("[fg]▸ Сохранение мастер-ключа Age (~/.config/sops/age/keys.txt)...[/fg]")
         secrets_service.provision(
             self.executor, config.MOUNT_POINT, cfg.username, cfg.age_master_key
         )
         console.print("  [success]✓ Сохранение мастер-ключа Age[/success]")
 
+        # 3. nixos-install устанавливает систему и активирует профиль
+        self._stream_step(
+            "Установка NixOS (nixos-install)... Копирование пакетов из кэша",
+            nixos_service.install_cmd(self.repo, host),
+        )
         console.print("[fg]▸ Установка пароля пользователя целевой системы...[/fg]")
         if cfg.user_password:
             nixos_service.set_user_password(

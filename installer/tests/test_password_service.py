@@ -13,7 +13,7 @@ class TestDryRun:
         set_user_password(executor, Path("/mnt"), "gosha20777", "hunter2secure")
 
         assert executor.executed == [
-            ["chroot", "/mnt", "chpasswd"]
+            ["chroot", "/mnt", "/nix/var/nix/profiles/system/sw/bin/chpasswd"]
         ]
 
     def test_password_not_in_audit_log(self, tmp_path: Path):
@@ -23,7 +23,7 @@ class TestDryRun:
         set_user_password(executor, Path("/mnt"), "gosha20777", "hunter2secure")
 
         content = log.read_text()
-        assert "chroot /mnt chpasswd" in content
+        assert "chroot /mnt /nix/var/nix/profiles/system/sw/bin/chpasswd" in content
         assert "hunter2secure" not in content  # stdin never logged
 
 

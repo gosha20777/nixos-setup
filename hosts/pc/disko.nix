@@ -12,9 +12,9 @@ in
   disko.devices = {
     disk = {
       # ── Samsung 970 PRO (System + Active Data) ──
-      nvme0n1 = {
+      samsung = {
         type = "disk";
-        device = lib.mkDefault "/dev/nvme0n1";
+        device = lib.mkDefault "/dev/disk/by-id/nvme-Samsung_SSD_970_PRO_512GB_S5JYNS0N907879H";
         content = {
           type = "gpt";
           partitions = {
@@ -68,9 +68,9 @@ in
       };
 
       # ── WD SN550 (Games + Media) ──
-      nvme1n1 = {
+      wd = {
         type = "disk";
-        device = lib.mkDefault "/dev/nvme1n1";
+        device = lib.mkDefault "/dev/disk/by-id/nvme-WDC_WDS500G2B0C-00PXH0_2108B9449712";
         content = {
           type = "gpt";
           partitions = {

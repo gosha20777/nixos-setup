@@ -13,5 +13,5 @@ def test_format_and_mount_builds_exact_command():
     format_and_mount(executor, repo, "thinkpad")
 
     assert executor.executed == [
-        ["disko", "--mode", "destroy,format,mount", "--flake", "/iso/repo#thinkpad"]
+        ["disko", "--mode", "destroy,format,mount", "--yes-wipe-all-disks", "--flake", "/iso/repo#thinkpad"]
     ]
