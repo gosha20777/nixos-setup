@@ -21,7 +21,7 @@ case "${FILE:-}" in
     cover="record.png" ;;
 esac
 if [ -n "$cover" ] && [ -f "$covers/$cover" ]; then
-  echo "size: $(stat -c%s "$covers/$cover")"
+  echo "size: $(stat -L -c%s "$covers/$cover")"
   echo "action: display"
   cat "$covers/$cover"
 else
