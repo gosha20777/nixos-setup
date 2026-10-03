@@ -14,11 +14,7 @@ in
   home.packages = [ noctalia-dictation ];
 
   # 1. Noctalia native Luau plugin (linked cleanly from package output, 0 inline code in nix)
-  xdg.configFile."noctalia/plugins/catalog.toml" = {
-    source = "${noctalia-dictation}/share/noctalia-plugins/dictation/catalog.toml";
-    force = true;
-  };
-  xdg.configFile."noctalia/plugins/dictation" = {
+  xdg.dataFile."noctalia/plugins/dictation" = {
     source = "${noctalia-dictation}/share/noctalia-plugins/dictation";
     force = true;
   };

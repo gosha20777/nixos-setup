@@ -32,14 +32,6 @@
     accel-speed = 0.15;
   };
 
-  # Noctalia bar: add caffeine widget in center beside clock
-  programs.noctalia.settings.bar.default.center = lib.mkForce [
-    "cat"
-    "clock"
-    "caffeine"
-    "audio_visualizer"
-  ];
-
   # Disable generic 10-minute lock in Noctalia; swayidle below handles the 3-step cascade
   programs.noctalia.settings.idle.behavior.lock.enabled = lib.mkForce false;
 

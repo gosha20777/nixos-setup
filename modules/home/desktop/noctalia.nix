@@ -128,6 +128,7 @@ in
         center = [
           "cat"
           "clock"
+          "caffeine"
           "audio_visualizer"
         ];
         end = [
@@ -179,7 +180,7 @@ in
         cat = {
           type = "local/bongocat:cat";
           input_devices = [
-            "/dev/input/by-path/platform-i8042-serio-0-event-kbd"
+            "/dev/input/by-path/*-event-kbd"
           ];
           audio_spectrum = false;
         };
@@ -254,12 +255,12 @@ in
   # user-template ссылается на него через $XDG_CONFIG_HOME.
   xdg.configFile."noctalia/templates/niri.kdl".source = ../../themes/${systemSettings.theme}/niri.kdl;
 
-  xdg.configFile."noctalia/plugins/bongocat" = {
+  xdg.dataFile."noctalia/plugins/bongocat" = {
     source = "${noctalia-bongocat}/share/noctalia-plugins/bongocat";
     force = true;
   };
 
-  xdg.configFile."noctalia/plugins/keybind-cheatsheet" = {
+  xdg.dataFile."noctalia/plugins/keybind-cheatsheet" = {
     source = "${noctalia-keybind-cheatsheet}/share/noctalia-plugins/keybind-cheatsheet";
     force = true;
   };
