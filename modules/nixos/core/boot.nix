@@ -48,7 +48,7 @@ in
   };
 
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.loader.timeout = 2;
+  boot.loader.timeout = lib.mkDefault 2;
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Plymouth boot splash screen (Everforest Warm Minimal Theme)
