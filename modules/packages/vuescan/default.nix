@@ -19,6 +19,7 @@
   zlib,
   desktop-file-utils,
   coreutils,
+  gtkTheme ? null,
 }:
 
 stdenv.mkDerivation rec {
@@ -74,6 +75,7 @@ stdenv.mkDerivation rec {
           coreutils
         ]
       }
+      ${lib.optionalString (gtkTheme != null) ''--set-default GTK_THEME "${gtkTheme}"''}
     )
   '';
 

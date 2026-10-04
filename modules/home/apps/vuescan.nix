@@ -8,7 +8,10 @@
   ...
 }:
 let
-  vuescan = pkgs.callPackage ../../packages/vuescan { };
+  theme = import ../../themes/${systemSettings.theme};
+  vuescan = pkgs.callPackage ../../packages/vuescan {
+    gtkTheme = theme.gtkTheme or "Everforest-Dark";
+  };
   dataDir = ../../data/vuescan;
 in
 {
@@ -40,6 +43,11 @@ in
           ${pkgs.coreutils}/bin/install -m 0644 "${dataDir}/$preset" "$DIR/$preset"
         fi
       done
+
+      # Ensure DarkMode=1 is configured under [Prefs] in vuescan.ini
+      if [ -f "$DIR/vuescan.ini" ] && ! grep -q "^DarkMode=" "$DIR/vuescan.ini"; then
+        ${pkgs.gnused}/bin/sed -i '/^\[Prefs\]/a DarkMode=1' "$DIR/vuescan.ini"
+      fi
     '';
   };
 }

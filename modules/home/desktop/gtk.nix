@@ -4,13 +4,17 @@
 # с цветами палитры, которые подмешиваются через @import в gtk.css.
 {
   pkgs,
+  systemSettings,
   ...
 }:
+let
+  theme = import ../../themes/${systemSettings.theme};
+in
 {
   gtk = {
     enable = true;
     theme = {
-      name = "Everforest-Dark";
+      name = theme.gtkTheme or "Everforest-Dark";
       package = pkgs.everforest-gtk-theme;
     };
     iconTheme = {
