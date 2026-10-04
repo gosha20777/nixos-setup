@@ -23,11 +23,11 @@
 
 stdenv.mkDerivation rec {
   pname = "vuescan";
-  version = "9.8.59";
+  version = "9.8.55";
 
   src = fetchurl {
-    url = "https://files.hamrick.com/vuex6498.tgz";
-    hash = "sha256-NKbmL0L9uM/GADHY61oCLopEr8yHuuM0Xem3q9l0Ao8=";
+    url = "https://files.hamrick.com/version-archive/9.8.55/vuex6498.tgz";
+    hash = "sha256-Q9oWI7m4KpQbOSMiRoYUeYogEOxbfFyOtlkEzzUv6UQ=";
   };
 
   sourceRoot = "VueScan";
