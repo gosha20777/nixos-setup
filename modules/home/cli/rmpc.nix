@@ -27,4 +27,19 @@
     source = ../../data/radio/covers;
     recursive = true;
   };
+
+  xdg.desktopEntries.rmpc = {
+    name = "rmpc";
+    genericName = "Rusty Music Player Client";
+    exec = "rmpc";
+    terminal = true;
+    icon = "multimedia-audio-player";
+    categories = [
+      "AudioVideo"
+      "Audio"
+      "Player"
+      "Music"
+      "ConsoleOnly"
+    ];
+  };
 }

@@ -4,6 +4,9 @@
   pkgs,
   ...
 }:
+let
+  vuescan = pkgs.callPackage ../../packages/vuescan { };
+in
 {
   ############################################################
   # System-wide GUI applications
@@ -31,4 +34,7 @@
     cryptsetup # handy for inspecting/managing the LUKS volume post-install
 
   ];
+
+  # Udev rules for USB scanner access (VueScan)
+  services.udev.packages = [ vuescan ];
 }
