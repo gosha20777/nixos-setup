@@ -17,6 +17,8 @@
   libx11,
   systemd,
   zlib,
+  desktop-file-utils,
+  coreutils,
 }:
 
 stdenv.mkDerivation rec {
@@ -29,6 +31,9 @@ stdenv.mkDerivation rec {
   };
 
   sourceRoot = "VueScan";
+  # VueScan appends an internal resource archive (vuescan.dat, ~40MB) to the end
+  # of the ELF binary. Standard strip removes it, causing an immediate null pointer dereference.
+  dontStrip = true;
 
   nativeBuildInputs = [
     autoPatchelfHook
@@ -59,6 +64,17 @@ stdenv.mkDerivation rec {
     install -Dm644 vuescan.rul $out/lib/udev/rules.d/60-vuescan.rules
 
     runHook postInstall
+  '';
+
+  preFixup = ''
+    gappsWrapperArgs+=(
+      --prefix PATH : ${
+        lib.makeBinPath [
+          desktop-file-utils
+          coreutils
+        ]
+      }
+    )
   '';
 
   desktopItems = [
