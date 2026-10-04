@@ -104,5 +104,5 @@ rec {
   # Конфигурация экрана входа noctalia-greeter
   greeter = import ./greeter.nix { inherit colors; };
   # Имя системной темы GTK
-  gtkTheme = "Everforest-Dark";
+  gtkTheme = "adw-gtk3-dark";
 }

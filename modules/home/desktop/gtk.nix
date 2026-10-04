@@ -1,7 +1,6 @@
-# GTK theming. Everforest-Dark (Fausto-Korpsvart) + graphite-cursors (vinceliuice).
-# adw-gtk3 удален из пакетов, поэтому apply.sh Noctalia не переключает gsettings
-# gtk-theme обратно на adw-gtk3. При этом шаблоны gtk3/gtk4 рендерят noctalia.css
-# с цветами палитры, которые подмешиваются через @import в gtk.css.
+# GTK theming. adw-gtk3 (native libadwaita port for GTK3) + graphite-cursors (vinceliuice).
+# Noctalia's native design: Noctalia templates render noctalia.css with palette colors,
+# which recolor adw-gtk3 and libadwaita apps dynamically via @import in gtk.css.
 {
   pkgs,
   systemSettings,
@@ -14,8 +13,8 @@ in
   gtk = {
     enable = true;
     theme = {
-      name = theme.gtkTheme or "Everforest-Dark";
-      package = pkgs.everforest-gtk-theme;
+      name = theme.gtkTheme or "adw-gtk3-dark";
+      package = pkgs.adw-gtk3;
     };
     iconTheme = {
       name = "Papirus-Dark";

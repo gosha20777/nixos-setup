@@ -10,7 +10,7 @@
 let
   theme = import ../../themes/${systemSettings.theme};
   vuescan = pkgs.callPackage ../../packages/vuescan {
-    gtkTheme = theme.gtkTheme or "Everforest-Dark";
+    gtkTheme = theme.gtkTheme or "adw-gtk3-dark";
   };
   dataDir = ../../data/vuescan;
 in
