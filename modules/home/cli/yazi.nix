@@ -21,46 +21,46 @@ in
       opener = {
         edit = [
           {
-            run = "nvim \"$@\"";
+            run = "nvim %s";
             block = true;
             desc = "Neovim";
           }
           {
-            run = "code \"$@\"";
+            run = "code %s";
             orphan = true;
             desc = "VS Code";
           }
         ];
         image = [
           {
-            run = "vipsdisp \"$@\"";
+            run = "vipsdisp %s";
             orphan = true;
             desc = "vipsdisp";
           }
           {
-            run = "gthumb \"$@\"";
+            run = "gthumb %s";
             orphan = true;
             desc = "gThumb";
           }
           {
-            run = "ART \"$@\"";
+            run = "ART %s";
             orphan = true;
             desc = "ART";
           }
         ];
         folder = [
           {
-            run = "gthumb \"$@\"";
+            run = "gthumb %s";
             orphan = true;
             desc = "gThumb";
           }
           {
-            run = "nemo \"$@\"";
+            run = "nemo %s";
             orphan = true;
             desc = "Nemo";
           }
           {
-            run = "code \"$@\"";
+            run = "code %s";
             orphan = true;
             desc = "VS Code";
           }
