@@ -103,6 +103,8 @@ rec {
   limine = import ./limine.nix { inherit colors; };
   # Конфигурация экрана входа noctalia-greeter
   greeter = import ./greeter.nix { inherit colors; };
+  # Конфигурация темы telegram (.tdesktop-theme)
+  telegram = import ./telegram.nix;
   # Имя системной темы GTK
   gtkTheme = "adw-gtk3-dark";
 }

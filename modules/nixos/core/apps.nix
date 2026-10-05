@@ -14,7 +14,6 @@ in
   environment.systemPackages = with pkgs; [
     google-chrome
     vscode
-    telegram-desktop
     nemo-with-extensions
     nemo-preview
     file-roller
