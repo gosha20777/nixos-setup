@@ -16,7 +16,8 @@
       zlib
       glib
 
-      # GUI / X11 / Wayland compatibility for OpenCV and Matplotlib
+      # GUI / X11 / Wayland compatibility for OpenCV, Qt/PySide, and Matplotlib
+      dbus
       libGL
       libglvnd
       wayland
