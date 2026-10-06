@@ -37,7 +37,7 @@ def test_dictation_config_defaults():
     assert config.silence_duration_seconds == 3.0
     assert config.vad_aggressiveness == 2
     assert config.sample_rate == 16000
-    assert "Ты — помощник" in config.system_prompt
+    assert "Ты — стенографист" in config.system_prompt
     assert config.vocab_path == ""
     assert config.memory_path == ""
     assert config.history_path == ""
