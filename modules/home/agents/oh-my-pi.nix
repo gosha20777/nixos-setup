@@ -46,6 +46,8 @@ in
             baseUrl: "${config.sops.placeholder.ollama_base_url}"
             apiKey: OLLAMA_API_KEY
             api: openai-completions
+            headers:
+              Authorization: "Bearer ${config.sops.placeholder.ollama_api_key}"
             discovery:
               type: ollama
             modelOverrides:
@@ -71,7 +73,7 @@ in
             slow: google-antigravity/claude-opus-5-5-medium:high
             commit: google-antigravity/gemini-3.5-flash-lite:minimal
             plan: google-antigravity/gemini-3.1-pro:high
-            smol: google-antigravity/gemini-3.5-flash-lite:low
+            smol: ollama/qwen-3.8-mtp:latest:medium
             advisor: openrouter/nvidia/nemotron-3-ultra-550b-a55b:free:medium
             task: google-antigravity/gemini-3.6-flash:medium
             web: google/gemini-2.5-flash
