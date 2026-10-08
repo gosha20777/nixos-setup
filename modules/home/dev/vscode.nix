@@ -18,6 +18,9 @@ in
 
       # Nix language support & syntax highlighting
       jnoortheen.nix-ide
+
+      # LaTeX writing, preview, SyncTeX & build automation
+      james-yu.latex-workshop
     ];
   };
 
