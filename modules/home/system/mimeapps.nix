@@ -20,6 +20,12 @@
       "x-scheme-handler/claude-cli" = "claude-code-url-handler.desktop";
       "inode/directory" = "nemo.desktop";
       "application/x-gnome-saved-search" = "nemo.desktop";
+      # PDF documents: Evince
+      "application/pdf" = "org.gnome.Evince.desktop";
+      "application/x-pdf" = "org.gnome.Evince.desktop";
+      "application/x-bzpdf" = "org.gnome.Evince.desktop";
+      "application/x-gzpdf" = "org.gnome.Evince.desktop";
+      "application/x-xzpdf" = "org.gnome.Evince.desktop";
       # Default image viewer: vipsdisp (instant tile-streaming GTK4 viewer)
       "image/jpeg" = "org.libvips.vipsdisp.desktop";
       "image/png" = "org.libvips.vipsdisp.desktop";
@@ -47,6 +53,25 @@
       "image/x-pentax-pef" = "org.libvips.vipsdisp.desktop";
       "image/x-sigma-x3f" = "org.libvips.vipsdisp.desktop";
       "image/x-dcraw" = "org.libvips.vipsdisp.desktop";
+      # Video playback: mpv
+      "video/mp4" = "mpv.desktop";
+      "video/x-matroska" = "mpv.desktop";
+      "video/webm" = "mpv.desktop";
+      "video/quicktime" = "mpv.desktop";
+      "video/x-msvideo" = "mpv.desktop";
+      "video/x-ms-wmv" = "mpv.desktop";
+      "video/ogg" = "mpv.desktop";
+      # Standalone audio playback: mpv
+      "audio/mpeg" = "mpv.desktop";
+      "audio/flac" = "mpv.desktop";
+      "audio/ogg" = "mpv.desktop";
+      "audio/wav" = "mpv.desktop";
+      "audio/x-wav" = "mpv.desktop";
+      "audio/aac" = "mpv.desktop";
+      "audio/mp4" = "mpv.desktop";
+      "audio/m4a" = "mpv.desktop";
+      "audio/x-m4a" = "mpv.desktop";
+      "audio/opus" = "mpv.desktop";
     };
   };
 }
