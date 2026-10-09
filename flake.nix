@@ -111,6 +111,13 @@
       url = "github:mierak/rmpc/fbc57536abcd8dc7deb4dc7b42614c896a2992a3";
     };
 
+    # NegPy — Tool for processing film negatives with film-physics simulation.
+    # Ships its own uv2nix flake; nixpkgs is not followed to preserve its
+    # pinned uv2nix/pyproject-nix dependencies and cache.
+    negpy = {
+      url = "github:marcinz606/NegPy";
+    };
+
     # ── SECURE BOOT ────────────────────────────────────────────────
     # Uncomment to enable lanzaboote. Do this ONLY after the system is
     # installed and booting (see secure-boot.md). Enabling it before
