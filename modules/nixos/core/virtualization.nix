@@ -12,6 +12,7 @@ in
       package = pkgs.qemu_kvm;
       runAsRoot = true;
       swtpm.enable = true;
+      vhostUserPackages = [ pkgs.virtiofsd ];
     };
   };
 
@@ -25,6 +26,7 @@ in
   environment.systemPackages = with pkgs; [
     virtio-win # Windows VirtIO drivers ISO (VirtIO SCSI, Net, Balloon, SPICE tools)
     spice-gtk # USB redirection & clipboard support
+    virtiofsd # vhost-user virtio-fs daemon for shared folders
   ];
 
   # VM disk storage in ~/Documents/VMs with Btrfs nodatacow (+C) optimization.
