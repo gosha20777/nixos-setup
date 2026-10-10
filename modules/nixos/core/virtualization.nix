@@ -34,5 +34,6 @@ in
     "d ${vmDir} 0755 ${config.systemSettings.username} users -"
     "h ${vmDir} - - - - +C"
     "L+ /var/lib/libvirt/images - - - - ${vmDir}"
+    "L+ ${vmDir}/virtio-win.iso - - - - ${pkgs.virtio-win.src}"
   ];
 }
