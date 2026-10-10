@@ -18,6 +18,7 @@
       "docker"
       "video"
       "input"
+      "libvirtd"
     ];
   };
 
