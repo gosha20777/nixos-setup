@@ -13,6 +13,7 @@ let
     str:
     lib.gvariant.mkArray (
       map (c: lib.gvariant.mkUchar (lib.strings.charToInt c)) (lib.stringToCharacters str)
+      ++ [ (lib.gvariant.mkUchar 0) ]
     );
 in
 {
