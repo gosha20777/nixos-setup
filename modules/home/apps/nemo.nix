@@ -5,11 +5,17 @@
   systemSettings,
   ...
 }:
+let
+  # GVariant 'ay' (byte array) type constructor for strings.
+  # Nemo's gschema defines `bulk-rename-tool` as type="ay", which rejects
+  # standard string values (type="s") with a type mismatch warning.
+  mkByteArray =
+    str:
+    lib.gvariant.mkArray (
+      map (c: lib.gvariant.mkUchar (lib.strings.charToInt c)) (lib.stringToCharacters str)
+    );
+in
 {
-  home.packages = [
-    pkgs.bulky # Official Linux Mint / Nemo batch file renamer (F2)
-  ];
-
   dconf.settings = {
     # Default terminal emulator for Nemo's "Open in Terminal" context menu
     "org/cinnamon/desktop/applications/terminal" = {
@@ -34,15 +40,7 @@
       thumbnail-limit = lib.gvariant.mkUint64 134217728;
       show-image-thumbnails = "always";
       # Batch rename utility: bulky (invoked on F2 / Rename with multiple selection)
-      bulk-rename-tool = lib.gvariant.mkArray (
-        map lib.gvariant.mkUchar [
-          98
-          117
-          108
-          107
-          121
-        ]
-      );
+      bulk-rename-tool = mkByteArray "bulky";
     };
 
     "org/nemo/preferences/menu-config" = {
@@ -78,4 +76,5 @@
     Extensions=any;
     Dependencies=gthumb;
   '';
+
 }

@@ -17,6 +17,7 @@ in
     nemo-with-extensions
     nemo-preview
     file-roller
+    bulky
     p7zip
     zip
     ffmpegthumbnailer
