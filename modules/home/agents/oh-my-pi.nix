@@ -70,12 +70,12 @@ in
           modelRoles:
             default: google-antigravity/gemini-3.8-flash:medium
             tiny: google-antigravity/gemini-3.5-flash-lite:minimal
-            slow: google-antigravity/claude-opus-5-5-medium:high
+            slow: google-antigravity/gemini-4-argon:medium
             commit: google-antigravity/gemini-3.5-flash-lite:minimal
-            plan: google-antigravity/gemini-3.1-pro:high
+            plan: google-antigravity/gemini-4-argon:medium
             smol: ollama/qwen-3.8-mtp:latest:medium
-            advisor: openrouter/nvidia/nemotron-3-ultra-550b-a55b:free:medium
-            task: google-antigravity/gemini-3.6-flash:medium
+            advisor: ollama/qwen-3.8-mtp:latest:medium
+            task: google-antigravity/gemini-3.8-flash:medium
             web: google/gemini-2.5-flash
           symbolPreset: nerd
           composer:
@@ -121,8 +121,13 @@ in
             enabled: true
           task:
             maxConcurrency: 4
-            maxRecursionDepth: 0
+            maxRecursionDepth: 2
             maxEffort: max
+            agentModelOverrides:
+              scout: "ollama/qwen-3.8-mtp:latest:medium"
+              task: "google-antigravity/gemini-3.8-flash:medium"
+              reviewer: "ollama/qwen-3.8-mtp:latest:max"
+              sonic: "ollama/qwen-3.8-mtp:latest:medium"
           commands:
             enableOpencodeProject: false
             enableOpencodeUser: false
