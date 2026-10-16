@@ -1,6 +1,9 @@
 """UI screens for the NixOS Everforest Live Installer."""
 
+import os
+import subprocess
 import sys
+from pathlib import Path
 from typing import List, Optional
 from rich.panel import Panel
 from rich.table import Table
@@ -137,9 +140,34 @@ class AgeKeyPromptScreen:
                     return key
                 console.print("[error]✗ Ошибка: ключ должен начинаться с 'AGE-SECRET-KEY-1...'[/error]")
         elif mode == "2":
-            path = Prompt.ask("[prompt]Укажите путь к файлу keys.txt[/prompt]", default="/mnt/usb/keys.txt")
-            console.print(f"[info]Имитация: ключ считан из {path}[/info]")
-            return "AGE-SECRET-KEY-1MOCKMOCKMOCKMOCKMOCKMOCKMOCKMOCKMOCKMOCKMOCKMOCKMOCKMOCK"
+            while True:
+                path_str = Prompt.ask(
+                    "[prompt]Укажите путь к файлу keys.txt (или оставьте пустым для отмены)[/prompt]",
+                    default="/mnt/usb/keys.txt",
+                ).strip()
+                if not path_str:
+                    return ""
+                key_path = Path(path_str)
+                if not key_path.is_file():
+                    console.print(f"[error]✗ Файл не найден: {path_str}[/error]")
+                    if Confirm.ask("[warning]Пропустить ввод ключа Age?[/warning]", default=False):
+                        return ""
+                    continue
+                try:
+                    content = key_path.read_text(encoding="utf-8")
+                except OSError as exc:
+                    console.print(f"[error]✗ Ошибка чтения {path_str}: {exc}[/error]")
+                    continue
+                matched_line = ""
+                for line in content.splitlines():
+                    stripped = line.strip()
+                    if stripped.startswith("AGE-SECRET-KEY-1") and len(stripped) >= 60:
+                        matched_line = stripped
+                        break
+                if matched_line:
+                    console.print(f"[success]✓ Ключ Age успешно считан из {path_str}[/success]")
+                    return content if content.endswith("\n") else content + "\n"
+                console.print(f"[error]✗ В файле {path_str} не найден валидный ключ 'AGE-SECRET-KEY-1...'[/error]")
         else:
             console.print("[warning]! Установка будет продолжена без мастер-ключа Age[/warning]")
             return ""
@@ -225,7 +253,7 @@ class SummaryConfirmScreen:
 class CompletionScreen:
     """Final screen offering reboot or shell."""
     @staticmethod
-    def show() -> None:
+    def show(dry_run: bool = True) -> None:
         console.print()
         card = Panel(
             "[bold green]🌲 СИСТЕМА УСПЕШНО УСТАНОВЛЕНА![/bold green]\n\n"
@@ -244,8 +272,16 @@ class CompletionScreen:
 
         choice = Prompt.ask("[prompt]Выберите действие[/prompt]", choices=["1", "2", "3"], default="1")
         if choice == "1":
-            console.print("[info]Имитация: перезагрузка системы...[/info]")
+            if dry_run:
+                console.print("[info]Имитация: перезагрузка системы (systemctl reboot)...[/info]")
+            else:
+                console.print("[info]Перезагрузка системы...[/info]")
+                subprocess.run(["systemctl", "reboot"], check=False)
         elif choice == "2":
-            console.print("[info]Имитация: переход в chroot /mnt...[/info]")
+            if dry_run:
+                console.print("[info]Имитация: переход в chroot /mnt...[/info]")
+            else:
+                console.print("[info]Вход в chroot /mnt (введите exit для выхода)...[/info]")
+                subprocess.run(["nixos-enter", "--root", "/mnt"], check=False)
         else:
             console.print("[info]Возврат в терминал. До свидания![/info]")

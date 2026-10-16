@@ -195,7 +195,10 @@ def main() -> None:
                 default="shell",
             )
             if choice == "shell":
-                console.print("[info]Имитация: переход в shell для диагностики (journalctl, lsblk)...[/info]")
+                if executor.dry_run:
+                    console.print("[info]Имитация: переход в shell для диагностики (journalctl, lsblk)...[/info]")
+                else:
+                    os.execvp("fish", ["fish"])
             sys.exit(1)
 
         # Step 7: Completion
@@ -204,7 +207,7 @@ def main() -> None:
                 f"\n[muted]Dry-run: всего зафиксировано команд — {len(executor.executed)}. "
                 "Для реальной установки запустите с флагом --execute.[/muted]"
             )
-        CompletionScreen.show()
+        CompletionScreen.show(dry_run=executor.dry_run)
 
     except KeyboardInterrupt:
         console.print("\n\n[error]✗ Процесс прерван комбинацией Ctrl+C. Выход.[/error]\n")

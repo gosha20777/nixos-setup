@@ -83,7 +83,6 @@
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHz1i0hWB0f6oP3+EkA0EodjJrp5R3P9F8rC5sivM1py gosha20777@pc"
   ];
 
-  services.tailscale.enable = true;
   # ── Services ──
   my.services.ollama.enable = true;
 

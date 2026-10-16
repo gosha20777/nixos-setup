@@ -18,3 +18,6 @@ def deploy(executor: CommandExecutor, repo_src: Path, mount: Path, username: str
     # (also fixes the age key's root-created parent dirs from secrets_service).
     executor.run(["git", "-C", dest, "remote", "set-url", "origin", config.GITHUB_ORIGIN])
     executor.run(["chown", "-R", "1000:100", home])
+    storage = mount / "mnt" / "storage"
+    if storage.exists():
+        executor.run(["chown", "-R", "1000:100", str(storage)], check=False)

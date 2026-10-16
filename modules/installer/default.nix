@@ -41,21 +41,35 @@
   # Home Manager live tweaks: auto-start installer, set scale, and fish hint
   home-manager.users.${config.systemSettings.username} = {
     programs.niri.settings = {
-      spawn-at-startup = [
-        {
-          argv = [
-            "kitty"
-            "-e"
-            "nixos-installer"
-          ];
-        }
-      ];
       outputs."eDP-1".scale = 1.25;
       outputs."Virtual-1".scale = 1.25;
     };
 
+    # Launch the TUI installer in --execute mode only AFTER graphical-session.target
+    # and noctalia.service are active (preventing early startup race with Noctalia's
+    # kitty theme generation).
+    systemd.user.services.nixos-installer-autostart = {
+      Unit = {
+        Description = "Auto-start NixOS Everforest Live Installer in Kitty";
+        After = [
+          "graphical-session.target"
+          "noctalia.service"
+        ];
+        Wants = [ "noctalia.service" ];
+        PartOf = [ "graphical-session.target" ];
+      };
+      Service = {
+        Type = "simple";
+        ExecStartPre = "${pkgs.coreutils}/bin/sleep 1";
+        ExecStart = "${pkgs.kitty}/bin/kitty --title \"NixOS Everforest Installer\" -e /run/current-system/sw/bin/nixos-installer --execute";
+      };
+      Install = {
+        WantedBy = [ "graphical-session.target" ];
+      };
+    };
+
     programs.fish.interactiveShellInit = ''
-      set -g fish_greeting "🌲 NixOS Everforest Live — для запуска установщика выполните: nixos-installer"
+      set -g fish_greeting "🌲 NixOS Everforest Live — для запуска установщика выполните: nixos-installer --execute"
     '';
   };
 
@@ -71,7 +85,11 @@
   # Ensure Home Manager activation completes before greetd starts the session,
   # preventing races where niri/Noctalia launch before themes, icons, and wallpapers exist.
   systemd.services.greetd = {
-    after = [ "home-manager-${config.systemSettings.username}.service" ];
+    after = [
+      "home-manager-${config.systemSettings.username}.service"
+      "systemd-user-sessions.service"
+      "network.target"
+    ];
     wants = [ "home-manager-${config.systemSettings.username}.service" ];
   };
   environment.systemPackages =
@@ -88,7 +106,12 @@
 
       # TUI installer launcher — runs the baked flake repo's installer app
       (writeShellScriptBin "nixos-installer" ''
-        exec sudo -n ${installerPython}/bin/python3 /etc/iso/repo/installer/main.py --repo /etc/iso/repo "$@"
+        for arg in "$@"; do
+          if [ "$arg" = "--dry-run" ]; then
+            exec sudo -n ${installerPython}/bin/python3 /etc/iso/repo/installer/main.py --repo /etc/iso/repo
+          fi
+        done
+        exec sudo -n ${installerPython}/bin/python3 /etc/iso/repo/installer/main.py --repo /etc/iso/repo --execute "$@"
       '')
     ];
 

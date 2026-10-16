@@ -30,6 +30,7 @@
 
   hardware.nvidia = {
     modesetting.enable = true;
+    powerManagement.enable = true;
     # Turing is fully supported by the open kernel modules
     open = true;
     nvidiaSettings = true;

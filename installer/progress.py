@@ -57,6 +57,14 @@ class InstallPipeline:
         )
         console.print("  [success]✓ Сохранение мастер-ключа Age[/success]")
 
+        # Disko's X-mount.mkdir and install -D run as root, leaving nested
+        # subvolume mountpoints (Documents/Datasets/..., .cache) and .config/
+        # owned by root:root. Fix ownership to 1000:100 BEFORE nixos-install so
+        # Home Manager and user-level sops-nix do not hit Permission Denied.
+        home_dir = str(config.MOUNT_POINT / "home" / cfg.username)
+        self.executor.run(["install", "-d", "-m", "700", home_dir])
+        self.executor.run(["chown", "-R", "1000:100", home_dir])
+
         # 3. nixos-install устанавливает систему и активирует профиль
         self._stream_step(
             "Установка NixOS (nixos-install)... Копирование пакетов из кэша",
