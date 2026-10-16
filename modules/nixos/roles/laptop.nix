@@ -29,4 +29,7 @@
   # `org.freedesktop.DBus.Error.ServiceUnknown` and silently drops battery
   # state. power-profiles-daemon doesn't pull it in on its own.
   services.upower.enable = true;
+
+  home-manager.users.${config.systemSettings.username}.my.desktop.idle.profile =
+    lib.mkDefault "laptop";
 }

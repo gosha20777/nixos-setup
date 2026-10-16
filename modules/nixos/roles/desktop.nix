@@ -13,4 +13,7 @@
 {
   services.fwupd.enable = true;
   services.fstrim.enable = true;
+
+  home-manager.users.${config.systemSettings.username}.my.desktop.idle.profile =
+    lib.mkDefault "desktop";
 }

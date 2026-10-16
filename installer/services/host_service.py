@@ -51,7 +51,7 @@ def discover_hosts(repo_root: Path) -> list[HostInfo]:
             continue
         default_nix = entry / "default.nix"
         content = default_nix.read_text() if default_nix.exists() else ""
-        if "btrfs-uefi.nix" in content:
+        if "btrfs-uefi.nix" in content or "./disko.nix" in content:
             boot_mode = "UEFI"
             disko_layout = "btrfs-uefi"
         else:

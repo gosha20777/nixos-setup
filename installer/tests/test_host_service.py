@@ -6,7 +6,7 @@ from installer.services.host_service import discover_hosts
 
 
 def _make_repo(tmp_path: Path) -> Path:
-    """Build a minimal repo tree: hosts/thinkpad (UEFI) + hosts/dev (BIOS)."""
+    """Build a minimal repo tree: hosts/thinkpad (UEFI) + hosts/dev (BIOS) + hosts/lab (custom disko)."""
     hosts = tmp_path / "hosts"
     thinkpad = hosts / "thinkpad"
     thinkpad.mkdir(parents=True)
@@ -17,6 +17,11 @@ def _make_repo(tmp_path: Path) -> Path:
     dev.mkdir()
     (dev / "default.nix").write_text(
         "imports = [ ../../modules/disko/btrfs-bios.nix ];"
+    )
+    lab = hosts / "lab"
+    lab.mkdir()
+    (lab / "default.nix").write_text(
+        "imports = [ ./disko.nix ];"
     )
     # common.nix is a FILE — must not be picked up as a host
     (hosts / "common.nix").write_text("{ }: { }")
@@ -29,7 +34,7 @@ class TestDiscoverHosts:
 
         hosts = discover_hosts(repo)
 
-        assert [h.name for h in hosts] == ["dev", "thinkpad"]
+        assert [h.name for h in hosts] == ["dev", "lab", "thinkpad"]
 
     def test_boot_mode_inferred_from_disko_layout(self, tmp_path: Path):
         repo = _make_repo(tmp_path)
@@ -38,6 +43,8 @@ class TestDiscoverHosts:
 
         assert hosts["thinkpad"].boot_mode == "UEFI"
         assert hosts["thinkpad"].disko_layout == "btrfs-uefi"
+        assert hosts["lab"].boot_mode == "UEFI"
+        assert hosts["lab"].disko_layout == "btrfs-uefi"
         assert hosts["dev"].boot_mode == "BIOS"
         assert hosts["dev"].disko_layout == "btrfs-bios"
 
