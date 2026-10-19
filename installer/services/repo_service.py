@@ -12,7 +12,10 @@ def deploy(executor: CommandExecutor, repo_src: Path, mount: Path, username: str
     dest = str(mount / "home" / username / config.REPO_DEST)
     # Create the Projects/ parent first (cp cannot create nested parents)
     executor.run(["install", "-d", str(mount / "home" / username / "Projects")])
-    executor.run(["cp", "-r", str(repo_src), dest])
+    # Dereference symlinks (-L) because repo_src in the Live CD is a symlink into /nix/store
+    executor.run(["cp", "-rL", str(repo_src), dest])
+    # Ensure write permissions: Nix store files copied from Live CD are read-only (0444/0555)
+    executor.run(["chmod", "-R", "u+w", dest])
     # git runs BEFORE chown: the fresh copy is root-owned, so git-as-root sees
     # no dubious-ownership error; the final chown hands everything to the user
     # (also fixes the age key's root-created parent dirs from secrets_service).

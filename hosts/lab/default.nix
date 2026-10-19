@@ -47,6 +47,13 @@
     package = config.boot.kernelPackages.nvidiaPackages.latest;
   };
 
+  # ── Greeter Display Configuration ──
+  # Pin login screen to primary (left) monitor at calculated 1.60 scale
+  services.displayManager.noctalia-greeter.settings.output = {
+    name = "HDMI-A-2";
+    scale = 1.6;
+  };
+
   # ── Swap & Storage ──
   # Compressed RAM swap (25% total RAM ≈ 8 GB virtual swap)
   zramSwap = {
