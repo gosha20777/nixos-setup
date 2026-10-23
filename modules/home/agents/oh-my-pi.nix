@@ -75,7 +75,6 @@ in
             plan: google-antigravity/gemini-4-argon:medium
             smol: ollama/qwen-3.8-mtp:latest:medium
             advisor: ollama/qwen-3.8-mtp:latest:medium
-            task: google-antigravity/gemini-3.8-flash:medium
             web: google/gemini-2.5-flash
           symbolPreset: nerd
           composer:
@@ -123,11 +122,6 @@ in
             maxConcurrency: 4
             maxRecursionDepth: 2
             maxEffort: max
-            agentModelOverrides:
-              scout: "ollama/qwen-3.8-mtp:latest:medium"
-              task: "google-antigravity/gemini-3.8-flash:medium"
-              reviewer: "ollama/qwen-3.8-mtp:latest:max"
-              sonic: "ollama/qwen-3.8-mtp:latest:medium"
           commands:
             enableOpencodeProject: false
             enableOpencodeUser: false
