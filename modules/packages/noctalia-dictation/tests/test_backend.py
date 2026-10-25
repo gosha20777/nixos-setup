@@ -16,6 +16,7 @@ def test_transcribe_and_refine_success(monkeypatch):
     def mock_handler(request: httpx.Request):
         url = str(request.url)
         if url.endswith("/audio/transcriptions"):
+            assert b'name="language"\r\n\r\nru' in request.content
             return httpx.Response(200, text="напиши функцию на питоне")
         elif url.endswith("/chat/completions"):
             return httpx.Response(
@@ -87,6 +88,15 @@ def test_build_whisper_prompt_smart_truncation(tmp_path):
     # Ensure the last word is not truncated mid-word
     assert not prompt.endswith("longt")
     assert prompt.startswith("word_000_longterm")
+
+def test_build_whisper_prompt_with_base_prompt(tmp_path):
+    from backend import _build_whisper_prompt
+
+    vocab_file = tmp_path / "vocab.json"
+    vocab_file.write_text(json.dumps(["NixOS", "flake.nix"]), encoding="utf-8")
+
+    prompt = _build_whisper_prompt(str(vocab_file), "Стенограмма речи на русском языке:")
+    assert prompt == "Стенограмма речи на русском языке: NixOS, flake.nix"
 
 
 def test_read_memory_context(tmp_path):

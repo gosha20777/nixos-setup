@@ -36,8 +36,9 @@ flowchart LR
 * Аудио короче ~0.4 с отбрасывается как случайный щелчок.
 
 ### 2.2. Распознавание речи — Whisper (`src/backend.py`, шаг 1)
-* WAV отправляется в `POST {base_url}/audio/transcriptions` (Groq API, модель `whisper-large-v3-turbo`, temperature 0).
-* В параметр `prompt` подставляется строка терминов из `vocabulary.json` (до 400 символов) — **biasing-подсказка**: Whisper ожидает встретить знакомые термины и перестаёт распознавать «никсос» вместо NixOS.
+* WAV отправляется в `POST {base_url}/audio/transcriptions` (Groq API, модель `whisper-large-v3-turbo`, temperature 0, `language: "ru"`).
+* Язык принудительно зафиксирован на русском (`stt_language = "ru"`), что исключает ложные переключения и английские галлюцинации.
+* В параметр `prompt` подставляется русскоязычный контекст (`stt_prompt`) со строкой терминов из `vocabulary.json` (до 400 символов) — **biasing-подсказка**: Whisper ожидает встретить знакомые термины и перестаёт распознавать «никсос» вместо NixOS.
 * Whisper не имеет состояния: каждый запрос независим, «память» живёт только в файле словаря.
 
 ### 2.3. Очистка текста — refine LLM (шаг 2)
@@ -146,6 +147,8 @@ Unix-сокет `$XDG_RUNTIME_DIR/noctalia-dictation.sock`, протокол —
 | :--- | :--- | :--- |
 | `base_url` | `https://api.groq.com/openai/v1` | OpenAI-совместимый endpoint |
 | `stt_model` | `whisper-large-v3-turbo` | модель распознавания |
+| `stt_language` | `ru` | принудительный язык распознавания (ISO-639-1) |
+| `stt_prompt` | `Стенограмма речи на русском языке с техническими терминами:` | контекстный префикс biasing-подсказки |
 | `refinement_model` | `qwen/qwen3.8-27b` | модель очистки и цикла обучения |
 | `silence_duration_seconds` | 3.0 | тишина до автостопа (0.5–10) |
 | `vad_aggressiveness` | 2 | чувствительность VAD (0–3) |

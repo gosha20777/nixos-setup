@@ -36,6 +36,7 @@ DEFAULT_VOCABULARY = [
 
 DEFAULT_MEMORY = """# Developer Profile & Style Rules
 - Стек: NixOS, Niri, Wayland, Python, PyTorch, CUDA, Neovim, Rust.
+- Язык строго русский. Запрещено выводить фразы на английском языке и переводить текст.
 - Предпочитай технические термины на английском (например, feature, refactoring, pull request, build).
 - Команды CLI и имена файлов пиши точно (flake.nix, git commit).
 - Запрещены лишние вводные фразы и мета-комментарии."""

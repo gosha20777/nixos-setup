@@ -7,32 +7,49 @@ from config import DictationConfig
 
 logger = logging.getLogger("noctalia-dictation")
 
-def _build_whisper_prompt(vocab_path: str) -> str:
-    """Build comma-separated prompt for Whisper, smartly bounded at 400 chars."""
-    if not vocab_path:
+def _build_whisper_prompt(vocab_path: str, base_prompt: str = "") -> str:
+    """Build prompt for Whisper with optional base context and vocab terms, bounded at 400 chars."""
+    vocab_words = []
+    if vocab_path:
+        try:
+            path = Path(vocab_path)
+            if path.exists():
+                words = json.loads(path.read_text(encoding="utf-8"))
+                if isinstance(words, list):
+                    vocab_words = [w.strip() for w in words if isinstance(w, str) and w.strip()]
+        except Exception as e:
+            logger.warning("Failed to read vocabulary prompt from %s: %s", vocab_path, e)
+
+    prefix = base_prompt.strip() if base_prompt else ""
+    if not prefix and not vocab_words:
         return ""
-    try:
-        path = Path(vocab_path)
-        if not path.exists():
-            return ""
-        words = json.loads(path.read_text(encoding="utf-8"))
-        if not isinstance(words, list):
-            return ""
-        prompt_words = []
-        current_len = 0
-        for w in words:
-            if not isinstance(w, str) or not w.strip():
-                continue
-            item = w.strip()
-            add_len = len(item) + (2 if prompt_words else 0)
-            if current_len + add_len > 400:
+
+    if not prefix:
+        res = []
+        cur_len = 0
+        for w in vocab_words:
+            add_len = len(w) + (2 if res else 0)
+            if cur_len + add_len > 400:
                 break
-            prompt_words.append(item)
-            current_len += add_len
-        return ", ".join(prompt_words)
-    except Exception as e:
-        logger.warning("Failed to read vocabulary prompt from %s: %s", vocab_path, e)
-        return ""
+            res.append(w)
+            cur_len += add_len
+        return ", ".join(res)
+
+    res = [prefix]
+    cur_len = len(prefix)
+    sep = " " if prefix.endswith((".", "!", "?", ":", ";")) else ", "
+    first = True
+    for w in vocab_words:
+        add_len = len(w) + (len(sep) if first else 2)
+        if cur_len + add_len > 400:
+            break
+        res.append(w)
+        cur_len += add_len
+        first = False
+
+    if len(res) == 1:
+        return res[0]
+    return res[0] + sep + ", ".join(res[1:])
 
 def _read_memory_context(memory_path: str) -> str:
     """Read core memory rules to append to system prompt."""
@@ -63,7 +80,10 @@ def transcribe_and_refine_full(wav_bytes: bytes, config: DictationConfig) -> tup
             "response_format": "text",
             "temperature": "0.0",
         }
-        whisper_prompt = _build_whisper_prompt(config.vocab_path)
+        if config.stt_language:
+            data["language"] = config.stt_language
+
+        whisper_prompt = _build_whisper_prompt(config.vocab_path, config.stt_prompt)
         if whisper_prompt:
             data["prompt"] = whisper_prompt
 
