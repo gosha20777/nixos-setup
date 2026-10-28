@@ -68,14 +68,16 @@ in
       let
         baseConfig = pkgs.writeText "omp-config.yml" ''
           modelRoles:
-            default: google-antigravity/gemini-3.8-flash:medium
-            tiny: google-antigravity/gemini-3.5-flash-lite:minimal
-            slow: google-antigravity/gemini-4-argon:medium
-            commit: google-antigravity/gemini-3.5-flash-lite:minimal
-            plan: google-antigravity/gemini-4-argon:medium
-            smol: ollama/qwen-3.8-mtp:latest:medium
-            advisor: ollama/qwen-3.8-mtp:latest:medium
+            default: opencode-go/deepseek-v4.1-flash:high
+            slow: kimi-code/k3.1-pro:high
+            commit: opencode-go/hy3:low
+            plan: kimi-code/k3.1-pro:high
+            smol: google-antigravity/gemini-3.8-flash:medium
+            advisor: opencode-go/claude-haiku-5-5:high
             web: google/gemini-2.5-flash
+            task: google-antigravity/gemini-3.8-flash:high
+            tiny: opencode-go/hy3:minimal
+            vision: opencode-go/qwen3.8-flash:medium
           symbolPreset: nerd
           composer:
             shape: pi
@@ -142,6 +144,8 @@ in
                 - web/ecosia
                 - web/mojeek
                 - web/public
+          dev:
+            autoqaConsent: granted
         '';
       in
       ''
