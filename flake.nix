@@ -76,8 +76,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    oh-my-pi = {
-      url = "github:can1357/oh-my-pi";
+    # Oh My Pi (omp) prebuilt standalone binaries (auto-updated from upstream releases).
+    # Multi-platform: x86_64-linux, aarch64-linux (Asahi 16K pages), aarch64-darwin.
+    omp = {
+      url = "github:gosha20777/omp-bin-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

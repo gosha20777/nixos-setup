@@ -12,7 +12,7 @@ let
 in
 {
   home.packages = [
-    inputs.oh-my-pi.packages.${pkgs.stdenv.hostPlatform.system}.default
+    inputs.omp.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
   # Everforest Warm theme for oh-my-pi
