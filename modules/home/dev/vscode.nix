@@ -39,6 +39,17 @@ in
             "editor.fontSize" = 24;
             "editor.semanticHighlighting.enabled" = true;
             "workbench.colorTheme" = "Default Dark Modern";
+            # Fish is the login shell on every host, but Remote-SSH bootstraps by
+            # piping commands into stdin and waiting for output before EOF — fish
+            # buffers stdin until EOF, so without a known platform it never appends
+            # its explicit `bash` remote command and the connection times out.
+            "remote.SSH.remotePlatform" = {
+              lab = "linux";
+              pc = "linux";
+              dev = "linux";
+              thinkpad = "linux";
+              mac-vm = "linux";
+            };
             "workbench.colorCustomizations" = theme.vscode.colorCustomizations;
             "editor.tokenColorCustomizations" = theme.vscode.tokenColorCustomizations;
             "editor.semanticTokenColorCustomizations" = theme.vscode.semanticTokenColorCustomizations;
