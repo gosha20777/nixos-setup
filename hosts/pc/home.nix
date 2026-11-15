@@ -1,6 +1,7 @@
 { config, ... }:
 
 {
+
   # Machine-specific SSH key from secrets/pc.yaml
   sops.secrets."id_ed25519" = {
     sopsFile = ../../secrets/pc.yaml;
