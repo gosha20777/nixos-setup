@@ -341,11 +341,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795002983,
-        "narHash": "sha256-3Zv/tDG1PtiFl4ZpYWkd2+4+qTLTisrMHguhnk3sIV0=",
+        "lastModified": 1795046920,
+        "narHash": "sha256-6BGx3eC7L8Pd6g2YIShN85W8TR11OZpNuD/bkGiv9wA=",
         "owner": "gosha20777",
         "repo": "omp-bin-flake",
-        "rev": "970ab510c8c1f2317f582cb637ea167947e4fdf7",
+        "rev": "e8e027ca23815abb07dc40296ba38f61401c3288",
         "type": "github"
       },
       "original": {
