@@ -91,6 +91,7 @@ in
 
     bashMode = colors.c6; # Aqua mint
     pythonMode = colors.c11; # Bright Amber
+    btwMode = colors.c4; # Match the main accent
 
     inherit statusLineBg;
     inherit statusLineSep;
